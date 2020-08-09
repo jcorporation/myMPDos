@@ -1,6 +1,7 @@
 #!/bin/sh
 
-IMAGE="myMPDos-0.1.0.img"
+VERSION="0.1.0"
+IMAGE="myMPDos-${VERSION}-$(date +%Y%m%d).img"
 ARCH="aarch64"
 ALPINE_MAJOR_VERSION="3.12"
 ALPINE_VERSION="${ALPINE_MAJOR_VERSION}.0"
@@ -42,20 +43,24 @@ w
 
 EOL
 LOOP=$(sudo losetup --partscan --show -f $IMAGE)
+[ "$LOOP" = "" ] && exit 1
 sudo mkfs.vfat "${LOOP}p1"
 sudo mkfs.ext4 "${LOOP}p2"
 install -d mnt
-sudo mount -ouid=$BUILDUSER "${LOOP}p1" mnt
+sudo mount -ouid=$BUILDUSER "${LOOP}p1" mnt || exit 1
 tar -xzf alpine-rpi-${ALPINE_VERSION}-${ARCH}.tar.gz -C mnt
 cp boot/modloop-lts mnt/boot
 install -d mnt/mympd
 cp -r ../mympd/build/* mnt/mympd
+[ -d ../mympd-os-apks/.abuild ] && cp -r ../mympd-os-apks/.abuild mnt/mympd/
+sudo umount mnt || exit 1
+
 rm -f init
 gzip -dc boot/initramfs-lts | cpio -id init
 patch init ../mympd/build/init.patch
 echo ./init | cpio -H newc -o | gzip >> boot/initramfs-lts
-sudo umount mnt
 
+echo "Starting build image"
 qemu-system-aarch64 \
   -M virt -m 1024M -cpu cortex-a57 \
   -kernel boot/vmlinuz-lts -initrd boot/initramfs-lts \
@@ -67,10 +72,10 @@ qemu-system-aarch64 \
 
 echo "Saving packages"
 install -d ../mympd-os-apks
-sudo mount -text4 "${LOOP}p2" mnt
+sudo mount -text4 "${LOOP}p2" mnt || exit 1
 cp mnt/build/packages/package/${ARCH}/* ../mympd-os-apks/
 cp -r mnt/build/.abuild ../mympd-os-apks/
-sudo umount mnt
+sudo umount mnt || exit 1
 sudo losetup -d "${LOOP}"
 
 echo "Create image"
@@ -88,15 +93,16 @@ w
 
 EOL
 LOOP=$(sudo losetup --partscan --show -f $IMAGE)
+[ "$LOOP" = "" ] && exit 1
 sudo mkfs.vfat "${LOOP}p1"
-sudo mount -ouid=$BUILDUSER "${LOOP}p1" mnt
+sudo mount -ouid=$BUILDUSER "${LOOP}p1" mnt || exit 1
 tar -xzf alpine-rpi-${ALPINE_VERSION}-${ARCH}.tar.gz -C mnt
 cd ../mympd/overlay || exit 1
 tar -czf ../../tmp/mnt/headless.apkovl.tar.gz *
 cd ../../tmp || exit 1
 echo "ssid WPA-PSK password" > mnt/wifi.txt
 cp -r ../mympd-os-apks mnt/
-sudo umount mnt
+sudo umount mnt || exit 1
 sudo losetup -d "${LOOP}"
 
 echo "Cleanup"

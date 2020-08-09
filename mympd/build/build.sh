@@ -25,7 +25,18 @@ apk add git sudo alpine-sdk perl build-base
 adduser -D build -h "$BUILDDIR"
 addgroup build abuild
 echo "build    ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-su build -c "abuild-keygen -n -a -i"
+if [ -d /media/vda1/mympd/.abuild ]
+then
+ cp -r /media/vda1/mympd/.abuild /usr/build/
+ chown -R build.abuild /usr/build/.abuild
+ chmod 700 /usr/build/.abuild
+ chmod 600 /usr/build/.abuild/*.rsa
+ chmod 644 /usr/build/.abuild/*.rsa.pub
+ chmod 644 /usr/build/.abuild/abuild.conf
+ cp /usr/build/.abuild/*.rsa.pub /etc/apk/keys/
+else
+  su build -c "abuild-keygen -n -a -i"
+fi
 
 install -d /var/cache/distfiles -g abuild -m775
 
@@ -33,7 +44,7 @@ cd "$BUILDDIR" || exit 1
 
 su build -c "git clone -b $BRANCH --depth=1 https://github.com/jcorporation/myMPD.git"
 cd myMPD || exit 1
-su build -c "./build.sh pkgalpine"
+#su build -c "./build.sh pkgalpine"
 cd ..
 
 #su build -c "cp -r /media/vda1/mympd/mpd-master ."
