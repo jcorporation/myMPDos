@@ -1,5 +1,4 @@
-/mnt
-/mympd-os_v0.1.0.img
-/packages
+/*.img
+/mympd-os-apks
 /tmp
 *~

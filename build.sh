@@ -50,6 +50,7 @@ tar -xzf alpine-rpi-${ALPINE_VERSION}-${ARCH}.tar.gz -C mnt
 cp boot/modloop-lts mnt/boot
 install -d mnt/mympd
 cp -r ../mympd/build/* mnt/mympd
+rm -f init
 gzip -dc boot/initramfs-lts | cpio -id init
 patch init ../mympd/build/init.patch
 echo ./init | cpio -H newc -o | gzip >> boot/initramfs-lts
@@ -60,18 +61,17 @@ qemu-system-aarch64 \
   -kernel boot/vmlinuz-lts -initrd boot/initramfs-lts \
   -append "console=ttyAMA0 ip=dhcp" \
   -nographic \
-  -drive sd,file=${IMAGE},format=raw \
+  -drive file=${IMAGE},format=raw \
   -netdev user,id=mynet0,net=192.168.76.0/24,dhcpstart=192.168.76.9 \
   -nic user,id=mynet0
 
 echo "Saving packages"
 install -d ../mympd-os-apks
-sudo mount -text "${LOOP}p2" mnt
-find mnt/build/ -name \*.apk -exec cp {}  ../mympd-os-apks/ \;
-cp mnt/build/APKINDEX.tar.gt ../mympd-os-apks/
+sudo mount -text4 "${LOOP}p2" mnt
+cp mnt/build/packages/package/${ARCH}/* ../mympd-os-apks/
 cp -r mnt/build/.abuild ../mympd-os-apks/
 sudo umount mnt
-losetup -d "${LOOP}"
+sudo losetup -d "${LOOP}"
 
 echo "Create image"
 dd if=/dev/zero of="$IMAGE" bs=1M count=256
@@ -84,6 +84,7 @@ p
 t
 b
 a
+w
 
 EOL
 LOOP=$(sudo losetup --partscan --show -f $IMAGE)
@@ -96,6 +97,7 @@ cd ../../tmp || exit 1
 echo "ssid WPA-PSK password" > mnt/wifi.txt
 cp -r ../mympd-os-apks mnt/
 sudo umount mnt
+sudo losetup -d "${LOOP}"
 
 echo "Cleanup"
 #mv "$IMAGE" ..

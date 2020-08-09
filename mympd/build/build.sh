@@ -14,29 +14,26 @@ apk update
 apk upgrade
 apk add e2fsprogs
 
-mount -oremount,rw /media/vda1
 install -d /media/vda2
-mount /dev/vda2 /media/vda2
+mount /dev/vda2 /media/vda2 -text4
 cp -a /usr/* /media/vda2
 umount /media/vda2
 mount /dev/vda2 /usr -text4
 
-apk add git sudo alpine-sdk perl
+apk add git sudo alpine-sdk perl build-base
 
 adduser -D build -h "$BUILDDIR"
 addgroup build abuild
 echo "build    ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 su build -c "abuild-keygen -n -a -i"
 
-install -d /var/cache/distfiles
-chgrp abuild /var/cache/distfiles
-chmod g+w /var/cache/distfiles
+install -d /var/cache/distfiles -g abuild -m775
 
 cd "$BUILDDIR" || exit 1
 
 su build -c "git clone -b $BRANCH --depth=1 https://github.com/jcorporation/myMPD.git"
 cd myMPD || exit 1
-#su build -c "./build.sh pkgalpine"
+su build -c "./build.sh pkgalpine"
 cd ..
 
 #su build -c "cp -r /media/vda1/mympd/mpd-master ."
