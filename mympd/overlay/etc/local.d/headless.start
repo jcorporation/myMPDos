@@ -1,0 +1,73 @@
+#!/bin/sh
+
+__create_eni()
+{
+	cat <<-EOF > /etc/network/interfaces
+	auto lo
+	iface lo inet loopback
+
+	auto ${iface}
+	iface ${iface} inet dhcp
+	        hostname mympd
+	EOF
+}
+
+__create_eww()
+{
+	cat <<-EOF > /etc/wpa_supplicant/wpa_supplicant.conf
+	network={
+	        ssid="${ssid}"
+	        key_mgmt=${km}
+	        psk="${psk}"
+	}
+	EOF
+}
+
+__edit_ess()
+{
+	cat <<-EOF >> /etc/ssh/sshd_config
+	PermitEmptyPasswords yes
+	PermitRootLogin yes
+	EOF
+}
+
+__find_wint()
+{
+	for dev in /sys/class/net/*
+	do
+		if [ -e "${dev}"/wireless -o -e "${dev}"/phy80211 ]
+		then
+			echo "${dev##*/}"
+		fi
+	done
+}
+
+ovlpath=$(find /media -name *.apkovl.tar.gz -exec dirname {} \;)
+read ssid km psk < "${ovlpath}/wifi.txt"
+
+if [ ${ssid} ]
+then
+  iface=$(__find_wint)
+  apk add wpa_supplicant
+  __create_eww
+  rc-service wpa_supplicant start
+  rc-update add wpa_supplicant boot
+else
+  iface="eth0"
+fi
+
+__create_eni
+rc-service networking start
+
+/sbin/setup-sshd -c openssh
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.orig
+__edit_ess
+rc-service sshd restart
+mv /etc/ssh/sshd_config.orig /etc/ssh/sshd_config
+
+cat > /etc/motd << EOL
+Welcome to myMPD-OS!
+
+You can setup the system with the command: setup-mympd-os
+
+EOL

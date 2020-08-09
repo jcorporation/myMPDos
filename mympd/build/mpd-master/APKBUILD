@@ -1,0 +1,77 @@
+# Maintainer: Juergen Mang <mail@jcgames.de>
+# Based on: https://pkgs.alpinelinux.org/package/edge/community/x86_64/mpd
+pkgname=mympd-os-mpd-master
+pkgver=0.22.0
+pkgrel=0
+pkgdesc="Music daemon that plays MP3, FLAC, Ogg Vorbis files and Audio CDs"
+url="https://musicpd.org"
+pkgusers="mpd"
+pkggroups="mpd audio"
+arch="all"
+license="GPL-2.0-or-later"
+makedepends="py3-sphinx lame-dev glib-dev curl-dev libao-dev libmad-dev flac-dev
+	libogg-dev faad2-dev libid3tag-dev libvorbis-dev alsa-lib-dev pulseaudio-dev
+	libsamplerate-dev libshout-dev libmodplug-dev boost-dev icu-dev
+	libnfs-dev samba-dev opus-dev ffmpeg-dev meson libmpdclient-dev
+	avahi-dev py3-attrs libcap wavpack-dev sqlite-dev"
+checkdepends="gtest-dev gtest"
+install="$pkgname.pre-install"
+subpackages="$pkgname-doc $pkgname-dbg $pkgname-openrc"
+source="https://github.com/MusicPlayerDaemon/MPD/archive/master.zip
+	${pkgname}.initd
+	${pkgname}.confd
+	"
+
+build() {
+	cd MPD-master
+	meson \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--localstatedir=/var \
+		--buildtype=plain \
+		-Dshout=enabled \
+		-Dopus=enabled \
+		-Dmodplug=enabled \
+		-Dnfs=enabled \
+		-Dsmbclient=enabled \
+		-Dffmpeg=enabled \
+		-Dlibmpdclient=enabled \
+		-Dzeroconf=avahi \
+		-Dtest=true \
+		-Ddocumentation=true \
+		-Dwavpack=enabled \
+		. output
+	ninja -C output
+}
+
+check() {
+	ninja -C output -v test
+}
+
+package() {
+	DESTDIR="$pkgdir" ninja -C output install
+
+	# mpd attempts to configure real-time scheduling on linux
+	# add the capability which allows doing that
+	# see: https://www.musicpd.org/doc/html/user.html#real-time-scheduling
+	setcap cap_sys_nice+ep "$pkgdir"/usr/bin/mpd
+
+	# provide a config that works by default
+	install -d "$pkgdir"/etc
+	sed	-e 's:\#user.*:user\t\t"mpd":' \
+		-e 's:\#log_file.*:log_file\t\t"syslog":' \
+		doc/mpdconf.example > "$pkgdir"/etc/mpd.conf
+	install -m755 -D "$srcdir"/$pkgname.initd \
+		"$pkgdir"/etc/init.d/$pkgname
+	install -m644 -D "$srcdir"/$pkgname.confd \
+		"$pkgdir"/etc/conf.d/$pkgname
+	install -d -g audio -o mpd -m775 \
+		"$pkgdir"/var/run/mpd \
+		"$pkgdir"/var/log/mpd \
+		"$pkgdir"/var/lib/mpd \
+		"$pkgdir"/var/lib/mpd/playlists \
+		"$pkgdir"/var/lib/mpd/music
+}
+
+sha512sums=""
