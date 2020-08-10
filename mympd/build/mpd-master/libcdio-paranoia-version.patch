@@ -1,0 +1,12 @@
+--- ./src/input/plugins/meson.build.org
++++ ./src/input/plugins/meson.build
+@@ -10,7 +10,8 @@
+   input_plugins_sources += 'AlsaInputPlugin.cxx'
+ endif
+ 
+-libcdio_paranoia_dep = dependency('libcdio_paranoia', version: '>= 10.2+0.93+1', required: get_option('cdio_paranoia'))
++libcdio_paranoia_dep = dependency('libcdio_paranoia', version: '>= 0.93p1', required: get_option('cdio_paranoia'))
++
+ input_features.set('ENABLE_CDIO_PARANOIA', libcdio_paranoia_dep.found())
+ if libcdio_paranoia_dep.found()
+   input_plugins_sources += 'CdioParanoiaInputPlugin.cxx'
