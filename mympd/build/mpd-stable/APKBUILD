@@ -1,11 +1,7 @@
 # Maintainer: Juergen Mang <mail@jcgames.de>
 # Based on: https://git.alpinelinux.org/aports/tree/community/mpd
 pkgname=mympd-os-mpd-stable
-pkgver=0.21.25
-case $pkgver in
-*.*.*) _branch=${pkgver%.*};;
-*.*) _branch=$pkgver;;
-esac
+pkgver=__MPDVER__
 pkgrel=0
 pkgdesc="Music daemon that plays MP3, FLAC, Ogg Vorbis files and Audio CDs"
 url="https://musicpd.org"
@@ -13,21 +9,24 @@ pkgusers="mpd"
 pkggroups="mpd audio"
 arch="all"
 license="GPL-2.0-or-later"
-makedepends="py3-sphinx lame-dev glib-dev curl-dev libao-dev libmad-dev flac-dev
-	libogg-dev faad2-dev libid3tag-dev libvorbis-dev alsa-lib-dev pulseaudio-dev
-	libsamplerate-dev libshout-dev libmodplug-dev boost-dev icu-dev
-	libnfs-dev samba-dev opus-dev ffmpeg-dev meson libmpdclient-dev
-	avahi-dev py3-attrs libcap wavpack-dev sqlite-dev"
+makedepends="lame-dev glib-dev curl-dev libao-dev libmad-dev flac-dev
+        libogg-dev faad2-dev libid3tag-dev libvorbis-dev alsa-lib-dev pulseaudio-dev
+        libsamplerate-dev libshout-dev libmodplug-dev boost-dev icu-dev
+        libnfs-dev samba-dev opus-dev ffmpeg-dev meson libmpdclient-dev
+        avahi-dev libcap wavpack-dev sqlite-dev chromaprint-dev expat-dev
+        sndio-dev yajl-dev soxr-dev libmms-dev libcdio libcdio-paranoia-dev 
+	zziplib-dev openal-soft-dev fluidsynth-dev audiofile-dev
+        libmikmod-dev mpg123-dev libsndfile-dev"
 checkdepends="gtest-dev gtest"
 install="$pkgname.pre-install"
 subpackages="$pkgname-doc $pkgname-dbg $pkgname-openrc"
-source="https://www.musicpd.org/download/mpd/$_branch/mpd-$pkgver.tar.xz
+source="mympd-os-mpd-stable.tar.gz
 	stacksize.patch
 	${pkgname}.initd
 	${pkgname}.confd
-	remove-avahi-test.patch
-	disable-time-test.patch
+	libcdio-paranoia-version.patch
 	"
+options="!check"
 
 build() {
 	meson \
@@ -36,23 +35,8 @@ build() {
 		--mandir=/usr/share/man \
 		--localstatedir=/var \
 		--buildtype=plain \
-		-Dshout=enabled \
-		-Dopus=enabled \
-		-Dmodplug=enabled \
-		-Dnfs=enabled \
-		-Dsmbclient=enabled \
-		-Dffmpeg=enabled \
-		-Dlibmpdclient=enabled \
-		-Dzeroconf=avahi \
-		-Dtest=true \
-		-Ddocumentation=true \
-		-Dwavpack=enabled \
 		. output
 	ninja -C output
-}
-
-check() {
-	ninja -C output -v test
 }
 
 package() {
