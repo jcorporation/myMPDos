@@ -20,7 +20,7 @@ setup-alpine
 echo "Available MPD versions"
 echo "  1. MPD 21.x (stable) (default)"
 echo "  2. MPD 22.x (unstable"
-read -n1 -p "Select: " MPD_VERSION
+read -n1 -r -p "Select: " MPD_VERSION
 if [ "$MPD_VERSION" != "1" ] && [ "$MPD_VERSION" != "2" ]
 then
   MPD_VERSION=1

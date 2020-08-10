@@ -790,7 +790,7 @@ if [ ! -x "${sysroot}${KOPT_init}" ]; then
 fi
 
 #mympd build
-echo "Adding mympd build service to firstboot"
+echo "Adding myMPD-os build service to firstboot"
 sed -i -e 's|eend $rc|/media/vda1/mympd/build.sh\n\teend $rc|' "${sysroot}/etc/init.d/firstboot"
 
 # switch over to new root
