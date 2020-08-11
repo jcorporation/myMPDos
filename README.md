@@ -9,11 +9,14 @@ The `build.sh` script creates a qemu image, starts it and compiles myMPD and MPD
 ## Usage
 
 1. Create the image with `./build.sh`
-2. Transfer the image to a sdcard
-3. Optional edit wifi.txt to setup wlan
-4. ssh to the raspberry (root password is blank)
-5. Run mympd-os-config to setup the system
+2. Optionally run `./cleanup.sh` to cleanup things
+3. Transfer the image to a sdcard
+4. Optional edit wifi.txt to setup wlan
+5. ssh to the raspberry (root password is blank)
+6. Run mympd-os-config to setup the system
 
+## Test
+- Run `./startimage.sh`
 
 ## Copyright
-2020 <mail@jcgames.de>
+2020 Juergen Mang <mail@jcgames.de>

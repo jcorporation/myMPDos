@@ -1,4 +1,10 @@
 #!/bin/sh
+#
+# SPDX-License-Identifier: GPL-2.0-or-later
+# myMPD (c) 2018-2020 Juergen Mang <mail@jcgames.de>
+# https://github.com/jcorporation/mympd
+#
+
 BUILDDIR="/usr/build"
 MYMPD_BRANCH="devel"
 POWEROFF="0"
@@ -6,7 +12,7 @@ POWEROFF="0"
 #Build packages
 B_MYMPD="0"
 B_MPD_STABLE="0"
-B_MPD_MASTER="1"
+B_MPD_MASTER="0"
 
 echo ""
 echo "Starting myMPDos build"
@@ -45,8 +51,7 @@ echo "Setting up package signing key"
 if [ -f /media/vda1/mympd/abuild.tgz ]
 then
   echo "Restoring .abuild"
-  tar -xzf /media/vda1/mympd/abuild.tgz
-  
+  tar -xzf /media/vda1/mympd/abuild.tgz 
 else
   su build -c "abuild-keygen -n -a"
   tar -czf abuild.tgz .abuild

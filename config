@@ -1,0 +1,14 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+# myMPD (c) 2018-2020 Juergen Mang <mail@jcgames.de>
+# https://github.com/jcorporation/mympd
+#
+VERSION="0.1.0"
+IMAGE="myMPDos-${VERSION}-$(date +%Y%m%d).img"
+BUILDIMAGE="myMPDos-build.img"
+ARCH="aarch64"
+ALPINE_MAJOR_VERSION="3.12"
+ALPINE_VERSION="${ALPINE_MAJOR_VERSION}.0"
+ALPINE_MIRROR="http://dl-cdn.alpinelinux.org/alpine"
+BUILDUSER=$USER
+IMAGESIZE=256
+IMAGESIZEBUILD=2048
