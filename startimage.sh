@@ -32,6 +32,7 @@ qemu-system-aarch64 -m 1024 \
 	-kernel image/boot/vmlinuz-rpi \
 	-initrd image/boot/initramfs-rpi \
 	-append "console=ttyAMA0" \
-	-dtb bcm2837-rpi-3-b.dtb -nographic
+	-dtb image/bcm2837-rpi-3-b.dtb \
+	-nographic
 
 exit 0

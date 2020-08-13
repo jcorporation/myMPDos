@@ -1,0 +1,131 @@
+#!/bin/sh
+#
+# SPDX-License-Identifier: GPL-2.0-or-later
+# myMPD (c) 2018-2020 Juergen Mang <mail@jcgames.de>
+# https://github.com/jcorporation/mympd
+#
+BOOTPATH=$(find /media -name *.apkovl.tar.gz -exec dirname {} \;)
+
+read VERSION < "${BOOTPATH}/myMPDos.version"
+
+echo ""
+echo "myMPDos $VERSION first start script"
+echo ""
+
+__create_eni()
+{
+	cat <<-EOF > /etc/network/interfaces
+	auto lo
+	iface lo inet loopback
+
+	auto ${IFACE}
+	iface ${IFACE} inet dhcp
+	        hostname myMPDos
+	EOF
+}
+
+__create_eww()
+{
+	cat <<-EOF > /etc/wpa_supplicant/wpa_supplicant.conf
+	network={
+	        ssid="${SSID}"
+	        key_mgmt=${KM}
+	        psk="${PSK}"
+	}
+	EOF
+}
+
+__edit_ess()
+{
+	cat <<-EOF >> /etc/ssh/sshd_config
+	PermitEmptyPasswords yes
+	PermitRootLogin yes
+	EOF
+}
+
+__find_wint()
+{
+	for DEV in /sys/class/net/*
+	do
+		if [ -e "${DEV}"/wireless -o -e "${DEV}"/phy80211 ]
+		then
+			echo "${DEV##*/}"
+		fi
+	done
+}
+
+read ssid km psk < "${BOOTPATH}/wifi.txt"
+
+if [ ${SSID} ]
+then
+	echo "Found ssid ${SSID}, configuring wlan"
+  IFACE=$(__find_wint)
+  apk add wpa_supplicant
+  __create_eww
+  rc-service wpa_supplicant start
+  rc-update add wpa_supplicant boot
+else
+  echo "Configuring eth0"
+  IFACE="eth0"
+fi
+
+__create_eni
+rc-service networking start
+
+echo "Setup OpenSSH"
+/sbin/setup-sshd -c openssh
+cp /etc/ssh/sshd_config /etc/ssh/sshd_config.orig
+__edit_ess
+rc-service sshd restart
+mv /etc/ssh/sshd_config.orig /etc/ssh/sshd_config
+
+if [ ! -e /dev/mmcblk0p2 ]
+then
+	echo "Creating data partition on sd card"
+	fdisk /dev/mmcblk0 << EOL
+n
+p
+2
+
+
+w
+
+EOL
+fi
+
+if [ ! -e /dev/mmcblk0p2 ]
+then
+	echo "Rebooting"
+	reboot
+fi
+
+if [ "$(blkid /dev/mmcblk0p2)" = "" ]
+then
+	echo "Formating data partition on sd card"
+	apk add e2fsprogs
+	mkfs.ext4 /dev/mmcblk0p2
+fi
+
+if [ "$(blkid /dev/mmcblk0p2)" != "" ]
+then
+	echo "Mounting data partition on sd card"
+	install -d /media/mmcblk0p2
+	if ! grep -q "mmcblk0p2" /etc/fstab
+	then
+		echo "/dev/mmcblk0p2	/media/mmcblk0p2	ext4	noatime,ro,defaults 0 0" >> /etc/fstab
+		mount -a
+	fi
+fi
+
+hostname myMPDos
+
+cat > /etc/issue << EOL
+Welcome to myMPDos ${VERSION}!
+Kernel \r on an \m (\l)
+
+EOL
+
+cat > /etc/motd << EOL
+You can setup the system with the command: setup-mympdos
+
+EOL

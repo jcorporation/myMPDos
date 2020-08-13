@@ -7,7 +7,7 @@
 
 BUILDDIR="/usr/build"
 MYMPD_BRANCH="devel"
-POWEROFF="0"
+POWEROFF="1"
 
 #Build packages
 B_MYMPD="0"

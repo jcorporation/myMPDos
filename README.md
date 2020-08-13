@@ -16,7 +16,16 @@ The `build.sh` script creates a qemu image, starts it and compiles myMPD and MPD
 6. Run mympd-os-config to setup the system
 
 ## Test
+
+Qemu does not support a raspberry pi comptabile network interace.
+
 - Run `./startimage.sh`
+
+## Depedencies
+
+- Qemu (qemu-system-aarch64)
+- DHCP server in your network
+- Working internet connection
 
 ## Copyright
 2020 Juergen Mang <mail@jcgames.de>

@@ -7,6 +7,16 @@
 
 source config || { echo "config not found"; exit 1; }
 
+umount_retry() {
+  if ! sudo umount "$1"
+  then
+    echo "Retrying in 2s"
+    sleep 2
+    sudo umount "$1" || return 1
+  fi
+  return 0
+}
+
 install -d tmp
 cd tmp || exit 1
 
@@ -53,7 +63,7 @@ install -d mnt/mympd
 cp -r ../mympd/build/* mnt/mympd
 [ -f ../mympd-os-apks/abuild.tgz ] && cp ../mympd-os-apks/abuild.tgz mnt/mympd/
 date +%s > mnt/date
-sudo umount mnt || exit 1
+umount_retry mnt || exit 1
 
 echo "Patching initramfs"
 rm -f init
@@ -76,7 +86,7 @@ install -d ../mympd-os-apks
 sudo mount -text4 "${LOOP}p2" mnt || exit 1
 [ -f mnt/build/abuild.tgz ] && cp mnt/build/abuild.tgz ../mympd-os-apks/
 cp mnt/build/packages/package/"${ARCH}"/* ../mympd-os-apks/
-sudo umount mnt || exit 1
+umount_retry mnt || exit 1
 sudo losetup -d "${LOOP}"
 
 echo "Create image"
@@ -102,8 +112,9 @@ cd ../mympd/overlay || exit 1
 tar -czf ../../tmp/mnt/mympd-os.apkovl.tar.gz .
 cd ../../tmp || exit 1
 echo "ssid WPA-PSK password" > mnt/wifi.txt
+echo "$VERSION" > mnt/myMPDos.version
 cp -r ../mympd-os-apks mnt/
-sudo umount mnt || exit 1
+umount_retry mnt || exit 1
 sudo losetup -d "${LOOP}"
 install -d ../images
 mv "$IMAGE" ../images
