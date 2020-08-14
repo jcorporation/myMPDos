@@ -1,0 +1,33 @@
+#
+#Bootstrap file for myMPDos
+#
+ROOT_PASSWORD=your_secure_password
+
+#Keybord layout
+KEYBOARD_LAYOUT=de
+KEYBOARD_VARIANT=de-nodeadkeys
+#KEYBOARD_LAYOUT=en
+#KEYBOARD_VARIANT=us
+
+#Software
+#MPD version
+#1 = MPD 21.x (stable)
+#2 = MPD 22.x (unstable)
+MPD_VERSION=1
+
+#Network settings
+IP_HOSTNAME=myMPDos
+#DNS servers must only be configured if you set IP_TYPE to static
+#IP_DNS1=
+#IP_DNS2=
+#If WLAN is not set to true eth0 is configured
+WLAN_ENABLE=false
+WLAN_SSID=<your ssid>
+WLAN_KEYMGMT=WPA-PSK
+WLAN_PSK=<your psk>
+IP_TYPE=dhcp
+#Comment above line and uncomment other IP_* settings to configure a static ip
+#IP_TYPE=static
+#IP_ADDRESS=
+#IP_NETMASK=
+#IP_GATEWAY=

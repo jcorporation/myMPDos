@@ -7,7 +7,7 @@
 
 BUILDDIR="/usr/build"
 MYMPD_BRANCH="devel"
-POWEROFF="1"
+POWEROFF="0"
 
 #Build packages
 B_MYMPD="0"
@@ -26,6 +26,7 @@ setup-keymap de de-nodeadkeys
 echo "Setup repositories and upgrade"
 setup-apkrepos -1
 sed -r -e's/^#(.*\d\/community)/\1/' -i /etc/apk/repositories
+apk update
 apk upgrade
 
 echo "Moving /usr to /dev/vda2"

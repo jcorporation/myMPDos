@@ -111,7 +111,7 @@ tar -xzf "alpine-rpi-${ALPINE_VERSION}-${ARCH}.tar.gz" -C mnt
 cd ../mympd/overlay || exit 1
 tar -czf ../../tmp/mnt/mympd-os.apkovl.tar.gz .
 cd ../../tmp || exit 1
-echo "ssid WPA-PSK password" > mnt/wifi.txt
+cp ../mympd/bootstrap.txt mnt/
 echo "$VERSION" > mnt/myMPDos.version
 cp -r ../mympd-os-apks mnt/
 umount_retry mnt || exit 1

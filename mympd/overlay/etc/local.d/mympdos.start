@@ -4,81 +4,16 @@
 # myMPD (c) 2018-2020 Juergen Mang <mail@jcgames.de>
 # https://github.com/jcorporation/mympd
 #
-BOOTPATH=$(find /media -name *.apkovl.tar.gz -exec dirname {} \;)
 
-read VERSION < "${BOOTPATH}/myMPDos.version"
+BOOTPATH=$(find /media -name "*.apkovl.tar.gz" -exec dirname {} \;)
+source "${BOOTPATH}/bootstrap.txt"
+read -r VERSION < "${BOOTPATH}/myMPDos.version"
 
 echo ""
-echo "myMPDos $VERSION first start script"
+echo "myMPDos $VERSION bootstrap script"
 echo ""
 
-__create_eni()
-{
-	cat <<-EOF > /etc/network/interfaces
-	auto lo
-	iface lo inet loopback
-
-	auto ${IFACE}
-	iface ${IFACE} inet dhcp
-	        hostname myMPDos
-	EOF
-}
-
-__create_eww()
-{
-	cat <<-EOF > /etc/wpa_supplicant/wpa_supplicant.conf
-	network={
-	        ssid="${SSID}"
-	        key_mgmt=${KM}
-	        psk="${PSK}"
-	}
-	EOF
-}
-
-__edit_ess()
-{
-	cat <<-EOF >> /etc/ssh/sshd_config
-	PermitEmptyPasswords yes
-	PermitRootLogin yes
-	EOF
-}
-
-__find_wint()
-{
-	for DEV in /sys/class/net/*
-	do
-		if [ -e "${DEV}"/wireless -o -e "${DEV}"/phy80211 ]
-		then
-			echo "${DEV##*/}"
-		fi
-	done
-}
-
-read ssid km psk < "${BOOTPATH}/wifi.txt"
-
-if [ ${SSID} ]
-then
-	echo "Found ssid ${SSID}, configuring wlan"
-  IFACE=$(__find_wint)
-  apk add wpa_supplicant
-  __create_eww
-  rc-service wpa_supplicant start
-  rc-update add wpa_supplicant boot
-else
-  echo "Configuring eth0"
-  IFACE="eth0"
-fi
-
-__create_eni
-rc-service networking start
-
-echo "Setup OpenSSH"
-/sbin/setup-sshd -c openssh
-cp /etc/ssh/sshd_config /etc/ssh/sshd_config.orig
-__edit_ess
-rc-service sshd restart
-mv /etc/ssh/sshd_config.orig /etc/ssh/sshd_config
-
+#Setup sdcard
 if [ ! -e /dev/mmcblk0p2 ]
 then
 	echo "Creating data partition on sd card"
@@ -97,27 +32,166 @@ if [ ! -e /dev/mmcblk0p2 ]
 then
 	echo "Rebooting"
 	reboot
-fi
-
-if [ "$(blkid /dev/mmcblk0p2)" = "" ]
-then
+	exit 0
+else
 	echo "Formating data partition on sd card"
 	apk add e2fsprogs
 	mkfs.ext4 /dev/mmcblk0p2
 fi
 
-if [ "$(blkid /dev/mmcblk0p2)" != "" ]
+echo "Mounting data partition on sd card"
+install -d /media/mmcblk0p2
+if ! grep -q "mmcblk0p2" /etc/fstab
 then
-	echo "Mounting data partition on sd card"
-	install -d /media/mmcblk0p2
-	if ! grep -q "mmcblk0p2" /etc/fstab
-	then
-		echo "/dev/mmcblk0p2	/media/mmcblk0p2	ext4	noatime,ro,defaults 0 0" >> /etc/fstab
-		mount -a
-	fi
+	echo "/dev/mmcblk0p2	/media/mmcblk0p2	ext4	noatime,ro,defaults 0 0" >> /etc/fstab
+	mount -a
 fi
 
-hostname myMPDos
+#setup networking
+__create_eni_dhcp()
+{
+	cat <<-EOF > /etc/network/interfaces
+	auto lo
+	iface lo inet loopback
+
+	auto ${IFACE}
+	iface ${IFACE} inet dhcp
+	        hostname myMPDos
+	EOF
+}
+
+__create_eni_static()
+{
+	cat <<-EOF > /etc/network/interfaces
+	auto lo
+	iface lo inet loopback
+
+	auto ${IFACE}
+	iface ${IFACE} inet static
+					address $IP_ADDRESS
+					netmask $IP_NETMASK
+					gatways $IP_GATEWAY
+	        hostname $IP_HOSTNAME
+	EOF
+}
+
+__create_eww()
+{
+	cat <<-EOF > /etc/wpa_supplicant/wpa_supplicant.conf
+	network={
+	        ssid="$WLAN_SSID"
+	        key_mgmt=$WLAN_KEYMGMT
+	        psk="$WLAN_PSK"
+	}
+	EOF
+}
+
+__find_wint()
+{
+	for DEV in /sys/class/net/*
+	do
+		if [ -e "${DEV}"/wireless -o -e "${DEV}"/phy80211 ]
+		then
+			echo "${DEV##*/}"
+		fi
+	done
+}
+
+if [ "$WLAN_ENABLE" = "true" ]
+then
+	echo "Configuring wlan"
+  IFACE=$(__find_wint)
+  apk add wpa_supplicant
+  __create_eww
+  rc-service wpa_supplicant start
+  rc-update add wpa_supplicant boot
+else
+  echo "Configuring eth0"
+  IFACE="eth0"
+fi
+
+if [ "$IP_TYPE" = "dhcp" ]
+then
+	__create_eni_dhcp
+else
+	__create_eni_static
+fi
+if [ "$IP_DNS1" != "" ]
+then
+	echo "nameserver $IP_DNS1" > /etc/resolv.conf
+	[ "$IP_DNS1" != "" ] && echo "nameserver $IP_DNS2" > /etc/resolv.conf
+fi
+
+rc-service networking start
+hostname "$IP_HOSTNAME"
+echo "$IP_HOSTNAME" > /etc/hostname
+
+echo "Setup OpenSSH"
+setup-sshd -c openssh
+
+echo "Prevent clock warnings and set NTP"
+rc-update add swclock boot
+rc-update del hwclock boot
+setup-ntp -c busybox
+
+echo "Setting up keymap"
+if [ -f "/usr/share/bkeymaps/$KEYBOARD_LAYOUT/$KEYBOARD_VARIANT" ]
+then
+  setup-keymap "$KEYBOARD_LAYOUT" "$KEYBOARD_VARIANT"
+else
+  echo "Invalid keyboard layout or variant configured."
+fi
+
+echo "Adding repositories and upgrade"
+cp /media/mmcblk0p1/mympd-os-apks/*.rsa.pub /etc/apk/keys/
+echo "/media/mmcblk0p1/mympd-os-apks" >> /etc/apk/repositories
+sed -r -e's/^#(.*\d\/community)/\1/' -i /etc/apk/repositories
+apk update
+apk upgrade
+
+echo "Adding more software"
+if [ "$MPD_VERSION" = "1" ]
+then
+  apk add mympd-os-mpd-stable
+else
+  apk add mympd-os-mpd-master
+fi
+apk add rng-tools mympd mpc sudo alsa-utils
+rc-update add rngd boot
+rc-update add urandom boot
+
+echo "Setting mympd user rights"
+adduser mympd mpd
+
+echo "Creating files in data partition"
+mount -oremount,rw /media/mmcblk0p2
+install -d /media/mmcblk0p2/apkcache
+install -d /media/mmcblk0p2/library -o mpd -g mpd -m 775
+cp -r /usr/local/defaults/scripts /media/mmcblk0p2/
+mount -oremount,ro /media/mmcblk0p2
+
+echo "Setting up apk cache"
+setup-apkcache /media/mmcblk0p2/apkcache
+apk cache -v sync
+
+echo "Setting defaults"
+install -d /var/lib/mpd/cache -o mpd -g mpd
+cat /usr/local/defaults/sudoers >> /etc/sudoers
+cp /usr/local/defaults/lua/*.lua /var/lib/mympd/scripts/
+cp /usr/local/defaults/mpd.conf /etc/
+cp /usr/local/defaults/mympd.conf /etc/
+
+#change motd
+cat > /etc/motd << EOL
+Welcome to myMPDos ${VERSION}!
+
+myMPDos is based on Alpine Linux.
+
+myMPDos: <https://github.com/jcorporation/myMPDos>
+
+Enjoy the music!
+
+EOL
 
 cat > /etc/issue << EOL
 Welcome to myMPDos ${VERSION}!
@@ -125,7 +199,31 @@ Kernel \r on an \m (\l)
 
 EOL
 
-cat > /etc/motd << EOL
-You can setup the system with the command: setup-mympdos
+removeOverlay() {
+  mount -o remount,rw /media/mmcblk0p1
+  rm /media/mmcblk0p1/*.apkovl.tar.gz
+  rm /media/mmcblk0p1/bootstrap.txt
+  mount -o remount,ro /media/mmcblk0p1
 
-EOL
+  rc-update del local default
+  rm /etc/local.d/mympdos.start
+}
+
+if [ "$ROOT_PASSWORD" != "" ]
+then
+  echo "Setting root password"
+  echo -e "$ROOT_PASSWORD\n$ROOT_PASSWORD\n" | passwd
+fi
+
+echo "Removing installation files"
+removeOverlay
+echo "Saving configuration"
+echo "LBU_MEDIA=mmcblk0p2" > /etc/lbu/lbu.conf
+LBU_INCLUDES="/var/lib/mympd /var/lib/mpd /usr"
+for INCLUDE in $LBU_INCLUDES
+do
+  lbu_include "$INCLUDE"
+done
+lbu_commit
+echo "myMPDos installation is finished"
+reboot

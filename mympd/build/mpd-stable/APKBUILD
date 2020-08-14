@@ -14,8 +14,7 @@ makedepends="lame-dev glib-dev curl-dev libao-dev libmad-dev flac-dev
 	libsamplerate-dev libshout-dev libmodplug-dev boost-dev icu-dev
 	libnfs-dev samba-dev opus-dev ffmpeg-dev meson libmpdclient-dev
 	avahi-dev libcap wavpack-dev sqlite-dev chromaprint-dev expat-dev
-	yajl-dev soxr-dev libmms-dev libcdio-paranoia-dev
-	zziplib-dev fluidsynth-dev audiofile-dev
+	yajl-dev soxr-dev libmms-dev zziplib-dev fluidsynth-dev audiofile-dev
 	libmikmod-dev libsndfile-dev"
 checkdepends="gtest-dev gtest"
 install="$pkgname.pre-install"
@@ -24,7 +23,6 @@ source="mympd-os-mpd-stable.tar.gz
 	stacksize.patch
 	${pkgname}.initd
 	${pkgname}.confd
-	libcdio-paranoia-version.patch
 	"
 options="!check"
 
