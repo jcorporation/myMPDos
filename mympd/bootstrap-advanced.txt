@@ -1,13 +1,11 @@
 #
-#Bootstrap configuration file for myMPDos
+#Advanced bootstrap configuration file for myMPDos
 #
 ROOT_PASSWORD="your_secure_password"
 
 #Keybord layout
 KEYBOARD_LAYOUT="de"
 KEYBOARD_VARIANT="de-nodeadkeys"
-#KEYBOARD_LAYOUT="en"
-#KEYBOARD_VARIANT="us"
 
 #Software
 #MPD version

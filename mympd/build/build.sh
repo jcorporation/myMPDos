@@ -1,33 +1,40 @@
 #!/bin/sh
 #
 # SPDX-License-Identifier: GPL-2.0-or-later
-# myMPD (c) 2018-2020 Juergen Mang <mail@jcgames.de>
+# myMPD (c) 2020 Juergen Mang <mail@jcgames.de>
 # https://github.com/jcorporation/mympd
 #
 
 BUILDDIR="/usr/build"
 MYMPD_BRANCH="devel"
-POWEROFF="0"
+POWEROFF="1"
 
 #Build packages
-B_MYMPD="0"
-B_MPD_STABLE="0"
+B_BUILD="1"
+B_MYMPD="1"
+B_MPD_STABLE="1"
 B_MPD_MASTER="0"
 
 echo ""
 echo "Starting myMPDos build"
 
 echo "Setting the local clock"
-date -s@$(cat /media/vda1/date)
+date -s@"$(cat /media/vda1/date)"
 
-echo "Setting keymap"
-setup-keymap de de-nodeadkeys
+if [ "$POWEROFF" = "0" ]
+then
+  echo "Setting keymap"
+  setup-keymap de de-nodeadkeys
+fi
 
-echo "Setup repositories and upgrade"
-setup-apkrepos -1
-sed -r -e's/^#(.*\d\/community)/\1/' -i /etc/apk/repositories
-apk update
-apk upgrade
+if [ "$B_BUILD" = "1" ]
+then
+  echo "Setup repositories and upgrade"
+  setup-apkrepos -1
+  sed -r -e's/^#(.*\d\/community)/\1/' -i /etc/apk/repositories
+  apk update
+  apk upgrade
+fi
 
 echo "Moving /usr to /dev/vda2"
 mount /dev/vda2 /mnt -text4
@@ -39,8 +46,11 @@ echo "Setup apkcache"
 install -d /usr/build/distfiles -g abuild -m775
 setup-apkcache /usr/build/distfiles
 
-echo "Installing build packages"
-apk add git alpine-sdk perl sudo build-base
+if [ "$B_BUILD" = "1" ]
+then
+  echo "Installing build packages"
+  apk add git alpine-sdk perl sudo build-base
+fi
 
 echo "Adding build user"
 adduser -D build -h "$BUILDDIR"

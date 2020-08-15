@@ -1,0 +1,319 @@
+#!/bin/sh
+#
+# SPDX-License-Identifier: GPL-2.0-or-later
+# myMPD (c) 2020 Juergen Mang <mail@jcgames.de>
+# https://github.com/jcorporation/mympd
+#
+
+SDCARD="mmcblk0"
+BOOTPART="p1"
+BOOTDEV="/dev/${SDCARD}p1"
+BOOTMEDIA="/media/${SDCARD}${BOOTPART}"
+DATAPART="p2"
+DATADEV="/dev/${SDCARD}${DATAPART}"
+DATAMEDIA="/media/${SDCARD}${DATAPART}"
+LBUMEDIA="${SDCARD}${DATAPART}"
+
+read -r VERSION < "$BOOTMEDIA/myMPDos.version" || { echo "$BOOTMEDIA/myMPDos.version not found"; exit 1; }
+
+echo ""
+echo "myMPDos $VERSION bootstrap script"
+echo ""
+
+#Bootstrap configuration
+IP_TYPE="dhcp"
+WLAN_ENABLE="true"
+WLAN_KEYMGMT="WPA-PSK"
+IP_HOSTNAME="myMPDos"
+MPD_VERSION="1"
+KEYBOARD_LAYOUT="en"
+KEYBOARD_VARIANT="us"
+
+source "$BOOTMEDIA/bootstrap.txt" || { echo "$BOOTMEDIA/bootstrap.txt not found"; exit 1; }
+
+#Setup sdcard
+wait_for_device()
+{
+	echo -n "Waiting for $1 "
+	#first check device exists and is a block device
+	I=0
+	while [ ! -b "$1" ]
+	do
+		echo -n "."
+		I=$((I+1))
+		sleep 1
+		if [ "$I" = "10" ]
+		then
+			echo "timeout"
+			return 1
+		fi
+	done
+	I=0
+	#Check if device has a filesystem
+	if [ "$2" = "FS" ]
+	then
+		while [ "$(blkid "$1")" = "" ]
+		do
+			echo -n "."
+			I=$((I+1))
+			sleep 1
+			if [ "$I" = "10" ]
+			then
+				echo "timeout"
+				return 1
+			fi
+		done
+	fi
+	echo "found with $2"
+	return 0
+}
+
+if [ ! -b "$DATADEV" ]
+then
+	#Unmount sd-card to avoid a extra reboot
+	/etc/init.d/modloop stop
+	umount "$BOOTDEV"
+	echo "Creating data partition on sd card"
+	fdisk "/dev/$SDCARD" <<-EOF
+	n
+	p
+	2
+
+
+	w
+
+	EOF
+	#wait for devices to appear
+	if ! wait_for_device "$BOOTDEV" FS
+	then
+		echo "Rebooting"
+		reboot
+		exit 0
+	fi
+	I=0
+	while ! mount -t vfat "$BOOTDEV" "$BOOTMEDIA" > /dev/null 2>&1
+	do
+		I=$((I+1))
+		if [ "$I" = 10 ]
+		then
+			echo "Can not mount $BOOTDEV"
+			exit 1
+		fi
+		sleep 1
+	done
+	/etc/init.d/modloop start
+fi
+
+if ! wait_for_device "$DATADEV" NOFS
+then
+	echo "Rebooting"
+	reboot
+	exit 0
+elif [ "$(blkid "$DATADEV")" = "" ]
+then
+	echo "Formating data partition on sd card"
+	apk add e2fsprogs
+	mkfs.ext4 "$DATADEV"
+fi
+
+echo "Mounting data partition on sd card"
+install -d "$DATAMEDIA"
+if ! grep -q "$DATADEV" /etc/fstab
+then
+	echo "$DATADEV	$DATAMEDIA	ext4	noatime,ro,defaults 0 0" >> /etc/fstab
+fi
+
+if ! mount "$DATADEV"
+then
+	echo "Can not mount $DATADEV"
+	exit 1
+fi
+
+#setup networking
+find_wlan_device()
+{
+	for DEV in /sys/class/net/*
+	do
+		if [ -e "${DEV}"/wireless ] || [ -e "${DEV}"/phy80211 ]
+		then
+			echo "${DEV##*/}"
+		fi
+	done
+}
+
+if [ "$WLAN_ENABLE" = "true" ]
+then
+	echo "Configuring wlan"
+  IFACE=$(find_wlan_device)
+	if [ "$IFACE" != "" ]
+	then
+		apk add wpa_supplicant
+		cat <<-EOF > /etc/wpa_supplicant/wpa_supplicant.conf
+		network={
+						ssid="$WLAN_SSID"
+						key_mgmt=$WLAN_KEYMGMT
+						psk="$WLAN_PSK"
+		}
+		EOF
+		rc-service wpa_supplicant start
+		rc-update add wpa_supplicant boot
+	else
+		echo "No wlan device found, falling back to eth0"
+		IFACE="eth0"
+	fi
+else
+  echo "Configuring eth0"
+  IFACE="eth0"
+fi
+
+if [ "$IP_TYPE" = "dhcp" ]
+then
+	cat <<-EOF > /etc/network/interfaces
+	auto lo
+	iface lo inet loopback
+
+	auto ${IFACE}
+	iface ${IFACE} inet dhcp
+	        hostname myMPDos
+	EOF
+else
+	cat <<-EOF > /etc/network/interfaces
+	auto lo
+	iface lo inet loopback
+
+	auto ${IFACE}
+	iface ${IFACE} inet static
+					address $IP_ADDRESS
+					netmask $IP_NETMASK
+					gatways $IP_GATEWAY
+	        hostname $IP_HOSTNAME
+	EOF
+fi
+if [ "$IP_DNS_CONFIGURE" = "true" ]
+then
+	cp /dev/null /etc/resolv.conf
+	[ "$IP_DNS_SEARCH" != "" ] && echo "search $IP_DNS_SEARCH" >> /etc/resolv.conf
+	[ "$IP_DNS_DOMAIN" != "" ] && echo "domain $IP_DNS_DOMAIN" >> /etc/resolv.conf
+	[ "${IP_DNS_SERVER1}${IP_DNS_SERVER2}" = "" ] && IP_DNS_SERVER1="$IP_GATEWAY"
+	[ "$IP_DNS_SERVER1" != "" ] && echo "nameserver $IP_DNS_SERVER1" >> /etc/resolv.conf
+	[ "$IP_DNS_SERVER2" != "" ] && echo "nameserver $IP_DNS_SERVER2" >> /etc/resolv.conf
+fi
+
+rc-service networking start
+hostname "$IP_HOSTNAME"
+echo "$IP_HOSTNAME" > /etc/hostname
+
+echo "Setup NTP"
+I=0
+while ! ntpd -n -q -p pool.ntp.org
+do
+	I=$((I+1))
+	[ "$I" = "5" ] && break;
+done
+setup-ntp -c busybox
+
+echo "Setup OpenSSH"
+setup-sshd -c openssh
+
+echo "Setting keymap to ${KEYBOARD_LAYOUT} ${KEYBOARD_VARIANT}"
+apk add kbd-bkeymaps
+if [ -f "/usr/share/bkeymaps/${KEYBOARD_LAYOUT}/${KEYBOARD_VARIANT}.bmap.gz" ]
+then
+  setup-keymap "$KEYBOARD_LAYOUT" "$KEYBOARD_VARIANT"
+else
+  echo "Invalid keyboard layout or variant configured."
+	exit 1
+fi
+
+echo "Adding repositories and upgrade"
+if [ -f "$BOOTMEDIA"/mympd-os-apks/APKINDEX.tar.gz ]
+then
+	if cp "$BOOTMEDIA"/mympd-os-apks/.abuild/*.rsa.pub /etc/apk/keys/mympdos.rsa.pub
+	then
+		echo "$BOOTMEDIA/mympd-os-apks" >> /etc/apk/repositories
+	else
+		echo "No package signing key for myMPDos repository found"
+	fi
+else
+	echo "Local myMPDos package repository is empty"
+fi
+sed -r -e's/^#(.*\d\/community)/\1/' -i /etc/apk/repositories
+apk update
+apk upgrade
+
+echo "Adding more software"
+if [ "$MPD_VERSION" = "1" ]
+then
+  apk add mympd-os-mpd-stable
+else
+  apk add mympd-os-mpd-master
+fi
+apk add rng-tools mympd mpc sudo alsa-utils $EXTRA_SOFTWARE
+rc-update add rngd boot
+rc-update add urandom boot
+
+echo "Setting mympd user rights"
+adduser mympd mpd
+
+echo "Creating files in data partition"
+mount -oremount,rw "$DATAMEDIA"
+install -d "$DATAMEDIA/apkcache"
+install -d "$DATAMEDIA/library" -o mpd -g mpd -m 775
+cp -r /usr/local/defaults/scripts "$DATAMEDIA"
+mount -oremount,ro "$DATAMEDIA"
+
+echo "Setting up apk cache"
+setup-apkcache "$DATAMEDIA/apkcache"
+apk cache -v sync
+
+echo "Setting defaults"
+install -d /var/lib/mpd/cache -o mpd -g mpd
+cat /usr/local/defaults/sudoers >> /etc/sudoers
+cp /usr/local/defaults/lua/*.lua /var/lib/mympd/scripts/
+cp /usr/local/defaults/mpd.conf /etc/
+cp /usr/local/defaults/mympd.conf /etc/
+
+#change motd
+cat > /etc/motd << EOL
+Welcome to myMPDos ${VERSION}!
+
+myMPDos is based on Alpine Linux.
+
+myMPDos: <https://github.com/jcorporation/myMPDos>
+
+Enjoy the music!
+
+EOL
+
+cat > /etc/issue << EOL
+Welcome to myMPDos ${VERSION}!
+Kernel \r on an \m (\l)
+
+EOL
+
+if [ "$ROOT_PASSWORD" != "" ]
+then
+  echo "Setting root password"
+  echo -e "$ROOT_PASSWORD\n$ROOT_PASSWORD\n" | passwd
+fi
+
+echo "Removing installation files"
+mount -o remount,rw "$BOOTMEDIA"
+rm "$BOOTMEDIA/mympdos-bootstrap.apkovl.tar.gz"
+rm "$BOOTMEDIA/bootstrap.txt"
+mount -o remount,ro "$BOOTMEDIA"
+
+rc-update del local default
+rm /etc/local.d/mympdos-bootstrap.start
+rm -r /usr/local/defaults
+
+echo "Saving configuration"
+echo "LBU_MEDIA=$LBUMEDIA" > /etc/lbu/lbu.conf
+LBU_INCLUDES="/var/lib/mympd /var/lib/mpd /usr"
+for INCLUDE in $LBU_INCLUDES
+do
+  lbu_include "$INCLUDE"
+done
+lbu_commit
+echo "myMPDos installation is finished"
+reboot

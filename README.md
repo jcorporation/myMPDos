@@ -1,6 +1,6 @@
 # myMPDos
 
-myMPDos is a Raspberry Pi image (aarch64) based on Alpine Linux. It is running entirely in RAM and it does not write to the SD-card unless you want to save settings. Therefore, myMPDos is very robust and you can simply pull the power without any risk of corruption of your sd-card.
+myMPDos is a Raspberry Pi image (aarch64) based on Alpine Linux. It is running entirely in RAM and it does not write to the sd-card unless you want to save settings. Therefore, myMPDos is very robust and you can simply turn off the power without any risk of corruption of your sd-card.
 
 myMPDos is a turnkey music playback solution and is designed arround [MPD](https://www.musicpd.org/) and [myMPD](https://github.com/jcorporation/myMPD). After startup you can access the myMPD webinterface, copy music to the sdcard data partition or mount a music storage and enjoy your music.
 
@@ -22,15 +22,16 @@ The `build.sh` script creates a qemu image, starts it and compiles myMPD and MPD
 
 ## Test
 
-Qemu does not support a raspberry pi comptabile network interace.
+Qemu does not support a raspberry pi compatible network interace.
 
 - Run `./startimage.sh`
 
-## Depedencies
+## Build depedencies
 
 - Qemu (qemu-system-aarch64)
 - DHCP server in your network
 - Working internet connection
+- Standard linux tools
 
 ## Copyright
 2020 Juergen Mang <mail@jcgames.de>
