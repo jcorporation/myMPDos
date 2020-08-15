@@ -1,6 +1,6 @@
 # myMPDos
 
-myMPDos is a Raspberry Pi image (aarch64) based on Alpine Linux. It is running entirely in RAM and it does not write to the SD-card unless you want to save settings. Therefore, myMPDos is very robust and you can simply pull the power without any risk of corruption of your SD card.
+myMPDos is a Raspberry Pi image (aarch64) based on Alpine Linux. It is running entirely in RAM and it does not write to the SD-card unless you want to save settings. Therefore, myMPDos is very robust and you can simply pull the power without any risk of corruption of your sd-card.
 
 myMPDos is a turnkey music playback solution and is designed arround [MPD](https://www.musicpd.org/) and [myMPD](https://github.com/jcorporation/myMPD). After startup you can access the myMPD webinterface, copy music to the sdcard data partition or mount a music storage and enjoy your music.
 
@@ -16,8 +16,9 @@ The `build.sh` script creates a qemu image, starts it and compiles myMPD and MPD
 ## Usage
 
 1. Transfer the image to a sdcard
-2. Edit `mympd/bootstrap.txt`
-3. Boot your Raspberry Pi
+2. Copy `mympd/bootstrap-simple.txt` or `mympd/bootstrap-advanced.txt` to `mympd/bootstrap.txt`
+3. Adapt `mympd/bootstrap.txt`
+4. Boot your Raspberry Pi
 
 ## Test
 

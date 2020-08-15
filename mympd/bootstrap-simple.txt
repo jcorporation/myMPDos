@@ -1,0 +1,22 @@
+#
+#Simple bootstrap configuration file for myMPDos
+#
+ROOT_PASSWORD="your_secure_password"
+
+#Keybord layout
+KEYBOARD_LAYOUT="de"
+KEYBOARD_VARIANT="de-nodeadkeys"
+#KEYBOARD_LAYOUT="en"
+#KEYBOARD_VARIANT="us"
+
+#Software
+#MPD version
+MPD_VERSION="1"
+
+#Network settings
+IP_HOSTNAME="myMPDos"
+WLAN_ENABLE="true"
+WLAN_SSID="ssid of your wlan"
+WLAN_KEYMGMT="WPA-PSK"
+WLAN_PSK="psk of the ssid"
+IP_TYPE="dhcp"
