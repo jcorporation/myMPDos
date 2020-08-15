@@ -16,15 +16,15 @@ The `build.sh` script creates a qemu image, starts it and compiles myMPD and MPD
 ## Usage
 
 1. Transfer the image to a sdcard
-2. Copy `mympd/bootstrap-simple.txt` or `mympd/bootstrap-advanced.txt` to `mympd/bootstrap.txt`
-3. Adapt `mympd/bootstrap.txt`
+2. Copy `bootstrap-simple.txt` or `bootstrap-advanced.txt` to `bootstrap.txt`
+3. Adapt `bootstrap.txt`
 4. Boot your Raspberry Pi
 
 ## Test
 
-Qemu does not support a raspberry pi compatible network interace.
+Qemu does not support a raspberry pi compatible network interace. Do not burn the image after test to the sd-card. After first start of an image all bootstrap files are removed.
 
-- Run `./startimage.sh`
+- Run `./image.sh start`
 
 ## Build depedencies
 

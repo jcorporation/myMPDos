@@ -6,7 +6,8 @@
 #
 
 source config || { echo "config not found"; exit 1; }
-[ -f mympd/bootstrap.txt ] || { echo "mympd/bootstrap.txt not found"; exit 1; }
+
+[ "$1" == "private" ] && PRIVATE=1
 
 echo "Checking dependencies"
 for DEP in wget tar gzip cpio dd losetup fdisk mkfs.vfat mkfs.ext4 sudo install sed patch
@@ -88,16 +89,33 @@ install -d mnt
 sudo mount -ouid="$BUILDUSER" "${LOOP}p1" mnt || exit 1
 tar -xzf "$ARCHIVE" -C mnt
 cp boot/modloop-lts mnt/boot
+
+echo "Copy build scripts"
 install -d mnt/mympd
-cp -r ../mympd/build/* mnt/mympd
-[ -f ../mympd-os-apks/abuild.tgz ] && cp ../mympd-os-apks/abuild.tgz mnt/mympd/
+cp -r ../mympdos/build/* mnt/mympd
+
+echo "Copy existing packages"
+install -d mnt/mympdos-apks
+if [ -f ../mympdos-apks/APKINDEX.tar.gz ]
+then
+  cp ../mympdos-apks/*.apk mnt/mympdos-apks/
+  cp ../mympdos-apks/APKINDEX.tar.gz mnt/mympdos-apks/
+else
+  echo "No existing packages found"
+fi
+if [ -f ../mympdos-apks/abuild.tgz ]
+then
+  cp ../mympdos-apks/abuild.tgz mnt/mympd/
+else
+  echo "No saved abuild.tgz found"
+fi
 date +%s > mnt/date
 umount_retry mnt || exit 1
 
 echo "Patching initramfs"
 rm -f init
 gzip -dc boot/initramfs-lts | cpio -id init
-patch init ../mympd/build/init.patch
+patch init ../mympdos/build/init.patch
 echo ./init | cpio -H newc -o | gzip >> boot/initramfs-lts
 
 echo "Starting build image"
@@ -111,17 +129,17 @@ qemu-system-aarch64 \
   -nic user,id=mynet0
 
 echo "Saving packages"
-install -d ../mympd-os-apks
+install -d ../mympdos-apks
 sudo mount -text4 "${LOOP}p2" mnt || exit 1
 if [ -f mnt/build/abuild.tgz ]
 then
-  cp mnt/build/abuild.tgz ../mympd-os-apks/
+  cp mnt/build/abuild.tgz ../mympdos-apks/
 else
-  echo "No abuild files found"
+  echo "No abuild.tgt found"
 fi
 if [ -f "mnt/build/packages/package/${ARCH}/APKINDEX.tar.gz" ]
 then
-  cp mnt/build/packages/package/"${ARCH}"/* ../mympd-os-apks/
+  cp mnt/build/packages/package/"${ARCH}"/* ../mympdos-apks/
 else
   echo "No APKINDEX.tar.gz found"
 fi
@@ -147,20 +165,42 @@ LOOP=$(sudo losetup --partscan --show -f "$IMAGE")
 sudo mkfs.vfat "${LOOP}p1"
 sudo mount -ouid="$BUILDUSER" "${LOOP}p1" mnt || exit 1
 tar -xzf "$ARCHIVE" -C mnt
-cd ../mympd/overlay || exit 1
+cd ../mympdos/overlay || exit 1
 tar -czf ../../tmp/mnt/mympdos-bootstrap.apkovl.tar.gz .
 cd ../../tmp || exit 1
-cp ../mympd/bootstrap.txt mnt/
+if [ "$PRIVATE" = "1" ]
+then
+  echo "Copy private bootstrap.txt"
+  cp ../mympdos/bootstrap.txt mnt/
+else
+  echo "Copy sample bootstrap.txt files"
+  cp ../mympdos/bootstrap-*.txt mnt/
+fi
 echo "$VERSION" > mnt/myMPDos.version
 echo "Copy saved packages to image"
-install -d mnt/mympd-os-apks
-if [ -f ../mympd-os-apks/APKINDEX.tar.gz ]
+install -d mnt/mympdos-apks
+if [ -f ../mympdos-apks/APKINDEX.tar.gz ]
 then
-  cp ../mympd-os-apks/*.apk mnt/mympd-os-apks/
-  cp ../mympd-os-apks/APKINDEX.tar.gz mnt/mympd-os-apks/
-  tar --wildcards -xzf ../mympd-os-apks/abuild.tgz -C mnt/mympd-os-apks ".abuild/*.rsa.pub"
+  cp ../mympdos-apks/*.apk mnt/mympdos-apks/
+  cp ../mympdos-apks/APKINDEX.tar.gz mnt/mympdos-apks/
+  tar --wildcards -xzf ../mympdos-apks/abuild.tgz -C mnt/mympdos-apks ".abuild/*.rsa.pub"
 else
   echo "No myMPDos apks found"
+fi
+
+echo ""
+echo "Image $IMAGE created successfully"
+if [ "$PRIVATE" = "1" ]
+then
+  echo ""
+  echo "Productive bootstrap.txt copied to image."
+  echo "Dont redistribute this image!"
+  echo ""
+else
+  echo ""
+  echo "Next step is to create a bootstrap.txt."
+  echo "There are samples in the image."
+  echo ""
 fi
 umount_retry mnt || exit 1
 sudo losetup -d "${LOOP}"

@@ -1,6 +1,6 @@
 # Maintainer: Juergen Mang <mail@jcgames.de>
 # Based on: https://pkgs.alpinelinux.org/package/edge/community/x86_64/mpd
-pkgname=mympd-os-mpd-master
+pkgname=mympdos-mpd-master
 pkgver=__MPDVER__
 pkgrel=0
 pkgdesc="Music daemon that plays MP3, FLAC, Ogg Vorbis files and Audio CDs"
@@ -18,7 +18,7 @@ makedepends="lame-dev glib-dev curl-dev libao-dev libmad-dev flac-dev
 	libmikmod-dev libsndfile-dev"
 install="$pkgname.pre-install"
 subpackages="$pkgname-doc $pkgname-dbg $pkgname-openrc"
-source="mympd-os-mpd-master.tar.gz
+source="mympdos-mpd-master.tar.gz
 	${pkgname}.initd
 	${pkgname}.confd
 	stacksize.patch
@@ -44,21 +44,14 @@ package() {
 	# see: https://www.musicpd.org/doc/html/user.html#real-time-scheduling
 	setcap cap_sys_nice+ep "$pkgdir"/usr/bin/mpd
 
-	# provide a config that works by default
-	install -d "$pkgdir"/etc
-	sed	-e 's:\#user.*:user\t\t"mpd":' \
-		-e 's:\#log_file.*:log_file\t\t"syslog":' \
-		doc/mpdconf.example > "$pkgdir"/etc/mpd.conf
 	install -m755 -D "$srcdir"/$pkgname.initd \
 		"$pkgdir"/etc/init.d/$pkgname
 	install -m644 -D "$srcdir"/$pkgname.confd \
 		"$pkgdir"/etc/conf.d/$pkgname
 	install -d -g audio -o mpd -m775 \
-		"$pkgdir"/var/run/mpd \
-		"$pkgdir"/var/log/mpd \
+		"$pkgdir"/run/mpd \
 		"$pkgdir"/var/lib/mpd \
-		"$pkgdir"/var/lib/mpd/playlists \
-		"$pkgdir"/var/lib/mpd/music
+		"$pkgdir"/var/lib/mpd/playlists
 }
 
 sha512sums=""
