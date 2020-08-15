@@ -1,7 +1,7 @@
 # Maintainer: Juergen Mang <mail@jcgames.de>
 # Based on: https://git.alpinelinux.org/aports/tree/community/mpd
 pkgname=mympdos-mpd-stable
-pkgver=__MPDVER__
+pkgver=0.21.25
 pkgrel=0
 pkgdesc="Music daemon that plays MP3, FLAC, Ogg Vorbis files and Audio CDs"
 url="https://musicpd.org"
@@ -32,7 +32,7 @@ build() {
 		--sysconfdir=/etc \
 		--mandir=/usr/share/man \
 		--localstatedir=/var \
-		--buildtype=plain \
+		--buildtype=release \
 		. output
 	ninja -C output
 }

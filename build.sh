@@ -106,7 +106,7 @@ echo ./init | cpio -H newc -o | gzip >> boot/initramfs-lts
 
 echo "Starting build image"
 qemu-system-aarch64 \
-  -M virt -m 1024M -cpu cortex-a57 \
+  -M virt -m "$BUILDRAM" -cpu cortex-a57 -smp "$BUILDCPUS" \
   -kernel boot/vmlinuz-lts -initrd boot/initramfs-lts \
   -append "console=ttyAMA0 ip=dhcp" \
   -nographic \
@@ -154,11 +154,11 @@ else
 fi
 echo "$VERSION" > mnt/myMPDos.version
 echo "Copy saved packages to image"
-install -d mnt/mympdos-apks
+install -d "mnt/mympdos-apks/$ARCH"
 if [ -f ../mympdos-apks/APKINDEX.tar.gz ]
 then
-  cp ../mympdos-apks/*.apk mnt/mympdos-apks/
-  cp ../mympdos-apks/APKINDEX.tar.gz mnt/mympdos-apks/
+  cp ../mympdos-apks/*.apk "mnt/mympdos-apks/$ARCH/"
+  cp ../mympdos-apks/APKINDEX.tar.gz "mnt/mympdos-apks/$ARCH/"
   tar --wildcards -xzf ../mympdos-apks/abuild.tgz -C mnt/mympdos-apks ".abuild/*.rsa.pub"
 else
   echo "No myMPDos apks found"
