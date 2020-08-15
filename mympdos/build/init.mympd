@@ -791,7 +791,7 @@ fi
 
 #mympd build
 echo "Adding myMPD-os build service to firstboot"
-sed -i -e 's|eend $rc|/media/vda1/mympd/build.sh\n\teend $rc|' "${sysroot}/etc/init.d/firstboot"
+sed -i -e 's|eend $rc|/media/vda1/mympdos/build.sh\n\teend $rc|' "${sysroot}/etc/init.d/firstboot"
 
 # switch over to new root
 cat /proc/mounts | while read DEV DIR TYPE OPTS ; do

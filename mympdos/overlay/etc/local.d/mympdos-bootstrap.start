@@ -28,6 +28,7 @@ IP_HOSTNAME="myMPDos"
 MPD_VERSION="1"
 KEYBOARD_LAYOUT="en"
 KEYBOARD_VARIANT="us"
+BT_ENABLE="false"
 if [ -f "$BOOTMEDIA/bootstrap.txt" ]
 then
 	source "$BOOTMEDIA/bootstrap.txt"
@@ -234,11 +235,11 @@ fi
 echo "Adding repositories and upgrade"
 setup-apkrepos -1
 sed -r -e's/^#(.*\d\/community)/\1/' -i /etc/apk/repositories
-if [ -f "$BOOTMEDIA"/mympd-os-apks/APKINDEX.tar.gz ]
+if [ -f "$BOOTMEDIA"/mympdos-apks/APKINDEX.tar.gz ]
 then
-	if cp "$BOOTMEDIA"/mympd-os-apks/.abuild/*.rsa.pub /etc/apk/keys/mympdos.rsa.pub
+	if cp "$BOOTMEDIA"/mympdos-apks/.abuild/*.rsa.pub /etc/apk/keys/mympdos.rsa.pub
 	then
-		echo "$BOOTMEDIA/mympd-os-apks" >> /etc/apk/repositories
+		echo "$BOOTMEDIA/mympdos-apks" >> /etc/apk/repositories
 	else
 		echo "No package signing key for myMPDos repository found"
 	fi
@@ -248,12 +249,18 @@ fi
 apk update
 apk upgrade
 
+if [ "$BT_ENABLE" = "true"]
+then
+	apk add bluez bluez-alsa
+	rc-update add bluetooth boot
+fi
+
 echo "Adding more software"
 if [ "$MPD_VERSION" = "1" ]
 then
-  apk add mympd-os-mpd-stable
+  apk add mympdos-mpd-stable
 else
-  apk add mympd-os-mpd-master
+  apk add mympdos-mpd-master
 fi
 apk add mympd
 apk add rng-tools mpc sudo alsa-utils $EXTRA_SOFTWARE
@@ -304,6 +311,15 @@ echo "Removing installation files"
 mount -o remount,rw "$BOOTMEDIA"
 rm "$BOOTMEDIA/mympdos-bootstrap.apkovl.tar.gz"
 rm "$BOOTMEDIA/bootstrap.txt"
+
+if [ ! -f "$BOOTMEDIA/usercfg.txt" ]
+then
+	echo "Setting usercfg.txt"
+	cp /usr/local/defaults/usercfg.txt "$BOOTMEDIA/"
+	[ "$WLAN_ENABLE" = "false" ] && echo "dtoverlay=disable-wifi" >> "$BOOTMEDIA/usercfg.txt"
+	[ "$BT_ENABLE" = "false" ] && echo "dtoverlay=disable-bt" >> "$BOOTMEDIA/usercfg.txt"
+	[ "$AUDIOHAT" != "" ] && echo "dtoverlay=$AUDIOHAT" >> "$BOOTMEDIA/usercfg.txt"
+fi
 mount -o remount,ro "$BOOTMEDIA"
 
 rm /etc/local.d/mympdos-bootstrap.start

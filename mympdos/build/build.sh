@@ -15,7 +15,7 @@ B_MYMPD="1"
 B_MYMPD_BRANCH="devel"
 B_LIBMPDCLIENT="1"
 B_MPD_STABLE="1"
-B_MPD_MASTER="0"
+B_MPD_MASTER="1"
 
 get_pkgver()
 {
@@ -74,10 +74,11 @@ echo "build    ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 cd "$BUILDDIR" || exit 1
 
 echo "Setting up package signing key"
-if [ -f /media/vda1/mympd/abuild.tgz ]
+if [ -f /media/vda1/mympdos/abuild.tgz ]
 then
   echo "Restoring .abuild"
-  tar -xzf /media/vda1/mympd/abuild.tgz
+  cp /media/vda1/mympdos/abuild.tgz .
+  tar -xzf abuild.tgz
 else
   if su build -c "abuild-keygen -n -a"
   then
@@ -87,6 +88,8 @@ fi
 cp .abuild/*.rsa.pub /etc/apk/keys/
 
 su build -c "install -d packages/package/$ARCH/"
+ln -s /usr/build/packages/package/ /usr/build/packages/build
+
 if [ -f /media/vda1/mympdos-apks/APKINDEX.tar.gz ]
 then
   echo "Restoring existing packages"
@@ -95,17 +98,16 @@ else
   echo "No existing packages found"
 fi
 
-LIBMPDCLIENT_PACKAGE=$(get_pkgname /media/vda1/mympd/libmpdclient)
-B_LIBMPDCLIENT_VER=$(get_pkgver /media/vda1/mympd/libmpdclient)
+LIBMPDCLIENT_PACKAGE=$(get_pkgname /media/vda1/mympdos/libmpdclient)
+B_LIBMPDCLIENT_VER=$(get_pkgver /media/vda1/mympdos/libmpdclient)
 if [ "$B_LIBMPDCLIENT" = "1" ] && [ ! -f "packages/package/$ARCH/$LIBMPDCLIENT_PACKAGE" ]
 then
   echo "Build libmpdclient"
-  su build -c "cp -r /media/vda1/mympd/libmpdclient ."
+  su build -c "cp -r /media/vda1/mympdos/libmpdclient ."
   cd libmpdclient || exit 1
   su build -c "abuild checksum"
   su build -c "abuild -r"
   cd ..
-  mv packages/build/"$ARCH"/*.apk "packages/package/$ARCH/"
 fi
 
 echo "/usr/build/packages/package/" >> /etc/apk/repositories
@@ -120,16 +122,18 @@ then
   if [ ! -f "../packages/package/$ARCH/$MYMPD_PACKAGE" ]
   then
     su build -c "./build.sh pkgalpine"
+  else
+    echo "myMPD is already up-to-date"
   fi
   cd ..
 fi
 
-MPD_MASTER_PACKAGE=$(get_pkgname /media/vda1/mympd/mpd-master)
-B_MPD_MASTER_VER=$(get_pkgver /media/vda1/mympd/mpd-master)
+MPD_MASTER_PACKAGE=$(get_pkgname /media/vda1/mympdos/mpd-master)
+B_MPD_MASTER_VER=$(get_pkgver /media/vda1/mympdos/mpd-master)
 if [ "$B_MPD_MASTER" = "1" ] && [ ! -f "packages/package/$ARCH/$MPD_MASTER_PACKAGE" ]
 then
   echo "Build MDP master"
-  su build -c "cp -r /media/vda1/mympd/mpd-master ."
+  su build -c "cp -r /media/vda1/mympdos/mpd-master ."
   cd mpd-master || exit 1
   su build -c "git clone -b master --depth=1 https://github.com/MusicPlayerDaemon/MPD.git"
   mv MPD "mympdos-mpd-master-${B_MPD_MASTER_VER}"
@@ -140,12 +144,12 @@ then
   cd ..
 fi
 
-MPD_STABLE_PACKAGE=$(get_pkgname /media/vda1/mympd/mpd-stable)
-B_MPD_STABLE_VER=$(get_pkgver /media/vda1/mympd/mpd-stable)
+MPD_STABLE_PACKAGE=$(get_pkgname /media/vda1/mympdos/mpd-stable)
+B_MPD_STABLE_VER=$(get_pkgver /media/vda1/mympdos/mpd-stable)
 if [ "$B_MPD_STABLE" = "1" ] && [ ! -f "packages/package/$ARCH/$MPD_STABLE_PACKAGE" ]
 then
   echo "Building MPD stable"
-  su build -c "cp -r /media/vda1/mympd/mpd-stable ."
+  su build -c "cp -r /media/vda1/mympdos/mpd-stable ."
   cd mpd-stable || exit 1
   su build -c "wget http://www.musicpd.org/download/mpd/0.21/mpd-${B_MPD_STABLE_VER}.tar.xz"
   tar -xf "mpd-${B_MPD_STABLE_VER}.tar.xz"
@@ -157,5 +161,9 @@ then
   su build -c "abuild -r"
   cd ..
 fi
+
+#echo "Creating repository index"
+#su build -c "apk index -o packages/package/$ARCH/APKINDEX.tar.gz packages/package/$ARCH/*.apk"
+#su build -c "abuild-sign packages/package/$ARCH/APKINDEX.tar.gz"
 
 [ "$POWEROFF" = "1" ] && poweroff

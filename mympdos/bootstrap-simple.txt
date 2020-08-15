@@ -5,3 +5,5 @@ ROOT_PASSWORD="your_secure_password"
 
 WLAN_SSID="ssid of your wlan"
 WLAN_PSK="psk of the ssid"
+
+AUDIOHAT="allo-digione"

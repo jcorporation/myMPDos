@@ -64,7 +64,7 @@ fi
 
 echo "Create build image"
 dd if=/dev/zero of="$BUILDIMAGE" bs=1M count="$IMAGESIZEBUILD"
-sfdisk "$BUILDIMAGE" <<< "1, ${BOOTPARTSIZE}, b, *"
+sfdisk "$BUILDIMAGE" <<< "1, ${BOOTPARTSIZEBUILD}, b, *"
 sfdisk -a "$BUILDIMAGE" <<< ","
 
 LOOP=$(sudo losetup --partscan --show -f "$BUILDIMAGE")
@@ -77,8 +77,8 @@ tar -xzf "$ARCHIVE" -C mnt
 cp boot/modloop-lts mnt/boot
 
 echo "Copy build scripts"
-install -d mnt/mympd
-cp -r ../mympdos/build/* mnt/mympd
+install -d mnt/mympdos
+cp -r ../mympdos/build/* mnt/mympdos
 
 echo "Copy existing packages"
 install -d mnt/mympdos-apks
@@ -91,7 +91,7 @@ else
 fi
 if [ -f ../mympdos-apks/abuild.tgz ]
 then
-  cp ../mympdos-apks/abuild.tgz mnt/mympd/
+  cp ../mympdos-apks/abuild.tgz mnt/mympdos/
 else
   echo "No saved abuild.tgz found"
 fi
@@ -115,13 +115,15 @@ qemu-system-aarch64 \
   -nic user,id=mynet0
 
 echo "Saving packages"
+BACKUPDIR="../mympdos-apks.$(date +%Y%m%d_%H%M)"
+[ -d ../mympdos-apks ] && mv ../mympdos-apks "$BACKUPDIR"
 install -d ../mympdos-apks
 sudo mount -text4 "${LOOP}p2" mnt || exit 1
 if [ -f mnt/build/abuild.tgz ]
 then
   cp mnt/build/abuild.tgz ../mympdos-apks/
 else
-  echo "No abuild.tgt found"
+  echo "No abuild.tgz found"
 fi
 if [ -f "mnt/build/packages/package/${ARCH}/APKINDEX.tar.gz" ]
 then
