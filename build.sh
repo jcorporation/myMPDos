@@ -10,7 +10,7 @@ source config || { echo "config not found"; exit 1; }
 [ "$1" == "private" ] && PRIVATE=1
 
 echo "Checking dependencies"
-for DEP in wget tar gzip cpio dd losetup fdisk mkfs.vfat mkfs.ext4 sudo install sed patch
+for DEP in wget tar gzip cpio dd losetup sfdisk mkfs.vfat mkfs.ext4 sudo install sed patch
 do
   if ! command -v "$DEP" > /dev/null
   then
@@ -64,23 +64,9 @@ fi
 
 echo "Create build image"
 dd if=/dev/zero of="$BUILDIMAGE" bs=1M count="$IMAGESIZEBUILD"
-fdisk "$BUILDIMAGE" > /dev/null << EOF
-n
-p
-1
+sfdisk "$BUILDIMAGE" <<< "1, ${BOOTPARTSIZE}, b, *"
+sfdisk -a "$BUILDIMAGE" <<< ","
 
-+248M
-t
-b
-a
-n
-p
-2
-
-
-w
-
-EOF
 LOOP=$(sudo losetup --partscan --show -f "$BUILDIMAGE")
 [ "$LOOP" = "" ] && exit 1
 sudo mkfs.vfat "${LOOP}p1"
@@ -148,18 +134,8 @@ sudo losetup -d "${LOOP}"
 
 echo "Create image"
 dd if=/dev/zero of="$IMAGE" bs=1M count="$IMAGESIZE"
-fdisk "$IMAGE" > /dev/null << EOF
-n
-p
-1
+sfdisk "$IMAGE" <<< "1, ${BOOTPARTSIZE}, b, *"
 
-
-t
-b
-a
-w
-
-EOF
 LOOP=$(sudo losetup --partscan --show -f "$IMAGE")
 [ "$LOOP" = "" ] && exit 1
 sudo mkfs.vfat "${LOOP}p1"

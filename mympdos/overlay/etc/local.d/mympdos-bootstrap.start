@@ -28,8 +28,13 @@ IP_HOSTNAME="myMPDos"
 MPD_VERSION="1"
 KEYBOARD_LAYOUT="en"
 KEYBOARD_VARIANT="us"
-
-source "$BOOTMEDIA/bootstrap.txt" || { echo "$BOOTMEDIA/bootstrap.txt not found"; exit 1; }
+if [ -f "$BOOTMEDIA/bootstrap.txt" ]
+then
+	source "$BOOTMEDIA/bootstrap.txt"
+else
+	echo "No bootstrap.txt found, using defaults"
+	WLAN_ENABLE="false"
+fi
 
 #Setup sdcard
 wait_for_device()
@@ -214,6 +219,7 @@ setup-ntp -c busybox
 
 echo "Setup OpenSSH"
 setup-sshd -c openssh
+echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 
 echo "Setting keymap to ${KEYBOARD_LAYOUT} ${KEYBOARD_VARIANT}"
 apk add kbd-bkeymaps
@@ -226,6 +232,8 @@ else
 fi
 
 echo "Adding repositories and upgrade"
+setup-apkrepos -1
+sed -r -e's/^#(.*\d\/community)/\1/' -i /etc/apk/repositories
 if [ -f "$BOOTMEDIA"/mympd-os-apks/APKINDEX.tar.gz ]
 then
 	if cp "$BOOTMEDIA"/mympd-os-apks/.abuild/*.rsa.pub /etc/apk/keys/mympdos.rsa.pub
@@ -237,7 +245,6 @@ then
 else
 	echo "Local myMPDos package repository is empty"
 fi
-sed -r -e's/^#(.*\d\/community)/\1/' -i /etc/apk/repositories
 apk update
 apk upgrade
 
@@ -248,7 +255,8 @@ then
 else
   apk add mympd-os-mpd-master
 fi
-apk add rng-tools mympd mpc sudo alsa-utils $EXTRA_SOFTWARE
+apk add mympd
+apk add rng-tools mpc sudo alsa-utils $EXTRA_SOFTWARE
 rc-update add rngd boot
 rc-update add urandom boot
 
@@ -272,6 +280,7 @@ cat /usr/local/defaults/sudoers >> /etc/sudoers
 cp /usr/local/defaults/lua/*.lua /var/lib/mympd/scripts/
 cp /usr/local/defaults/mpd.conf /etc/
 cp /usr/local/defaults/mympd.conf /etc/
+cp /usr/local/defaults/mympdos.start /etc/local.d/
 
 #change motd
 cat > /etc/motd << EOL
@@ -282,12 +291,6 @@ myMPDos is based on Alpine Linux.
 myMPDos: <https://github.com/jcorporation/myMPDos>
 
 Enjoy the music!
-
-EOL
-
-cat > /etc/issue << EOL
-Welcome to myMPDos ${VERSION}!
-Kernel \r on an \m (\l)
 
 EOL
 
@@ -303,7 +306,6 @@ rm "$BOOTMEDIA/mympdos-bootstrap.apkovl.tar.gz"
 rm "$BOOTMEDIA/bootstrap.txt"
 mount -o remount,ro "$BOOTMEDIA"
 
-rc-update del local default
 rm /etc/local.d/mympdos-bootstrap.start
 rm -r /usr/local/defaults
 

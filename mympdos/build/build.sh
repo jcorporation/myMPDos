@@ -6,13 +6,13 @@
 #
 
 BUILDDIR="/usr/build"
-MYMPD_BRANCH="devel"
 POWEROFF="1"
 
 #Build packages
-B_BUILD="0"
-B_MYMPD="0"
-B_MPD_STABLE="0"
+B_BUILD="1"
+B_MYMPD="1"
+B_MYMPD_BRANCH="devel"
+B_MPD_STABLE="1"
 B_MPD_MASTER="0"
 
 echo ""
@@ -61,7 +61,7 @@ echo "Setting up package signing key"
 if [ -f /media/vda1/mympd/abuild.tgz ]
 then
   echo "Restoring .abuild"
-  tar -xzf /media/vda1/mympd/abuild.tgz 
+  tar -xzf /media/vda1/mympd/abuild.tgz
 else
   if su build -c "abuild-keygen -n -a"
   then
@@ -82,7 +82,7 @@ fi
 if [ "$B_MYMPD" = "1" ]
 then
   echo "Building myMPD"
-  su build -c "git clone -b $MYMPD_BRANCH --depth=1 https://github.com/jcorporation/myMPD.git"
+  su build -c "git clone -b $B_MYMPD_BRANCH --depth=1 https://github.com/jcorporation/myMPD.git"
   cd myMPD || exit 1
   su build -c "./build.sh pkgalpine"
   cd ..

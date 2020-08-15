@@ -1,0 +1,8 @@
+#!/bin/sh
+
+cat > /etc/issue << EOL
+Welcome to myMPDos ${VERSION}!
+Kernel \r on an \m (\l)
+
+EOL
+ip -4 -o addr show up scope global | awk '{print $2,":",$4}'| sed -e "s/\/[1-9]*//" >> /etc/issue

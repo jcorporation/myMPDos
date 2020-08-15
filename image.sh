@@ -54,7 +54,7 @@ startimage() {
 
 	qemu-system-aarch64 -m 1024 \
 		-M raspi3 \
-		-sd "$IMAGE" \
+		-sd "../$IMAGE" \
 		-kernel image/boot/vmlinuz-rpi \
 		-initrd image/boot/initramfs-rpi \
 		-append "console=ttyAMA0" \
