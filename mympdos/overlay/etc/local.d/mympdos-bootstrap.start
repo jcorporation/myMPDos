@@ -14,7 +14,7 @@ DATADEV="/dev/${SDCARD}${DATAPART}"
 DATAMEDIA="/media/${SDCARD}${DATAPART}"
 LBUMEDIA="${SDCARD}${DATAPART}"
 ARCH=$(uname -m)
-REBOOT="0"
+REBOOT="1"
 
 read -r VERSION < "$BOOTMEDIA/myMPDos.version" || { echo "$BOOTMEDIA/myMPDos.version not found"; exit 1; }
 
@@ -171,7 +171,7 @@ write_interfaces_static()
 	iface ${IFACE} inet static
 					address $IP_ADDRESS
 					netmask $IP_NETMASK
-					gatways $IP_GATEWAY
+					gateway $IP_GATEWAY
 	        hostname $IP_HOSTNAME
 	EOF
 }
@@ -231,6 +231,17 @@ then
 	if [ "$IP_ADDRESS" != "" ] && [ "$IP_NETMASK" != "" ] && [ "$IP_GATEWAY" != "" ]
 	then
 		write_interfaces_static
+		rc-service networking restart
+	fi
+	#check
+	NIP_ADDRESS=$(ifconfig "$IFACE" | grep -m 1 "inet addr" | sed -r 's/.*inet addr:(\S+)\s.*/\1/')
+	NIP_NETMASK=$(ifconfig "$IFACE" | grep -m 1 "inet addr" | sed -r 's/.*Mask:(\S+)/\1/')
+	NIP_GATEWAY=$(route -n | grep -m 1 "^0.0.0.0" | sed -r 's/0\.0\.0\.0\s+(\S+)\s.*/\1/')
+	if [ "$IP_ADDRESS" != "$NIP_ADDRESS" ] || [ "$IP_NETMASK" != "$NIP_NETMASK" ] || [ "$IP_GATEWAY" != "$NIP_GATEWAY" ]
+	then
+		echo "Setting static ip address failed, reverting to dhcp"
+		cat /etc/network/interfaces
+		write_interfaces_dhcp
 		rc-service networking restart
 	fi
 fi
@@ -335,6 +346,7 @@ install -d /var/lib/mpd/cache -o mpd -g mpd
 cat /usr/local/defaults/sudoers >> /etc/sudoers
 install -d /var/lib/mympd/scripts -o mympd -g mympd -m 750
 cp /usr/local/defaults/lua/*.lua /var/lib/mympd/scripts/
+chown mympd.mympd /var/lib/mympd/scripts/*.lua
 cp /usr/local/defaults/mympd.conf /etc/
 case "$MPD_VERSION" in
 	1)
