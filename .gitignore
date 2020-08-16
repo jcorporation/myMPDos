@@ -1,4 +1,5 @@
 /mympdos-apks
+/mympdos-apks.*
 /tmp
 /images
 /mympdos/bootstrap.txt

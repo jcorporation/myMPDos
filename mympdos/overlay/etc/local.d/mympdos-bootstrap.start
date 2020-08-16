@@ -149,6 +149,33 @@ find_wlan_device()
 	done
 }
 
+write_interfaces_dhcp()
+{
+	cat <<-EOF > /etc/network/interfaces
+	auto lo
+	iface lo inet loopback
+
+	auto ${IFACE}
+	iface ${IFACE} inet dhcp
+	        hostname myMPDos
+	EOF
+}
+
+write_interfaces_static()
+{
+	cat <<-EOF > /etc/network/interfaces
+	auto lo
+	iface lo inet loopback
+
+	auto ${IFACE}
+	iface ${IFACE} inet static
+					address $IP_ADDRESS
+					netmask $IP_NETMASK
+					gatways $IP_GATEWAY
+	        hostname $IP_HOSTNAME
+	EOF
+}
+
 if [ "$WLAN_ENABLE" = "true" ]
 then
 	echo "Configuring wlan"
@@ -176,27 +203,11 @@ fi
 
 if [ "$IP_TYPE" = "dhcp" ]
 then
-	cat <<-EOF > /etc/network/interfaces
-	auto lo
-	iface lo inet loopback
-
-	auto ${IFACE}
-	iface ${IFACE} inet dhcp
-	        hostname myMPDos
-	EOF
+	write_interfaces_dhcp
 else
-	cat <<-EOF > /etc/network/interfaces
-	auto lo
-	iface lo inet loopback
-
-	auto ${IFACE}
-	iface ${IFACE} inet static
-					address $IP_ADDRESS
-					netmask $IP_NETMASK
-					gatways $IP_GATEWAY
-	        hostname $IP_HOSTNAME
-	EOF
+	write_interfaces_static
 fi
+
 if [ "$IP_DNS_CONFIGURE" = "true" ]
 then
 	cp /dev/null /etc/resolv.conf
@@ -210,6 +221,19 @@ fi
 rc-service networking start
 hostname "$IP_HOSTNAME"
 echo "$IP_HOSTNAME" > /etc/hostname
+
+if [ "$IP_TYPE" = "dhcp" ] && [ "$IP_COPY_DHCP_TO_STATIC" = "true" ]
+then
+	echo "Setting static ip address from dhcp"
+	IP_ADDRESS=$(ifconfig "$IFACE" | grep -m 1 "inet addr" | sed -r 's/.*inet addr:(\S+)\s.*/\1/')
+	IP_NETMASK=$(ifconfig "$IFACE" | grep -m 1 "inet addr" | sed -r 's/.*Mask:(\S+)/\1/')
+	IP_GATEWAY=$(route -n | grep -m 1 "^0.0.0.0" | sed -r 's/0\.0\.0\.0\s+(\S+)\s.*/\1/')
+	if [ "$IP_ADDRESS" != "" ] && [ "$IP_NETMASK" != "" ] && [ "$IP_GATEWAY" != "" ]
+	then
+		write_interfaces_static
+		rc-service networking restart
+	fi
+fi
 
 echo "Setup NTP"
 I=0
@@ -234,6 +258,7 @@ else
   echo "Invalid keyboard layout or variant configured."
 	exit 1
 fi
+apk del kbd-bkeymaps
 
 echo "Setting up apk cache"
 setup-apkcache "$DATAMEDIA/apkcache"
@@ -295,6 +320,7 @@ rc-update add rngd boot
 rc-update add urandom boot
 rc-update add mympd boot
 rc-update add alsa boot
+rc-update add crond boot
 rc-update add "$MPD_PACKAGE" boot
 
 echo "Creating files in data partition"
@@ -343,12 +369,25 @@ mount -o remount,ro "$BOOTMEDIA"
 rm /etc/local.d/mympdos-bootstrap.start
 rm -r /usr/local/defaults
 
+echo "Removing obsolet packages"
+[ "$WLAN_ENABLE" = "false" ] && apk del wpa_supplicant wpa_supplicant-openrc dbus-libs
+
+echo "Removing obsolet users and groups"
+for DU in lp mail postmaster ftp at squid xfs games cyrus vpopmail smmsp guest news operator
+do
+	deluser "$DU" > /dev/null 2>&1
+done
+for DG in mail tape
+do
+	delgroup "$DG" > /dev/null 2>&1
+done
+
 echo "Syncing apk cache"
 apk cache -v sync
 
 echo "Saving configuration"
 echo "LBU_MEDIA=$LBUMEDIA" > /etc/lbu/lbu.conf
-LBU_INCLUDES="/var/lib/mympd /var/lib/mpd /usr"
+LBU_INCLUDES="/var/lib/mympd /var/lib/mpd"
 for INCLUDE in $LBU_INCLUDES
 do
   lbu_include "$INCLUDE"

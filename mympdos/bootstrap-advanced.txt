@@ -34,7 +34,7 @@ IP_TYPE="dhcp"
 #IP_DNS_SERVER2=""
 #IP_DNS_DOMAIN=""
 #IP_DNS_SEARCH=""
-
+#IP_COPY_DHCP_TO_STATIC="true"
 #Pi settings
 BT_ENABLE="false"
 AUDIOHAT="allo-digione"
