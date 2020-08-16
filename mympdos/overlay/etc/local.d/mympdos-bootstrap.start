@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: GPL-2.0-or-later
 # myMPD (c) 2020 Juergen Mang <mail@jcgames.de>
-# https://github.com/jcorporation/mympd
+# https://github.com/jcorporation/myMPDos
 #
 
 SDCARD="mmcblk0"
@@ -13,6 +13,8 @@ DATAPART="p2"
 DATADEV="/dev/${SDCARD}${DATAPART}"
 DATAMEDIA="/media/${SDCARD}${DATAPART}"
 LBUMEDIA="${SDCARD}${DATAPART}"
+ARCH=$(uname -m)
+REBOOT="0"
 
 read -r VERSION < "$BOOTMEDIA/myMPDos.version" || { echo "$BOOTMEDIA/myMPDos.version not found"; exit 1; }
 
@@ -50,7 +52,7 @@ wait_for_device()
 		sleep 1
 		if [ "$I" = "10" ]
 		then
-			echo "timeout"
+			echo " timeout"
 			return 1
 		fi
 	done
@@ -65,12 +67,12 @@ wait_for_device()
 			sleep 1
 			if [ "$I" = "10" ]
 			then
-				echo "timeout"
+				echo " timeout"
 				return 1
 			fi
 		done
 	fi
-	echo "found with $2"
+	echo " found with $2"
 	return 0
 }
 
@@ -221,6 +223,7 @@ setup-ntp -c busybox
 echo "Setup OpenSSH"
 setup-sshd -c openssh
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
+service sshd restart
 
 echo "Setting keymap to ${KEYBOARD_LAYOUT} ${KEYBOARD_VARIANT}"
 apk add kbd-bkeymaps
@@ -232,12 +235,15 @@ else
 	exit 1
 fi
 
+echo "Setting up apk cache"
+setup-apkcache "$DATAMEDIA/apkcache"
+
 echo "Adding repositories and upgrade"
 setup-apkrepos -1
 sed -r -e's/^#(.*\d\/community)/\1/' -i /etc/apk/repositories
-if [ -f "$BOOTMEDIA"/mympdos-apks/APKINDEX.tar.gz ]
+if [ -f "$BOOTMEDIA/mympdos-apks/$ARCH/APKINDEX.tar.gz" ]
 then
-	if cp "$BOOTMEDIA"/mympdos-apks/.abuild/*.rsa.pub /etc/apk/keys/mympdos.rsa.pub
+	if cp "$BOOTMEDIA"/mympdos-apks/.abuild/*.rsa.pub /etc/apk/keys/
 	then
 		echo "$BOOTMEDIA/mympdos-apks" >> /etc/apk/repositories
 	else
@@ -249,57 +255,67 @@ fi
 apk update
 apk upgrade
 
-if [ "$BT_ENABLE" = "true"]
+if [ "$BT_ENABLE" = "true" ]
 then
 	apk add bluez bluez-alsa
 	rc-update add bluetooth boot
 fi
 
-echo "Adding more software"
-if [ "$MPD_VERSION" = "1" ]
-then
-  apk add mympdos-mpd-stable
-else
-  apk add mympdos-mpd-master
-fi
+echo "Installing MPD"
+addgroup -S mpd
+case "$MPD_VERSION" in
+	1)
+		MPD_PACKAGE="mympdos-mpd-stable";;
+	2)
+  	MPD_PACKAGE="mympdos-mpd-master";;
+	*)
+		echo "Invalid MPD package configured";;
+esac
+[ "$MPD_PACKAGE" != "" ] && apk add "$MPD_PACKAGE"
+
+echo "Installing myMPD"
+addgroup -S mympd
 apk add mympd
-apk add rng-tools mpc sudo alsa-utils $EXTRA_SOFTWARE
+adduser mympd audio
+
+echo "Installing myMPDos metapackage"
+apk add mympdos
+
+echo "Installing tools"
+apk add rng-tools mpc sudo alsa-utils 
+
+if [ "$EXTRA_SOFTWARE" != "" ]
+then
+	echo "Installing user defined software"
+	apk add $EXTRA_SOFTWARE
+fi
+
+echo "Enabling boot services"
 rc-update add rngd boot
 rc-update add urandom boot
-
-echo "Setting mympd user rights"
-adduser mympd mpd
+rc-update add mympd boot
+rc-update add alsa boot
+rc-update add "$MPD_PACKAGE" boot
 
 echo "Creating files in data partition"
 mount -oremount,rw "$DATAMEDIA"
 install -d "$DATAMEDIA/apkcache"
-install -d "$DATAMEDIA/library" -o mpd -g mpd -m 775
+install -d "$DATAMEDIA/library" -o mpd -g audio -m 775
 cp -r /usr/local/defaults/scripts "$DATAMEDIA"
 mount -oremount,ro "$DATAMEDIA"
-
-echo "Setting up apk cache"
-setup-apkcache "$DATAMEDIA/apkcache"
-apk cache -v sync
 
 echo "Setting defaults"
 install -d /var/lib/mpd/cache -o mpd -g mpd
 cat /usr/local/defaults/sudoers >> /etc/sudoers
+install -d /var/lib/mympd/scripts -o mympd -g mympd -m 750
 cp /usr/local/defaults/lua/*.lua /var/lib/mympd/scripts/
-cp /usr/local/defaults/mpd.conf /etc/
 cp /usr/local/defaults/mympd.conf /etc/
-cp /usr/local/defaults/mympdos.start /etc/local.d/
-
-#change motd
-cat > /etc/motd << EOL
-Welcome to myMPDos ${VERSION}!
-
-myMPDos is based on Alpine Linux.
-
-myMPDos: <https://github.com/jcorporation/myMPDos>
-
-Enjoy the music!
-
-EOL
+case "$MPD_VERSION" in
+	1)
+		cp /usr/local/defaults/mpd-stable.conf /etc/mpd.conf;;
+	2)
+  	cp /usr/local/defaults/mpd-master.conf /etc/mpd.conf;;
+esac
 
 if [ "$ROOT_PASSWORD" != "" ]
 then
@@ -307,10 +323,7 @@ then
   echo -e "$ROOT_PASSWORD\n$ROOT_PASSWORD\n" | passwd
 fi
 
-echo "Removing installation files"
 mount -o remount,rw "$BOOTMEDIA"
-rm "$BOOTMEDIA/mympdos-bootstrap.apkovl.tar.gz"
-rm "$BOOTMEDIA/bootstrap.txt"
 
 if [ ! -f "$BOOTMEDIA/usercfg.txt" ]
 then
@@ -320,10 +333,18 @@ then
 	[ "$BT_ENABLE" = "false" ] && echo "dtoverlay=disable-bt" >> "$BOOTMEDIA/usercfg.txt"
 	[ "$AUDIOHAT" != "" ] && echo "dtoverlay=$AUDIOHAT" >> "$BOOTMEDIA/usercfg.txt"
 fi
+
+echo "Removing installation files"
+rm "$BOOTMEDIA/mympdos-bootstrap.apkovl.tar.gz"
+rm "$BOOTMEDIA/bootstrap.txt"
+
 mount -o remount,ro "$BOOTMEDIA"
 
 rm /etc/local.d/mympdos-bootstrap.start
 rm -r /usr/local/defaults
+
+echo "Syncing apk cache"
+apk cache -v sync
 
 echo "Saving configuration"
 echo "LBU_MEDIA=$LBUMEDIA" > /etc/lbu/lbu.conf
@@ -334,4 +355,4 @@ do
 done
 lbu_commit
 echo "myMPDos installation is finished"
-reboot
+[ "$REBOOT" = "1" ] && reboot

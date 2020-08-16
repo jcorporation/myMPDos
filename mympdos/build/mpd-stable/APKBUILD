@@ -11,11 +11,8 @@ arch="all"
 license="GPL-2.0-or-later"
 makedepends="lame-dev glib-dev curl-dev libao-dev libmad-dev flac-dev
 	libogg-dev faad2-dev libid3tag-dev libvorbis-dev alsa-lib-dev
-	libsamplerate-dev libshout-dev libmodplug-dev boost-dev icu-dev
-	libnfs-dev samba-dev opus-dev ffmpeg-dev meson libmpdclient-dev
-	avahi-dev libcap wavpack-dev sqlite-dev chromaprint-dev expat-dev
-	yajl-dev soxr-dev libmms-dev zziplib-dev fluidsynth-dev audiofile-dev
-	libmikmod-dev libsndfile-dev"
+	libsamplerate-dev boost-dev icu-dev sqlite-dev libnfs-dev samba-dev 
+	opus-dev ffmpeg-dev meson libmpdclient-dev libcap wavpack-dev"
 checkdepends="gtest-dev gtest"
 install="$pkgname.pre-install"
 subpackages="$pkgname-doc $pkgname-dbg $pkgname-openrc"

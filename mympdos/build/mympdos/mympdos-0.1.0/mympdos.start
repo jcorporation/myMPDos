@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# SPDX-License-Identifier: GPL-2.0-or-later
+# myMPD (c) 2020 Juergen Mang <mail@jcgames.de>
+# https://github.com/jcorporation/myMPDos
+#
+if [ -f /media/mmcblk0p1/myMPDos.version ]
+then
+  read VERSION < /media/mmcblk0p1/myMPDos.version
+else
+  VERSION="n/a"
+fi
+cat > /etc/issue << EOL
+Welcome to myMPDos ${VERSION}!
+Kernel \r on an \m (\l)
+
+EOL
+ip -4 -o addr show up scope global | awk '{print $2,":",$4}'| sed -e "s/\/[1-9]*//" >> /etc/issue
+
+cat > /etc/motd << EOL
+Welcome to myMPDos ${VERSION}!
+
+myMPDos is based on Alpine Linux.
+
+myMPDos: <https://github.com/jcorporation/myMPDos>
+
+Enjoy the music!
+
+EOL

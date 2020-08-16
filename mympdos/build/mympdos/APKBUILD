@@ -1,0 +1,16 @@
+# Maintainer: Juergen Mang <mail@jcgames.de>
+pkgname=mympdos
+pkgver=0.1.0
+pkgrel=0
+pkgdesc="myMPDos metapackage"
+url="https://github.com/jcorporation/myMPDos"
+arch="noarch"
+license="GPL-2.0-or-later"
+makedepends=""
+install="$pkgname.pre-install $pkgname.post-install"
+source="$pkgname-$pkgver.tar.gz"
+options="!check"
+
+package() {
+	install -D -m 755 "$srcdir/$pkgname-$pkgver/mympdos.start" "$pkgdir/etc/local.d/mympdos.start"
+}

@@ -10,8 +10,8 @@ WARNING: myMPDOS is currently in an early development stage. If it evolves I wil
 
 The `build.sh` script creates a qemu image, starts it and compiles myMPD and MPD. The resulting packages are integrated in a custom overlay for the default Alpine Linux Raspberry image.
 
-1. Create the image with `./build.sh`
-2. Optionally run `./cleanup.sh` to cleanup things
+1. Create the image with `./build.sh build`
+2. Optionally run `./build.sh cleanup` to cleanup things
 
 ## Usage
 

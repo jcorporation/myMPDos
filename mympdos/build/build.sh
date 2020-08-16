@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: GPL-2.0-or-later
 # myMPD (c) 2020 Juergen Mang <mail@jcgames.de>
-# https://github.com/jcorporation/mympd
+# https://github.com/jcorporation/myMPDos
 #
 
 BUILDDIR="/usr/build"
@@ -162,8 +162,16 @@ then
   cd ..
 fi
 
-#echo "Creating repository index"
-#su build -c "apk index -o packages/package/$ARCH/APKINDEX.tar.gz packages/package/$ARCH/*.apk"
-#su build -c "abuild-sign packages/package/$ARCH/APKINDEX.tar.gz"
+MYMPDOS_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos)
+B_MYMPDOS_VER=$(get_pkgver /media/vda1/mympdos/mympdos)
+if [ "$B_BUILD" = "1" ] && [ ! -f "packages/package/$ARCH/$MYMPDOS_PACKAGE" ]
+then
+  su build -c "cp -r /media/vda1/mympdos/mympdos ."
+  cd mympdos || exit 1
+  tar -czf "mympdos-$B_MYMPDOS_VER.tar.gz" "mympdos-$B_MYMPDOS_VER"
+  su build -c "abuild checksum"
+  su build -c "abuild -r"
+  cd ..
+fi
 
 [ "$POWEROFF" = "1" ] && poweroff
