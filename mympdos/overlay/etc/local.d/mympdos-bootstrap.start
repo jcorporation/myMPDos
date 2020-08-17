@@ -343,16 +343,16 @@ mount -oremount,ro "$DATAMEDIA"
 
 echo "Setting defaults"
 install -d /var/lib/mpd/cache -o mpd -g mpd
-cat /usr/local/defaults/sudoers >> /etc/sudoers
+cat /usr/local/defaults/etc/sudoers >> /etc/sudoers
 install -d /var/lib/mympd/scripts -o mympd -g mympd -m 750
 cp /usr/local/defaults/lua/*.lua /var/lib/mympd/scripts/
 chown mympd.mympd /var/lib/mympd/scripts/*.lua
-cp /usr/local/defaults/mympd.conf /etc/
+cp /usr/local/defaults/etc/mympd.conf /etc/
 case "$MPD_VERSION" in
 	1)
-		cp /usr/local/defaults/mpd-stable.conf /etc/mpd.conf;;
+		cp /usr/local/defaults/etc/mpd-stable.conf /etc/mpd.conf;;
 	2)
-  	cp /usr/local/defaults/mpd-master.conf /etc/mpd.conf;;
+  	cp /usr/local/defaults/etc/mpd-master.conf /etc/mpd.conf;;
 esac
 
 if [ "$ROOT_PASSWORD" != "" ]
@@ -366,7 +366,7 @@ mount -o remount,rw "$BOOTMEDIA"
 if [ ! -f "$BOOTMEDIA/usercfg.txt" ]
 then
 	echo "Setting usercfg.txt"
-	cp /usr/local/defaults/usercfg.txt "$BOOTMEDIA/"
+	cp /usr/local/defaults/boot/usercfg.txt "$BOOTMEDIA/"
 	[ "$WLAN_ENABLE" = "false" ] && echo "dtoverlay=disable-wifi" >> "$BOOTMEDIA/usercfg.txt"
 	[ "$BT_ENABLE" = "false" ] && echo "dtoverlay=disable-bt" >> "$BOOTMEDIA/usercfg.txt"
 	[ "$AUDIOHAT" != "" ] && echo "dtoverlay=$AUDIOHAT" >> "$BOOTMEDIA/usercfg.txt"
