@@ -248,8 +248,9 @@ fi
 
 echo "Setup NTP"
 I=0
-while ! ntpd -n -q -p pool.ntp.org
+while ! ntpd -n -q -p pool.ntp.org > /dev/null 2>&1
 do
+	echo "."
 	I=$((I+1))
 	[ "$I" = "5" ] && break;
 done
@@ -257,6 +258,7 @@ setup-ntp -c busybox
 
 echo "Setup OpenSSH"
 setup-sshd -c openssh
+echo "Enabling ssh root login"
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 service sshd restart
 
@@ -318,7 +320,7 @@ echo "Installing myMPDos metapackage"
 apk add mympdos
 
 echo "Installing tools"
-apk add rng-tools mpc sudo alsa-utils 
+apk add rng-tools mpc sudo alsa-utils usbutils raspberrypi
 
 if [ "$EXTRA_SOFTWARE" != "" ]
 then
@@ -397,9 +399,16 @@ done
 echo "Syncing apk cache"
 apk cache -v sync
 
+echo "Unmuting soundcard"
+for F in $(amixer | grep -B1 pvolume | grep "mixer control" | sed -r "s/.+'([^']+)'.*/\1/")
+do
+	amixer set "$F" 60% unmute > /dev/null
+done
+alsactl store
+
 echo "Saving configuration"
 echo "LBU_MEDIA=$LBUMEDIA" > /etc/lbu/lbu.conf
-LBU_INCLUDES="/var/lib/mympd /var/lib/mpd"
+LBU_INCLUDES="/var/lib/mympd /var/lib/mpd /var/lib/alsa"
 for INCLUDE in $LBU_INCLUDES
 do
   lbu_include "$INCLUDE"

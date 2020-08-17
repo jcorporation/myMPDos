@@ -42,9 +42,12 @@ startimage() {
 	install -d tmp/image
 	
 	cd tmp || exit 1
-	[ -f "$ARCHIVE" ] || \
+	if [ ! -f "$ARCHIVE" ]
+	then
+		echo "Getting $ARCHIVE"
 		wget -q "${ALPINE_MIRROR}/v${ALPINE_MAJOR_VERSION}/releases/${ARCH}/$ARCHIVE" \
 			-O "alpine-rpi-${ALPINE_VERSION}-${ARCH}.tar.gz"
+	fi
 	if ! tar -xzf "$ARCHIVE" -C image
 	then
 		echo "Error unpacking $ARCHIVE"

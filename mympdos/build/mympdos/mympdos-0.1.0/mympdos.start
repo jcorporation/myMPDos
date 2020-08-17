@@ -27,3 +27,5 @@ myMPDos: <https://github.com/jcorporation/myMPDos>
 Enjoy the music!
 
 EOL
+
+ln -s /media/mmcblk0p1 /boot
