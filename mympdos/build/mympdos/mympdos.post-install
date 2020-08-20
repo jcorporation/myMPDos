@@ -1,5 +1,0 @@
-#!/bin/sh
-
-/etc/local.d/mympdos.start
-echo "Successfully installed myMPDos $pkgver"
-exit 0

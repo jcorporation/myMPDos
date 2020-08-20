@@ -14,7 +14,7 @@ DATADEV="/dev/${SDCARD}${DATAPART}"
 DATAMEDIA="/media/${SDCARD}${DATAPART}"
 LBUMEDIA="${SDCARD}${DATAPART}"
 ARCH=$(uname -m)
-REBOOT="1"
+REBOOT="0"
 
 read -r VERSION < "$BOOTMEDIA/myMPDos.version" || { echo "$BOOTMEDIA/myMPDos.version not found"; exit 1; }
 
@@ -24,13 +24,19 @@ echo ""
 
 #Bootstrap configuration
 IP_TYPE="dhcp"
-WLAN_ENABLE="true"
+WLAN_ENABLE="false"
 WLAN_KEYMGMT="WPA-PSK"
 IP_HOSTNAME="myMPDos"
 MPD_VERSION="1"
-KEYBOARD_LAYOUT="en"
+KEYBOARD_LAYOUT="us"
 KEYBOARD_VARIANT="us"
 BT_ENABLE="false"
+HTTPS_STREAMING="true"
+ADVANCED_SOFTWARE="true"
+TIMEZONE="UTC"
+ENABLE_RNGD="true"
+DISABLE_IPV6="true"
+DISABLE_HDMI="false"
 if [ -f "$BOOTMEDIA/bootstrap.txt" ]
 then
 	source "$BOOTMEDIA/bootstrap.txt"
@@ -38,6 +44,8 @@ else
 	echo "No bootstrap.txt found, using defaults"
 	WLAN_ENABLE="false"
 fi
+
+[ "WLAN_SSID" = "" ] && WLAN_ENABLE="false"
 
 #Setup sdcard
 wait_for_device()
@@ -246,15 +254,35 @@ then
 	fi
 fi
 
-echo "Setup NTP"
+echo -n "Checking network connectivity"
+I=0
+while ! ping -c 1 dl-cdn.alpinelinux.org > /dev/null 2>&1
+do
+	echo -n "."
+	I=$((I+1))
+	[ "$I" = "15" ] && break;
+	sleep 2
+done
+
+if ping -c 1 dl-cdn.alpinelinux.org
+then
+	echo "OK"
+else
+	echo "ERROR"
+	exit 1
+fi
+
+echo -n "Setup NTP"
 I=0
 while ! ntpd -n -q -p pool.ntp.org > /dev/null 2>&1
 do
-	echo "."
+	echo -n "."
 	I=$((I+1))
 	[ "$I" = "5" ] && break;
 done
+echo ""
 setup-ntp -c busybox
+[ "$TIMEZONE" != "" ] && setup-timezone -z "$TIMEZONE"
 
 echo "Setup OpenSSH"
 setup-sshd -c openssh
@@ -317,24 +345,25 @@ apk add mympd
 adduser mympd audio
 
 echo "Installing myMPDos metapackage"
-apk add mympdos
+apk add mympdos-base
 
-echo "Installing tools"
-apk add rng-tools mpc sudo alsa-utils usbutils raspberrypi
+echo "Installing basic packages"
+apk add mpc sudo alsa-utils
+[ "$ENABLE_RNGD" = "true" ] && apk add rng-tools
+
+if [ "$ADVANCED_SOFTWARE" = "true" ]
+then
+	echo "Installing advanced packages"
+	apk add usbutils raspberrypi busybox-extras net-tools
+fi
+
+[ "$HTTPS_STREAMING" = "true" ] && apk add stunnel
 
 if [ "$EXTRA_SOFTWARE" != "" ]
 then
 	echo "Installing user defined software"
 	apk add $EXTRA_SOFTWARE
 fi
-
-echo "Enabling boot services"
-rc-update add rngd boot
-rc-update add urandom boot
-rc-update add mympd boot
-rc-update add alsa boot
-rc-update add crond boot
-rc-update add "$MPD_PACKAGE" boot
 
 echo "Creating files in data partition"
 mount -oremount,rw "$DATAMEDIA"
@@ -350,12 +379,28 @@ install -d /var/lib/mympd/scripts -o mympd -g mympd -m 750
 cp /usr/local/defaults/lua/*.lua /var/lib/mympd/scripts/
 chown mympd.mympd /var/lib/mympd/scripts/*.lua
 cp /usr/local/defaults/etc/mympd.conf /etc/
+[ "$HTTPS_STREAMING" = "true" ] && cp /usr/local/defaults/etc/stunnel.conf /etc/stunnel/stunnel.conf
 case "$MPD_VERSION" in
 	1)
 		cp /usr/local/defaults/etc/mpd-stable.conf /etc/mpd.conf;;
 	2)
   	cp /usr/local/defaults/etc/mpd-master.conf /etc/mpd.conf;;
 esac
+[ "$DISABLE_IPV6" = "true" ] && cp /usr/local/defaults/etc/sysctl_disable_ipv6.conf /etc/sysctl.d/disable_ipv6.conf
+cp /usr/local/defaults/etc/sysctl_mympdos.conf /etc/sysctl.d/mympdos.conf
+
+echo "#myMPDos configuration file" > /etc/mympdos.conf
+echo "DISABLE_HDMI=\"$DISABLE_HDMI\"" >> /etc/mympdos.conf
+
+echo "Enabling boot services"
+[ "$ENABLE_RNGD" = "true" ] && rc-update add rngd boot
+rc-update add urandom boot
+rc-update add alsa boot
+[ "$ENABLE_CRON" = "true" ] && rc-update add crond boot
+echo "Enabling default services"
+[ "$HTTPS_STREAMING" = "true" ] && rc-update add stunnel default
+rc-update add "$MPD_PACKAGE" default
+rc-update add mympd default
 
 if [ "$ROOT_PASSWORD" != "" ]
 then
@@ -402,9 +447,16 @@ apk cache -v sync
 echo "Unmuting soundcard"
 for F in $(amixer | grep -B1 pvolume | grep "mixer control" | sed -r "s/.+'([^']+)'.*/\1/")
 do
+	echo "  $F"
 	amixer set "$F" 60% unmute > /dev/null
 done
 alsactl store
+
+echo "Cleaning up"
+sed -i -r 's/tty(2|3|4|5|6)/#tty\1/' /etc/inittab
+
+[ -e /boot ] || ln -s /media/mmcblk0p1 /boot
+[ -e /boot ] || ln -s /media/mmcblk0p2 /data
 
 echo "Saving configuration"
 echo "LBU_MEDIA=$LBUMEDIA" > /etc/lbu/lbu.conf

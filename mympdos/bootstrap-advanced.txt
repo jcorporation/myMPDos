@@ -3,6 +3,8 @@
 #
 ROOT_PASSWORD="your_secure_password"
 
+TIMEZONE="UTC"
+
 #Keybord layout
 KEYBOARD_LAYOUT="de"
 KEYBOARD_VARIANT="de-nodeadkeys"
@@ -12,13 +14,24 @@ KEYBOARD_VARIANT="de-nodeadkeys"
 #1 = MPD 21.x (stable)
 #2 = MPD 22.x (MPD master branch - unstable)
 MPD_VERSION="1"
-#Add none default packages
+
+#add packages: usbutils raspberrypi busybox-extras net-tools
+ADVANCED_SOFTWARE="true"
+
+#add user defined packages
 EXTRA_SOFTWARE=""
+
+#services to start
+ENABLE_CRON="false"
+ENABLE_RNGD="true"
+
+#MPD and myMPD settings
+HTTPS_STREAMING="true"
 
 #Network settings
 IP_HOSTNAME="myMPDos"
 #If WLAN is not set to true eth0 is configured
-WLAN_ENABLE="false"
+WLAN_ENABLE="true"
 WLAN_SSID="ssid of your wlan"
 WLAN_KEYMGMT="WPA-PSK"
 WLAN_PSK="psk of the ssid"
@@ -35,6 +48,9 @@ IP_TYPE="dhcp"
 #IP_DNS_DOMAIN=""
 #IP_DNS_SEARCH=""
 #IP_COPY_DHCP_TO_STATIC="true"
+DISABLE_IPV6="true"
+
 #Pi settings
 BT_ENABLE="false"
 AUDIOHAT="allo-digione"
+DISABLE_HDMI="false"

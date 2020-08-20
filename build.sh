@@ -196,6 +196,7 @@ build_stage5()
     echo "Copy sample bootstrap.txt files"
     cp ../mympdos/bootstrap-*.txt mnt/
   fi
+  echo "Setting version to $VERSION"
   echo "$VERSION" > mnt/myMPDos.version
   echo "Copy saved packages to image"
   install -d "mnt/mympdos-apks/$ARCH"

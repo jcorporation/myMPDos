@@ -1,2 +1,2 @@
-Cmnd_Alias MYMPD_CMDS = /media/mmcblk0p2/scripts/savereboot.sh, /media/mmcblk0p2/scripts/saveshutdown.sh /media/mmcblk0p2/scripts/rwlibrary.sh
+Cmnd_Alias MYMPD_CMDS = /media/mmcblk0p2/scripts/savereboot.sh, /media/mmcblk0p2/scripts/saveshutdown.sh, /media/mmcblk0p2/scripts/rwlibrary.sh
 mympd ALL=NOPASSWD: MYMPD_CMDS

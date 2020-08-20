@@ -1,5 +1,5 @@
 # Maintainer: Juergen Mang <mail@jcgames.de>
-pkgname=mympdos
+pkgname=mympdos-base
 pkgver=0.1.0
 pkgrel=0
 pkgdesc="myMPDos metapackage"

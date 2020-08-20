@@ -4,7 +4,10 @@
 # myMPD (c) 2020 Juergen Mang <mail@jcgames.de>
 # https://github.com/jcorporation/myMPDos
 #
-if [ -f /media/mmcblk0p1/myMPDos.version ]
+
+[ -f /etc/mympdos.conf ] && source /etc/mympdos.conf
+
+if [ -s /media/mmcblk0p1/myMPDos.version ]
 then
   read VERSION < /media/mmcblk0p1/myMPDos.version
 else
@@ -28,4 +31,8 @@ Enjoy the music!
 
 EOL
 
-ln -s /media/mmcblk0p1 /boot
+[ "$DISABLE_HDMI" = "true" ] && /opt/vc/bin/tvservice -off
+
+beep
+
+exit 0

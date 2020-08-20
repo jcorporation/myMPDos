@@ -17,14 +17,12 @@ fi
 mountimage() {
 	install -d tmp/mnt
 	LOOP=$(sudo losetup --partscan --show -f "$IMAGE")
-	sudo mount -ouid="$BUILDUSER" "${LOOP}p1" mnt || exit 1
+	sudo mount -ouid="$BUILDUSER" "${LOOP}p1" tmp/mnt || exit 1
 	return 0
 }
 
 umountimage() {
-	sudo umount tmp/mnt || exit 1
-	LOOP=$(losetup | grep "myMPDos" | awk '{print $1}')
-	sudo losetup -d "$LOOP"
+	./build.sh umountbuild
 }
 
 burnimage() {
@@ -35,6 +33,7 @@ burnimage() {
 		echo "$SDCARD seems to be mounted"
 		exit 1
 	fi
+	echo "Transfering $IMAGE to $SDCARD"
 	sudo dd if="$IMAGE" of="$SDCARD"
 }
 

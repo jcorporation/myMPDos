@@ -103,6 +103,7 @@ B_LIBMPDCLIENT_VER=$(get_pkgver /media/vda1/mympdos/libmpdclient)
 if [ "$B_LIBMPDCLIENT" = "1" ] && [ ! -f "packages/package/$ARCH/$LIBMPDCLIENT_PACKAGE" ]
 then
   echo "Build libmpdclient"
+  su build -c "rm -rf libmpdclient"
   su build -c "cp -r /media/vda1/mympdos/libmpdclient ."
   cd libmpdclient || exit 1
   su build -c "abuild checksum"
@@ -116,6 +117,7 @@ apk update
 if [ "$B_MYMPD" = "1" ]
 then
   echo "Build myMPD"
+  su build -c "rm -rf myMPD"
   su build -c "git clone -b $B_MYMPD_BRANCH --depth=1 https://github.com/jcorporation/myMPD.git"
   cd myMPD || exit 1
   MYMPD_PACKAGE=$(get_pkgname contrib/packaging/alpine)
@@ -133,6 +135,7 @@ B_MPD_MASTER_VER=$(get_pkgver /media/vda1/mympdos/mpd-master)
 if [ "$B_MPD_MASTER" = "1" ] && [ ! -f "packages/package/$ARCH/$MPD_MASTER_PACKAGE" ]
 then
   echo "Build MDP master"
+  su build -c "rm -rf mpd-master"
   su build -c "cp -r /media/vda1/mympdos/mpd-master ."
   cd mpd-master || exit 1
   su build -c "git clone -b master --depth=1 https://github.com/MusicPlayerDaemon/MPD.git"
@@ -149,6 +152,7 @@ B_MPD_STABLE_VER=$(get_pkgver /media/vda1/mympdos/mpd-stable)
 if [ "$B_MPD_STABLE" = "1" ] && [ ! -f "packages/package/$ARCH/$MPD_STABLE_PACKAGE" ]
 then
   echo "Building MPD stable"
+  su build -c "rm -rf mpd-stable"
   su build -c "cp -r /media/vda1/mympdos/mpd-stable ."
   cd mpd-stable || exit 1
   su build -c "wget http://www.musicpd.org/download/mpd/0.21/mpd-${B_MPD_STABLE_VER}.tar.xz"
@@ -162,13 +166,14 @@ then
   cd ..
 fi
 
-MYMPDOS_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos)
-B_MYMPDOS_VER=$(get_pkgver /media/vda1/mympdos/mympdos)
-if [ "$B_BUILD" = "1" ] && [ ! -f "packages/package/$ARCH/$MYMPDOS_PACKAGE" ]
+MYMPDOS_BASE_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-base)
+B_MYMPDOS_BASE_VER=$(get_pkgver /media/vda1/mympdos/mympdos-base)
+if [ "$B_BUILD" = "1" ] && [ ! -f "packages/package/$ARCH/$MYMPDOS_BASE_PACKAGE" ]
 then
-  su build -c "cp -r /media/vda1/mympdos/mympdos ."
-  cd mympdos || exit 1
-  tar -czf "mympdos-$B_MYMPDOS_VER.tar.gz" "mympdos-$B_MYMPDOS_VER"
+  su build -c "rm -rf mympdos-base"
+  su build -c "cp -r /media/vda1/mympdos/mympdos-base ."
+  cd mympdos-base || exit 1
+  tar -czf "mympdos-base-$B_MYMPDOS_BASE_VER.tar.gz" "mympdos-base-$B_MYMPDOS_BASE_VER"
   su build -c "abuild checksum"
   su build -c "abuild -r"
   cd ..
