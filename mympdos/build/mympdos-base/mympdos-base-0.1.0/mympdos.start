@@ -31,7 +31,16 @@ Enjoy the music!
 
 EOL
 
-[ "$DISABLE_HDMI" = "true" ] && /opt/vc/bin/tvservice -off
+if [ "$DISABLE_HDMI" = "true" ]
+then
+  if [ -x /opt/vc/bin/tvservice ]
+  then
+    /opt/vc/bin/tvservice -off
+  else
+    echo "Advanced software is not installed."
+    echo "Can not deactivate HDMI."
+  fi
+fi
 
 beep
 
