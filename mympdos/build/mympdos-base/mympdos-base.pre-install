@@ -3,7 +3,7 @@
 if [ -d /media/mmcblk0p1 ]
 then
   mount -oremount,rw /media/mmcblk0p1
-  echo "$pkgver" > /media/mmcblk0p1/myMPDos.version
+  echo "__VERSION__" > /media/mmcblk0p1/myMPDos.version
   mount -oremount,ro /media/mmcblk0p1
 fi
 exit 0

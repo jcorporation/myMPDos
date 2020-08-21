@@ -1,4 +1,0 @@
-#!/bin/sh
-
-/etc/local.d/mympdos.start
-exit 0

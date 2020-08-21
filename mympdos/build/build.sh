@@ -6,7 +6,7 @@
 #
 
 BUILDDIR="/usr/build"
-POWEROFF="0"
+POWEROFF="1"
 ARCH=$(uname -m)
 
 #Build packages
@@ -174,6 +174,7 @@ then
   su build -c "cp -r /media/vda1/mympdos/mympdos-base ."
   cd mympdos-base || exit 1
   tar -czf "mympdos-base-$B_MYMPDOS_BASE_VER.tar.gz" "mympdos-base-$B_MYMPDOS_BASE_VER"
+  sed -i "s/__VERSION__/$B_MYMPDOS_BASE_VER/g" mympdos-base.pre-install
   su build -c "abuild checksum"
   su build -c "abuild -r"
   cd ..

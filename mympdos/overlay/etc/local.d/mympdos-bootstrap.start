@@ -14,7 +14,7 @@ DATADEV="/dev/${SDCARD}${DATAPART}"
 DATAMEDIA="/media/${SDCARD}${DATAPART}"
 LBUMEDIA="${SDCARD}${DATAPART}"
 ARCH=$(uname -m)
-REBOOT="0"
+REBOOT="1"
 
 read -r VERSION < "$BOOTMEDIA/myMPDos.version" || { echo "$BOOTMEDIA/myMPDos.version not found"; exit 1; }
 
@@ -388,12 +388,14 @@ case "$MPD_VERSION" in
 esac
 [ "$DISABLE_IPV6" = "true" ] && cp /usr/local/defaults/etc/sysctl_disable_ipv6.conf /etc/sysctl.d/disable_ipv6.conf
 cp /usr/local/defaults/etc/sysctl_mympdos.conf /etc/sysctl.d/mympdos.conf
+cp /usr/local/defaults/etc/profile.d_mympdos.sh /etc/profile.d/mympdos.sh
 
 echo "#myMPDos configuration file" > /etc/mympdos.conf
 echo "DISABLE_HDMI=\"$DISABLE_HDMI\"" >> /etc/mympdos.conf
 
 echo "Enabling boot services"
 [ "$ENABLE_RNGD" = "true" ] && rc-update add rngd boot
+rc-update add networking boot
 rc-update add urandom boot
 rc-update add alsa boot
 [ "$ENABLE_CRON" = "true" ] && rc-update add crond boot
@@ -425,9 +427,6 @@ rm "$BOOTMEDIA/bootstrap.txt"
 
 mount -o remount,ro "$BOOTMEDIA"
 
-rm /etc/local.d/mympdos-bootstrap.start
-rm -r /usr/local/defaults
-
 echo "Removing obsolet packages"
 [ "$WLAN_ENABLE" = "false" ] && apk del wpa_supplicant wpa_supplicant-openrc dbus-libs
 
@@ -454,9 +453,14 @@ alsactl store
 
 echo "Cleaning up"
 sed -i -r 's/tty(2|3|4|5|6)/#tty\1/' /etc/inittab
+rm /etc/local.d/mympdos-bootstrap.start
+for DIR in /usr/local/defaults /etc/logrotate.d /etc/openldap /etc/pkcs11 /etc/acpi /etc/sasl2
+do
+	rm -rf "$DIR"
+done
 
-[ -e /boot ] || ln -s /media/mmcblk0p1 /boot
-[ -e /boot ] || ln -s /media/mmcblk0p2 /data
+echo "Creating certificate"
+mympd certs_create
 
 echo "Saving configuration"
 echo "LBU_MEDIA=$LBUMEDIA" > /etc/lbu/lbu.conf

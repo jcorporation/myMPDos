@@ -313,8 +313,9 @@ case "$1" in
     cleanup
     ;;
   *)
-    echo "Usage: $0 (build|stage1|stage2|stage3|stage4|stage5) [private|public]"
+    echo "Usage: $0 (build|stage1|stage2|stage3|stage4|stage5|cleanup|umountbuild) [private|public]"
     echo ""
+    echo "  build:        runs all stages"
     echo "  stage1:       downloads and extracts all needed sources"
     echo "  stage2:       creates a build environment"
     echo "  stage3:       starts the build image"
@@ -325,7 +326,7 @@ case "$1" in
     echo "  umountbuild:  removes dangling mounts and loop devices"
     echo ""
     echo "  private:      creates a image with a productive bootstrap.txt file"
-    echo "  public:       creates a image with samble bootstrap.txt files"
+    echo "  public:       creates a image with samble bootstrap.txt files (default)"
     echo ""
     ;;
 esac

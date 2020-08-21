@@ -31,6 +31,9 @@ Enjoy the music!
 
 EOL
 
+ln -s /media/mmcblk0p1 /boot
+ln -s /media/mmcblk0p2 /data
+
 if [ "$DISABLE_HDMI" = "true" ]
 then
   if [ -x /opt/vc/bin/tvservice ]
@@ -43,5 +46,4 @@ then
 fi
 
 beep
-
 exit 0
