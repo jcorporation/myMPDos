@@ -15,12 +15,18 @@ KEYBOARD_VARIANT="de-nodeadkeys"
 #2 = MPD 22.x (MPD master branch - unstable)
 MPD_VERSION="1"
 
+#Upsampling
+UPSAMPLING="false"
+AUDIO_OUTPUT_FORMAT="192000:24:2"
+SAMPLERATE_CONVERTER="soxr very high"
+
+#Or use the Resampler
 RESAMPLER="libsamplerate"
 LIBSAMPLERATE_TYPE="0"
 
 #RESAMPLER="soxr"
-SOXR_QUALITY="high"
-SOXR_THREADS="1"
+#SOXR_QUALITY="high"
+#SOXR_THREADS="1"
 
 #add packages: usbutils raspberrypi busybox-extras net-tools
 ADVANCED_SOFTWARE="true"

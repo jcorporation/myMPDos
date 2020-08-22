@@ -19,7 +19,13 @@ echo "Configuring sound devices"
 touch /tmp/configmpd.lock
 cp /etc/mympdos/mpd.conf.tmpl /etc/mpd.conf.new
 
-if [ "$RESAMPLER" = "libsamplerate" ]
+if [ "$UPSAMPLING" = "true" ]
+then
+  cat >> /etc/mpd.conf.new << EOF
+audio_output_format    "$AUDIO_OUTPUT_FORMAT"
+samplerate_converter   "$SAMPLERATE_CONVERTER"
+EOF
+elif [ "$RESAMPLER" = "libsamplerate" ]
 then
   cat >> /etc/mpd.conf.new << EOF
 resampler {
@@ -77,7 +83,7 @@ EOF
   then
     echo "    Mixer: $MIXER_CONTROL"
     echo "  mixer_type    \"hardware\"" >> /etc/mpd.conf.new
-    echo "  mixer_device  \"hw:$CARD_ID,$MIXER_ID\"" >> /etc/mpd.conf.new
+    echo "  mixer_device  \"hw:$CARD_ID\"" >> /etc/mpd.conf.new
     echo "  mixer_control \"$MIXER_CONTROL\"" >> /etc/mpd.conf.new
   else
     echo "    Mixer: none"

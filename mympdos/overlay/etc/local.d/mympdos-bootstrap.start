@@ -39,6 +39,7 @@ TIMEZONE="UTC"
 ENABLE_RNGD="true"
 DISABLE_IPV6="true"
 DISABLE_HDMI="false"
+UPSAMPLING="false"
 RESAMPLER="libsamplerate"
 LIBSAMPLERATE_TYPE="0"
 if [ -f "$BOOTMEDIA/bootstrap.txt" ]
@@ -406,7 +407,12 @@ sed -i -r 's/^sd\[a-z\]\.\*.*/sd\[a-z\]\.\*    root:disk 0660 \*\/etc\/mympdos\/
 echo "#myMPDos configuration file" > /etc/mympdos/mympdos.conf
 echo "DISABLE_HDMI=\"$DISABLE_HDMI\"" >> /etc/mympdos/mympdos.conf
 echo "RESAMPLER=\"$RESAMPLER\"" >> /etc/mympdos/mympdos.conf
-if [ "$RESAMPLER" = "libsamplerate" ]
+if [ "$UPSAMPLING" = "true" ]
+then
+	echo "UPSAMPLING=\"true\"" >> /etc/mympdos/mympdos.conf
+	echo "AUDIO_OUTPUT_FORMAT=\"$AUDIO_OUTPUT_FORMAT\"" >> /etc/mympdos/mympdos.conf
+	echo "SAMPLERATE_CONVERTER=\"$SAMPLERATE_CONVERTER\"" >> /etc/mympdos/mympdos.conf
+elif [ "$RESAMPLER" = "libsamplerate" ]
 then
 	echo "LIBSAMPLERATE_TYPE=\"$LIBSAMPLERATE_TYPE\"" >> /etc/mympdos/mympdos.conf
 elif [ "$RESAMPLER" = "soxr" ]
