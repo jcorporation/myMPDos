@@ -123,6 +123,12 @@ then
   MYMPD_PACKAGE=$(get_pkgname contrib/packaging/alpine)
   if [ ! -f "../packages/package/$ARCH/$MYMPD_PACKAGE" ]
   then
+    ./build.sh installdeps
+    if [ "$B_MYMPD_BRANCH" != "master" ]
+    then
+      su build -c "./build.sh cleanupdist"
+      su build -c "./build.sh createdist"
+    fi
     su build -c "./build.sh pkgalpine"
   else
     echo "myMPD is already up-to-date"

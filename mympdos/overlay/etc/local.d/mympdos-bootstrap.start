@@ -5,6 +5,8 @@
 # https://github.com/jcorporation/myMPDos
 #
 
+export BOOTSTRAP="true"
+
 SDCARD="mmcblk0"
 BOOTPART="p1"
 BOOTDEV="/dev/${SDCARD}p1"
@@ -37,6 +39,8 @@ TIMEZONE="UTC"
 ENABLE_RNGD="true"
 DISABLE_IPV6="true"
 DISABLE_HDMI="false"
+RESAMPLER="libsamplerate"
+LIBSAMPLERATE_TYPE="0"
 if [ -f "$BOOTMEDIA/bootstrap.txt" ]
 then
 	source "$BOOTMEDIA/bootstrap.txt"
@@ -354,7 +358,7 @@ apk add mpc sudo alsa-utils
 if [ "$ADVANCED_SOFTWARE" = "true" ]
 then
 	echo "Installing advanced packages"
-	apk add usbutils raspberrypi busybox-extras net-tools
+	apk add usbutils raspberrypi busybox-extras net-tools mpg123
 fi
 
 [ "$HTTPS_STREAMING" = "true" ] && apk add stunnel
@@ -369,6 +373,7 @@ echo "Creating files in data partition"
 mount -oremount,rw "$DATAMEDIA"
 install -d "$DATAMEDIA/apkcache"
 install -d "$DATAMEDIA/library" -o mpd -g audio -m 775
+ln -s /mnt "$DATAMEDIA/library/USB"
 cp -r /usr/local/defaults/scripts "$DATAMEDIA"
 mount -oremount,ro "$DATAMEDIA"
 
@@ -380,18 +385,35 @@ cp /usr/local/defaults/lua/*.lua /var/lib/mympd/scripts/
 chown mympd.mympd /var/lib/mympd/scripts/*.lua
 cp /usr/local/defaults/etc/mympd.conf /etc/
 [ "$HTTPS_STREAMING" = "true" ] && cp /usr/local/defaults/etc/stunnel.conf /etc/stunnel/stunnel.conf
+install -d /etc/mympdos
+cp /usr/local/defaults/etc/mympdos_automount.sh /etc/mympdos/automount.sh
 case "$MPD_VERSION" in
 	1)
-		cp /usr/local/defaults/etc/mpd-stable.conf /etc/mpd.conf;;
+		cp /usr/local/defaults/etc/mpd-stable.conf /etc/mympdos/mpd.conf.tmpl;;
 	2)
-  	cp /usr/local/defaults/etc/mpd-master.conf /etc/mpd.conf;;
+  	cp /usr/local/defaults/etc/mpd-master.conf /etc/mympdos/mpd.conf.tmpl;;
 esac
 [ "$DISABLE_IPV6" = "true" ] && cp /usr/local/defaults/etc/sysctl_disable_ipv6.conf /etc/sysctl.d/disable_ipv6.conf
 cp /usr/local/defaults/etc/sysctl_mympdos.conf /etc/sysctl.d/mympdos.conf
 cp /usr/local/defaults/etc/profile.d_mympdos.sh /etc/profile.d/mympdos.sh
 
-echo "#myMPDos configuration file" > /etc/mympdos.conf
-echo "DISABLE_HDMI=\"$DISABLE_HDMI\"" >> /etc/mympdos.conf
+/usr/local/defaults/scripts/configmpd.sh
+#Enable automatic reconfiguration of MPD
+sed -i -r 's/^SUBSYSTEM=sound.*/SUBSYSTEM=sound;\.\*    root:audio 0660 \*\/media\/mmcblk0p2\/scripts\/configmpd.sh/' /etc/mdev.conf 
+#Enable automount
+sed -i -r 's/^sd\[a-z\]\.\*.*/sd\[a-z\]\.\*    root:disk 0660 \*\/etc\/mympdos\/automount.sh/' /etc/mdev.conf
+
+echo "#myMPDos configuration file" > /etc/mympdos/mympdos.conf
+echo "DISABLE_HDMI=\"$DISABLE_HDMI\"" >> /etc/mympdos/mympdos.conf
+echo "RESAMPLER=\"$RESAMPLER\"" >> /etc/mympdos/mympdos.conf
+if [ "$RESAMPLER" = "libsamplerate" ]
+then
+	echo "LIBSAMPLERATE_TYPE=\"$LIBSAMPLERATE_TYPE\"" >> /etc/mympdos/mympdos.conf
+elif [ "$RESAMPLER" = "soxr" ]
+then
+	echo "SOXR_QUALITY=\"$SOXR_QUALITY\"" >> /etc/mympdos/mympdos.conf
+	echo "SOXR_THREADS=\"$SOXR_THREADS\"" >> /etc/mympdos/mympdos.conf
+fi
 
 echo "Enabling boot services"
 [ "$ENABLE_RNGD" = "true" ] && rc-update add rngd boot
@@ -401,7 +423,7 @@ rc-update add alsa boot
 [ "$ENABLE_CRON" = "true" ] && rc-update add crond boot
 echo "Enabling default services"
 [ "$HTTPS_STREAMING" = "true" ] && rc-update add stunnel default
-rc-update add "$MPD_PACKAGE" default
+rc-update add mpd default
 rc-update add mympd default
 
 if [ "$ROOT_PASSWORD" != "" ]
@@ -443,18 +465,11 @@ done
 echo "Syncing apk cache"
 apk cache -v sync
 
-echo "Unmuting soundcard"
-for F in $(amixer | grep -B1 pvolume | grep "mixer control" | sed -r "s/.+'([^']+)'.*/\1/")
-do
-	echo "  $F"
-	amixer set "$F" 60% unmute > /dev/null
-done
-alsactl store
-
 echo "Cleaning up"
 sed -i -r 's/tty(2|3|4|5|6)/#tty\1/' /etc/inittab
 rm /etc/local.d/mympdos-bootstrap.start
-for DIR in /usr/local/defaults /etc/logrotate.d /etc/openldap /etc/pkcs11 /etc/acpi /etc/sasl2
+for DIR in /usr/local/defaults /etc/logrotate.d /etc/openldap /etc/pkcs11 /etc/acpi /etc/sasl2 \
+	/etc/dbus-1 /etc/opt /media/cdrom /media/floppy /media/usb
 do
 	rm -rf "$DIR"
 done
@@ -469,6 +484,7 @@ for INCLUDE in $LBU_INCLUDES
 do
   lbu_include "$INCLUDE"
 done
+alsactl store
 lbu_commit
 echo "myMPDos installation is finished"
 [ "$REBOOT" = "1" ] && reboot

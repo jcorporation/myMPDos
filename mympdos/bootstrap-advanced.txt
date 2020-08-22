@@ -15,6 +15,13 @@ KEYBOARD_VARIANT="de-nodeadkeys"
 #2 = MPD 22.x (MPD master branch - unstable)
 MPD_VERSION="1"
 
+RESAMPLER="libsamplerate"
+LIBSAMPLERATE_TYPE="0"
+
+#RESAMPLER="soxr"
+SOXR_QUALITY="high"
+SOXR_THREADS="1"
+
 #add packages: usbutils raspberrypi busybox-extras net-tools
 ADVANCED_SOFTWARE="true"
 

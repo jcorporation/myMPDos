@@ -5,7 +5,7 @@
 # https://github.com/jcorporation/myMPDos
 #
 
-[ -f /etc/mympdos.conf ] && source /etc/mympdos.conf
+[ -f /etc/mympdos/mympdos.conf ] && source /etc/mympdos/mympdos.conf
 
 if [ -s /media/mmcblk0p1/myMPDos.version ]
 then
@@ -45,5 +45,11 @@ then
   fi
 fi
 
-beep
+if [ -f /media/mmcblk0p2/welcome.wav ]
+then
+  aplay /media/mmcblk0p2/welcome.wav
+elif [ -f /media/mmcblk0p2/welcome.mp3 ] && [ -x /usr/bin/mpg123 ]
+then
+  mpg123 /media/mmcblk0p2/welcome.mp3
+fi
 exit 0

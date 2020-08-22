@@ -143,9 +143,12 @@ build_stage3()
 build_stage4()
 {
   echo "myMPDos build stage 4: Saving packages"
-  BACKUPDATE=$(stat -c"%Y" ../mympdos-apks)
-  BACKUPDIR=../mympdos-apks.$(date -d@"$BACKUPDATE" +%Y%m%d_%H%M)
-  [ -d ../mympdos-apks ] && mv ../mympdos-apks "$BACKUPDIR"
+  if [ -d ../mympdos-apks ]
+  then
+    BACKUPDATE=$(stat -c"%Y" ../mympdos-apks)
+    BACKUPDIR=../mympdos-apks.$(date -d@"$BACKUPDATE" +%Y%m%d_%H%M)
+    mv ../mympdos-apks "$BACKUPDIR"
+  fi
   install -d "../mympdos-apks/$ARCH"
   LOOP=$(sudo losetup --partscan --show -f "$BUILDIMAGE")
   sudo mount -text4 "${LOOP}p2" mnt || exit 1
