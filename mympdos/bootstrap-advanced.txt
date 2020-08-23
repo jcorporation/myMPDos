@@ -9,11 +9,19 @@ TIMEZONE="UTC"
 KEYBOARD_LAYOUT="de"
 KEYBOARD_VARIANT="de-nodeadkeys"
 
+#Enables some magic
+ENABLE_AUTOMOUNT="true"
+ENABLE_CONFIGMPD="true"
+
 #Software
 #MPD version
 #1 = MPD 21.x (stable)
 #2 = MPD 22.x (MPD master branch - unstable)
 MPD_VERSION="1"
+
+#Mixer
+ENABLE_MIXER="true"
+SOFTWARE_MIXER_FALLBACK="false"
 
 #Upsampling
 UPSAMPLING="false"

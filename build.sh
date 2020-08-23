@@ -97,16 +97,16 @@ build_stage2()
 
   echo "Copy existing packages"
   install -d mnt/mympdos-apks
-  if [ -f "../mympdos-apks/$ARCH/APKINDEX.tar.gz" ]
+  if [ -f "../apks/$ARCH/APKINDEX.tar.gz" ]
   then
-    cp "../mympdos-apks/$ARCH/"*.apk mnt/mympdos-apks/
-    cp "../mympdos-apks/$ARCH/APKINDEX.tar.gz" mnt/mympdos-apks/
+    cp "../apks/$ARCH/"*.apk mnt/mympdos-apks/
+    cp "../apks/$ARCH/APKINDEX.tar.gz" mnt/mympdos-apks/
   else
     echo "No existing packages found"
   fi
-  if [ -f ../mympdos-apks/abuild.tgz ]
+  if [ -f ../apks/abuild.tgz ]
   then
-    cp ../mympdos-apks/abuild.tgz mnt/mympdos/
+    cp ../apks/abuild.tgz mnt/mympdos/
   else
     echo "No saved abuild.tgz found"
   fi
@@ -143,24 +143,24 @@ build_stage3()
 build_stage4()
 {
   echo "myMPDos build stage 4: Saving packages"
-  if [ -d ../mympdos-apks ]
+  if [ -d ../apks ]
   then
-    BACKUPDATE=$(stat -c"%Y" ../mympdos-apks)
-    BACKUPDIR=../mympdos-apks.$(date -d@"$BACKUPDATE" +%Y%m%d_%H%M)
-    mv ../mympdos-apks "$BACKUPDIR"
+    BACKUPDATE=$(stat -c"%Y" ../apks)
+    BACKUPDIR=../apks.$(date -d@"$BACKUPDATE" +%Y%m%d_%H%M)
+    mv ../apks "$BACKUPDIR"
   fi
-  install -d "../mympdos-apks/$ARCH"
+  install -d "../apks/$ARCH"
   LOOP=$(sudo losetup --partscan --show -f "$BUILDIMAGE")
   sudo mount -text4 "${LOOP}p2" mnt || exit 1
   if [ -f mnt/build/abuild.tgz ]
   then
-    cp mnt/build/abuild.tgz ../mympdos-apks/
+    cp mnt/build/abuild.tgz ../apks/
   else
     echo "No abuild.tgz found"
   fi
   if [ -f "mnt/build/packages/package/${ARCH}/APKINDEX.tar.gz" ]
   then
-    cp mnt/build/packages/package/"${ARCH}"/* "../mympdos-apks/$ARCH/"
+    cp mnt/build/packages/package/"${ARCH}"/* "../apks/$ARCH/"
   else
     echo "No APKINDEX.tar.gz found"
   fi
@@ -199,15 +199,17 @@ build_stage5()
     echo "Copy sample bootstrap.txt files"
     cp ../mympdos/bootstrap-*.txt mnt/
   fi
+  [ -f ../mympdos/mpd.replace ] && cp ../mympdos/mpd.replace mnt/
+  [ -f ../mympdos/mpd.conf ] && cp ../mympdos/mpd.conf mnt/
   echo "Setting version to $VERSION"
   echo "$VERSION" > mnt/myMPDos.version
   echo "Copy saved packages to image"
   install -d "mnt/mympdos-apks/$ARCH"
-  if [ -f "../mympdos-apks/$ARCH/APKINDEX.tar.gz" ]
+  if [ -f "../apks/$ARCH/APKINDEX.tar.gz" ]
   then
-    cp ../mympdos-apks/"$ARCH"/*.apk "mnt/mympdos-apks/$ARCH/"
-    cp ../mympdos-apks/"$ARCH"/APKINDEX.tar.gz "mnt/mympdos-apks/$ARCH/"
-    tar --wildcards -xzf ../mympdos-apks/abuild.tgz -C mnt/mympdos-apks ".abuild/*.rsa.pub"
+    cp ../apks/"$ARCH"/*.apk "mnt/mympdos-apks/$ARCH/"
+    cp ../apks/"$ARCH"/APKINDEX.tar.gz "mnt/mympdos-apks/$ARCH/"
+    tar --wildcards -xzf ../apks/abuild.tgz -C mnt/mympdos-apks ".abuild/*.rsa.pub"
   else
     echo "No myMPDos apks found"
   fi
@@ -245,7 +247,7 @@ cleanup()
   find ./images -name \*.img -mtime "$KEEPIMAGEDAYS" -delete
   find ./images -name \*.img.gz -mtime "$KEEPIMAGEDAYS" -delete
   echo "Removing old package directories"
-  find ./ -maxdepth 1 -type d -name mympdos-apks.\* -mtime "$KEEPPACKAGEDAYS" -exec rm -rf {} \;
+  find ./ -maxdepth 1 -type d -name apks.\* -mtime "$KEEPPACKAGEDAYS" -exec rm -rf {} \;
 }
 
 umountbuild() 
@@ -255,7 +257,7 @@ umountbuild()
   for LOOP in $LOOPS
   do
     echo "Found dangling $LOOP"
-    MOUNTS=$(mount | grep "$LOOP" | awk {'print $1}')
+    MOUNTS=$(mount | grep "$LOOP" | awk '{print $1}')
     for MOUNT in $MOUNTS
     do
       sudo umount "$MOUNT"
@@ -269,39 +271,39 @@ umountbuild()
 }
 
 case "$2" in
-  private)
+  private|p)
     PRIVATEIMAGE="true";;
   *)
     PRIVATEIMAGE="false";;
 esac
 
 case "$1" in
-  stage1)
+  stage1|1)
     check_deps
     install_tmp
     build_stage1
     ;;
-  stage2)
+  stage2|2)
     check_deps
     install_tmp
     build_stage2
     ;;
-  stage3)
+  stage3|3)
     check_deps
     install_tmp
     build_stage3
     ;;
-  stage4)
+  stage4|4)
     check_deps
     install_tmp
     build_stage4
     ;;
-  stage5)
+  stage5|5)
     check_deps
     install_tmp
     build_stage5
     ;;
-  build)
+  build|b)
     check_deps
     install_tmp
     build_stage1
@@ -310,26 +312,26 @@ case "$1" in
     build_stage4
     build_stage5
     ;;
-  umountbuild)
+  umountbuild|u)
     umountbuild;;
-  cleanup)
+  cleanup|c)
     cleanup
     ;;
   *)
-    echo "Usage: $0 (build|stage1|stage2|stage3|stage4|stage5|cleanup|umountbuild) [private|public]"
+    echo "Usage: $0 (b|1|2|3|4|5|c|u) [private|public]"
     echo ""
-    echo "  build:        runs all stages"
-    echo "  stage1:       downloads and extracts all needed sources"
-    echo "  stage2:       creates a build environment"
-    echo "  stage3:       starts the build image"
-    echo "  stage4:       copies the packages from build into mympdos-apks"
-    echo "  stage5:       creates the image"
+    echo "  build|b:        runs all stages"
+    echo "  stage1|1:       downloads and extracts all needed sources"
+    echo "  stage2|2:       creates the build image"
+    echo "  stage3|3:       starts the build image"
+    echo "  stage4|4:       copies the packages from build into apks"
+    echo "  stage5|5:       creates the image"
     echo ""
-    echo "  cleanup:      cleanup things"
-    echo "  umountbuild:  removes dangling mounts and loop devices"
+    echo "  cleanup|c:      cleanup things"
+    echo "  umountbuild|u:  removes dangling mounts and loop devices"
     echo ""
-    echo "  private:      creates a image with a productive bootstrap.txt file"
-    echo "  public:       creates a image with samble bootstrap.txt files (default)"
+    echo "  private|p:      creates a image with a productive bootstrap.txt file"
+    echo "  public:         creates a image with samble bootstrap.txt files (default)"
     echo ""
     ;;
 esac

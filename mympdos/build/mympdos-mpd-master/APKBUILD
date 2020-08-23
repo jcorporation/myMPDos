@@ -1,25 +1,25 @@
 # Maintainer: Juergen Mang <mail@jcgames.de>
-# Based on: https://git.alpinelinux.org/aports/tree/community/mpd
-pkgname=mympdos-mpd-stable
-pkgver=0.21.25
+# Based on: https://pkgs.alpinelinux.org/package/edge/community/x86_64/mpd
+pkgname=mympdos-mpd-master
+pkgver=0.22.0
 pkgrel=0
 pkgdesc="Music daemon that plays MP3, FLAC, Ogg Vorbis files and Audio CDs"
 url="https://musicpd.org"
 pkgusers="mpd"
 pkggroups="mpd audio"
+provides="mpd"
 arch="all"
 license="GPL-2.0-or-later"
 makedepends="lame-dev glib-dev curl-dev libao-dev libmad-dev flac-dev
 	libogg-dev faad2-dev libid3tag-dev libvorbis-dev alsa-lib-dev soxr-dev
 	libsamplerate-dev boost-dev icu-dev sqlite-dev libnfs-dev samba-dev 
-	opus-dev ffmpeg-dev meson libmpdclient-dev libcap wavpack-dev"
-checkdepends="gtest-dev gtest"
+	opus-dev ffmpeg-dev meson mympdos-libmpdclient-dev libcap wavpack-dev"
 install="$pkgname.pre-install"
 subpackages="$pkgname-doc $pkgname-dbg $pkgname-openrc"
-source="mympdos-mpd-stable.tar.gz
-	stacksize.patch
+source="mympdos-mpd-master.tar.gz
 	${pkgname}.initd
 	${pkgname}.confd
+	stacksize.patch
 	"
 options="!check"
 

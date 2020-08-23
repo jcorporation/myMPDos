@@ -16,7 +16,7 @@ DATADEV="/dev/${SDCARD}${DATAPART}"
 DATAMEDIA="/media/${SDCARD}${DATAPART}"
 LBUMEDIA="${SDCARD}${DATAPART}"
 ARCH=$(uname -m)
-REBOOT="1"
+REBOOT="0"
 
 read -r VERSION < "$BOOTMEDIA/myMPDos.version" || { echo "$BOOTMEDIA/myMPDos.version not found"; exit 1; }
 
@@ -42,6 +42,10 @@ DISABLE_HDMI="false"
 UPSAMPLING="false"
 RESAMPLER="libsamplerate"
 LIBSAMPLERATE_TYPE="0"
+ENABLE_AUTOMOUNT="true"
+ENABLE_CONFIGMPD="true"
+ENABLE_MIXER="true"
+SOFTWARE_MIXER_FALLBACK="false"
 if [ -f "$BOOTMEDIA/bootstrap.txt" ]
 then
 	source "$BOOTMEDIA/bootstrap.txt"
@@ -333,6 +337,7 @@ then
 fi
 
 echo "Installing MPD"
+apk add mympdos-libmpdclient
 addgroup -S mpd
 case "$MPD_VERSION" in
 	1)
@@ -349,7 +354,7 @@ addgroup -S mympd
 apk add mympd
 adduser mympd audio
 
-echo "Installing myMPDos metapackage"
+echo "Installing myMPDos package"
 apk add mympdos-base
 
 echo "Installing basic packages"
@@ -375,38 +380,31 @@ mount -oremount,rw "$DATAMEDIA"
 install -d "$DATAMEDIA/apkcache"
 install -d "$DATAMEDIA/library" -o mpd -g audio -m 775
 ln -s /mnt "$DATAMEDIA/library/USB"
-cp -r /usr/local/defaults/scripts "$DATAMEDIA"
 mount -oremount,ro "$DATAMEDIA"
 
 echo "Setting defaults"
 install -d /var/lib/mpd/cache -o mpd -g mpd
 cat /usr/local/defaults/etc/sudoers >> /etc/sudoers
-install -d /var/lib/mympd/scripts -o mympd -g mympd -m 750
-cp /usr/local/defaults/lua/*.lua /var/lib/mympd/scripts/
-chown mympd.mympd /var/lib/mympd/scripts/*.lua
-cp /usr/local/defaults/etc/mympd.conf /etc/
-[ "$HTTPS_STREAMING" = "true" ] && cp /usr/local/defaults/etc/stunnel.conf /etc/stunnel/stunnel.conf
-install -d /etc/mympdos
-cp /usr/local/defaults/etc/mympdos_automount.sh /etc/mympdos/automount.sh
-case "$MPD_VERSION" in
-	1)
-		cp /usr/local/defaults/etc/mpd-stable.conf /etc/mympdos/mpd.conf.tmpl;;
-	2)
-  	cp /usr/local/defaults/etc/mpd-master.conf /etc/mympdos/mpd.conf.tmpl;;
-esac
+cp /etc/mympdos/templates/mympd.conf.tmpl /etc/mympd.conf
+[ "$HTTPS_STREAMING" = "true" ] && cp /etc/mympdos/templates/stunnel.conf.tmpl /etc/stunnel/stunnel.conf
 [ "$DISABLE_IPV6" = "true" ] && cp /usr/local/defaults/etc/sysctl_disable_ipv6.conf /etc/sysctl.d/disable_ipv6.conf
-cp /usr/local/defaults/etc/sysctl_mympdos.conf /etc/sysctl.d/mympdos.conf
-cp /usr/local/defaults/etc/profile.d_mympdos.sh /etc/profile.d/mympdos.sh
 
-/usr/local/defaults/scripts/configmpd.sh
-#Enable automatic reconfiguration of MPD
-sed -i -r 's/^SUBSYSTEM=sound.*/SUBSYSTEM=sound;\.\*    root:audio 0660 \*\/media\/mmcblk0p2\/scripts\/configmpd.sh/' /etc/mdev.conf 
-#Enable automount
-sed -i -r 's/^sd\[a-z\]\.\*.*/sd\[a-z\]\.\*    root:disk 0660 \*\/etc\/mympdos\/automount.sh/' /etc/mdev.conf
+if [ "$ENABLE_CONFIGMPD" = "true" ]
+then
+	echo "Enable automatic reconfiguration of MPD"
+	sed -i -r 's/^SUBSYSTEM=sound.*/SUBSYSTEM=sound;\.\*    root:audio 0660 \*\/usr\/bin\/configmpd.sh/' /etc/mdev.conf 
+fi
+if [ "$ENABLE_AUTOMOUNT" = "true" ]
+then
+	echo "Enable automount"
+	sed -i -r 's/^sd\[a-z\]\.\*.*/sd\[a-z\]\.\*    root:disk 0660 \*\/usr\/bin\/automount.sh/' /etc/mdev.conf
+fi
 
 echo "#myMPDos configuration file" > /etc/mympdos/mympdos.conf
 echo "DISABLE_HDMI=\"$DISABLE_HDMI\"" >> /etc/mympdos/mympdos.conf
 echo "RESAMPLER=\"$RESAMPLER\"" >> /etc/mympdos/mympdos.conf
+echo "ENABLE_MIXER=\"$ENABLE_MIXER\"" >> /etc/mympdos/mympdos.conf
+echo "SOFTWARE_MIXER_FALLBACK=\"$SOFTWARE_MIXER_FALLBACK\"" >> /etc/mympdos/mympdos.conf
 if [ "$UPSAMPLING" = "true" ]
 then
 	echo "UPSAMPLING=\"true\"" >> /etc/mympdos/mympdos.conf
@@ -420,6 +418,12 @@ then
 	echo "SOXR_QUALITY=\"$SOXR_QUALITY\"" >> /etc/mympdos/mympdos.conf
 	echo "SOXR_THREADS=\"$SOXR_THREADS\"" >> /etc/mympdos/mympdos.conf
 fi
+
+echo "Configuring MPD"
+install -d /etc/mympdos/custom
+[ -f "$BOOTMEDIA/mpd.replace" ] && cp "$BOOTMEDIA/mpd.replace" /etc/mympdos/custom/
+[ -f "$BOOTMEDIA/mpd.conf" ] && cp "$BOOTMEDIA/mpd.conf" /etc/mympdos/custom/
+/usr/bin/configmpd.sh
 
 echo "Enabling boot services"
 [ "$ENABLE_RNGD" = "true" ] && rc-update add rngd boot

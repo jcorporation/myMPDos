@@ -1,9 +1,6 @@
 #!/bin/sh
 
-if [ -d /media/mmcblk0p1 ]
-then
-  mount -oremount,rw /media/mmcblk0p1
-  echo "__VERSION__" > /media/mmcblk0p1/myMPDos.version
-  mount -oremount,ro /media/mmcblk0p1
-fi
+addgroup -S mympd 2>/dev/null
+adduser -S -D -H -h /var/lib/mympd -s /sbin/nologin -G mympd -g myMPD mympd 2>/dev/null
+
 exit 0

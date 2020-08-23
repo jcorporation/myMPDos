@@ -1,0 +1,17 @@
+#Customizes the mpd configuration
+#Syntax is:
+#ACTION KEY VALUE
+#ACTION:
+# A: adds a line
+# C: changes a line
+# D: deletes a line
+#
+#Examples:
+#Adds auto_update_depth to 5
+#A auto_update_depth "5"
+#
+#Changes auto_update to no
+#C auto_update "no"
+#
+#Deletes the auto_update setting
+#D auto_update

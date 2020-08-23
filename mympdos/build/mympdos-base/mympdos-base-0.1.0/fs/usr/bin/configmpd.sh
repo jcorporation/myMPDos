@@ -13,11 +13,19 @@ then
   exit 0
 fi
 
+if [ -f /etc/mympdos/custom/mpd.conf ]
+then
+  cp /etc/mympdos/custom/mpd.conf /etc/mpd.conf
+  [ -f /run/mpd/pid ] && service mpd restart
+  exit 0
+fi
+
 source /etc/mympdos/mympdos.conf
 
 echo "Configuring sound devices"
 touch /tmp/configmpd.lock
-cp /etc/mympdos/mpd.conf.tmpl /etc/mpd.conf.new
+MPD=$(apk info | grep -E "^mympdos-mpd-(stable|master)$") || MPD="mympdos-mpd-stable"
+cp /etc/mympdos/templates/${MPD}.conf.tmpl /etc/mpd.conf.new
 
 if [ "$UPSAMPLING" = "true" ]
 then
@@ -48,7 +56,7 @@ LAST_CARD_ID=""
 LAST_DEVICE_ID=""
 for CARD in /proc/asound/card[0-9]/pcm?p
 do 
-  while read KEY VALUE
+  while read -r KEY VALUE
   do
     VALUE=$(echo "$VALUE" | sed 's/"//g')
     case "$KEY" in
@@ -76,28 +84,58 @@ audio_output {
   auto_resample "no"
   auto_format   "no"
 EOF
-  read MIXER_CONTROL MIXER_ID << EOF
+  if [ "$ENABLE_MIXER" = "true" ]
+  then
+    read -r MIXER_CONTROL MIXER_ID << EOF
 $(amixer -c "$CARD_ID" | grep -m1 "Simple mixer control" -A1 | grep pvolume -B1 | tr -d '\n' | sed -r "s/.*'([^']+)',(\d+).*/\1 \2/")
 EOF
-  if [ "$MIXER_CONTROL" != "" ] && [ "$MIXER_ID" != "" ]
-  then
-    echo "    Mixer: $MIXER_CONTROL"
-    echo "  mixer_type    \"hardware\"" >> /etc/mpd.conf.new
-    echo "  mixer_device  \"hw:$CARD_ID\"" >> /etc/mpd.conf.new
-    echo "  mixer_control \"$MIXER_CONTROL\"" >> /etc/mpd.conf.new
-  else
-    echo "    Mixer: none"
-    echo "  mixer_type    \"none\"" >> /etc/mpd.conf.new
+    if [ "$MIXER_CONTROL" != "" ] && [ "$MIXER_ID" != "" ]
+    then
+      echo "    Mixer: $MIXER_CONTROL"
+      echo "  mixer_type    \"hardware\"" >> /etc/mpd.conf.new
+      echo "  mixer_device  \"hw:$CARD_ID\"" >> /etc/mpd.conf.new
+      echo "  mixer_control \"$MIXER_CONTROL\"" >> /etc/mpd.conf.new
+    else
+      if [ "$SOFTWARE_MIXER_FALLBACK" = "true" ]
+      then
+        echo "    Mixer: none"
+        echo "  mixer_type    \"software\"" >> /etc/mpd.conf.new
+      else
+        echo "    Mixer: none"
+        echo "  mixer_type    \"none\"" >> /etc/mpd.conf.new
+      fi
+    fi
   fi
   echo "}" >> /etc/mpd.conf.new
 done
+
+if [ -f /etc/mympdos/custom/mpd.replace ]
+then
+  while read -r ACTION KEY VALUE
+  do
+    case "$ACTION" in
+      A)
+        echo "$KEY    $VALUE" >> /etc/mpd.conf.new
+        ;;
+      C)
+        sed -r -i "s/^\s*$KEY\s+.*$//" /etc/mpd.conf.new
+        echo "$KEY    $VALUE" >> /etc/mpd.conf.new
+        ;;
+      D)
+        sed -r -i "s/^(\s*$KEY\s+.*)$/#\1/" /etc/mpd.conf.new
+        ;;
+    esac
+  done << EOF
+$(grep -E '^(A|C|D)' /etc/mympdos/custom/mpd.replace)
+EOF
+fi
 
 if ! cmp /etc/mpd.conf /etc/mpd.conf.new > /dev/null 2>&1
 then
   echo "Updating MPD configuration"
   [ -f /etc/mpd.conf ] && cp /etc/mpd.conf /etc/mpd.conf.bak
   mv /etc/mpd.conf.new /etc/mpd.conf
-  [ "$BOOTSTRAP" = "true" ] || service mpd restart
+  [ -f /run/mpd/pid ] && service mpd restart
 else
   rm /etc/mpd.conf.new
 fi
@@ -113,3 +151,5 @@ do
 done
 
 rm /tmp/configmpd.lock
+
+exit 0

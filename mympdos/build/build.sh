@@ -6,7 +6,7 @@
 #
 
 BUILDDIR="/usr/build"
-POWEROFF="1"
+POWEROFF="0"
 ARCH=$(uname -m)
 
 #Build packages
@@ -98,14 +98,18 @@ else
   echo "No existing packages found"
 fi
 
-LIBMPDCLIENT_PACKAGE=$(get_pkgname /media/vda1/mympdos/libmpdclient)
-B_LIBMPDCLIENT_VER=$(get_pkgver /media/vda1/mympdos/libmpdclient)
+LIBMPDCLIENT_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-libmpdclient)
+B_LIBMPDCLIENT_VER=$(get_pkgver /media/vda1/mympdos/mympdos-libmpdclient)
 if [ "$B_LIBMPDCLIENT" = "1" ] && [ ! -f "packages/package/$ARCH/$LIBMPDCLIENT_PACKAGE" ]
 then
   echo "Build libmpdclient"
   su build -c "rm -rf libmpdclient"
-  su build -c "cp -r /media/vda1/mympdos/libmpdclient ."
-  cd libmpdclient || exit 1
+  su build -c "cp -r /media/vda1/mympdos/mympdos-libmpdclient ."
+  cd mympdos-libmpdclient || exit 1
+  su build -c "git clone -b master --depth=1 https://github.com/MusicPlayerDaemon/libmpdclient.git"
+  mv libmpdclient "mympdos-libmpdclient-${B_LIBMPDCLIENT_VER}"
+  tar -czf mympdos-libmpdclient.tar.gz "mympdos-libmpdclient-${B_LIBMPDCLIENT_VER}"
+  rm -fr "mympdos-libmpdclient-${B_LIBMPDCLIENT_VER}"
   su build -c "abuild checksum"
   su build -c "abuild -r"
   cd ..
@@ -113,6 +117,7 @@ fi
 
 echo "/usr/build/packages/package/" >> /etc/apk/repositories
 apk update
+apk add mympdos-libmpdclient
 
 if [ "$B_MYMPD" = "1" ]
 then
@@ -136,13 +141,13 @@ then
   cd ..
 fi
 
-MPD_MASTER_PACKAGE=$(get_pkgname /media/vda1/mympdos/mpd-master)
-B_MPD_MASTER_VER=$(get_pkgver /media/vda1/mympdos/mpd-master)
+MPD_MASTER_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-mpd-master)
+B_MPD_MASTER_VER=$(get_pkgver /media/vda1/mympdos/mympdos-mpd-master)
 if [ "$B_MPD_MASTER" = "1" ] && [ ! -f "packages/package/$ARCH/$MPD_MASTER_PACKAGE" ]
 then
   echo "Build MDP master"
   su build -c "rm -rf mpd-master"
-  su build -c "cp -r /media/vda1/mympdos/mpd-master ."
+  su build -c "cp -r /media/vda1/mympdos/mympdos-mpd-master ."
   cd mpd-master || exit 1
   su build -c "git clone -b master --depth=1 https://github.com/MusicPlayerDaemon/MPD.git"
   mv MPD "mympdos-mpd-master-${B_MPD_MASTER_VER}"
@@ -153,13 +158,13 @@ then
   cd ..
 fi
 
-MPD_STABLE_PACKAGE=$(get_pkgname /media/vda1/mympdos/mpd-stable)
-B_MPD_STABLE_VER=$(get_pkgver /media/vda1/mympdos/mpd-stable)
+MPD_STABLE_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-mpd-stable)
+B_MPD_STABLE_VER=$(get_pkgver /media/vda1/mympdos/mympdos-mpd-stable)
 if [ "$B_MPD_STABLE" = "1" ] && [ ! -f "packages/package/$ARCH/$MPD_STABLE_PACKAGE" ]
 then
   echo "Building MPD stable"
   su build -c "rm -rf mpd-stable"
-  su build -c "cp -r /media/vda1/mympdos/mpd-stable ."
+  su build -c "cp -r /media/vda1/mympdos/mympdos-mpd-stable ."
   cd mpd-stable || exit 1
   su build -c "wget http://www.musicpd.org/download/mpd/0.21/mpd-${B_MPD_STABLE_VER}.tar.xz"
   tar -xf "mpd-${B_MPD_STABLE_VER}.tar.xz"
@@ -176,11 +181,13 @@ MYMPDOS_BASE_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-base)
 B_MYMPDOS_BASE_VER=$(get_pkgver /media/vda1/mympdos/mympdos-base)
 if [ "$B_BUILD" = "1" ] && [ ! -f "packages/package/$ARCH/$MYMPDOS_BASE_PACKAGE" ]
 then
+  addgroup -S mympd
+  adduser -S -D -H -h /var/lib/mympd -s /sbin/nologin -G mympd -g myMPD mympd
   su build -c "rm -rf mympdos-base"
   su build -c "cp -r /media/vda1/mympdos/mympdos-base ."
   cd mympdos-base || exit 1
   tar -czf "mympdos-base-$B_MYMPDOS_BASE_VER.tar.gz" "mympdos-base-$B_MYMPDOS_BASE_VER"
-  sed -i "s/__VERSION__/$B_MYMPDOS_BASE_VER/g" mympdos-base.pre-install
+  sed -i "s/__VERSION__/$B_MYMPDOS_BASE_VER/g" mympdos-base.post-install
   su build -c "abuild checksum"
   su build -c "abuild -r"
   cd ..

@@ -17,8 +17,10 @@ if [ "$ACTION" = "add" ]
 then
   mkdir "$MOUNTDIR/$MDEV"
   mount -oro,noatime /dev/${MDEV} ${MOUNTDIR}/${MDEV}
+  [ -f /run/mpd/pid ] && mpc update
 elif [ "$ACTION" = "remove" ]
 then
   umount ${MOUNTDIR}/${MDEV}
   rmdir ${MOUNTDIR}/${MDEV}
+  [ -f /run/mpd/pid ] && mpc update
 fi
