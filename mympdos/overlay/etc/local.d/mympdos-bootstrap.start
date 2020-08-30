@@ -327,6 +327,13 @@ then
 else
 	echo "Local myMPDos package repository is empty"
 fi
+
+echo "Installing myMPDos package"
+apk update
+apk add mympdos-base
+
+echo "Adding mympdos online repository"
+echo "https://jcgames.de/stuff/mympdos/repository" >> /etc/apk/repositories
 apk update
 apk upgrade
 
@@ -353,9 +360,6 @@ echo "Installing myMPD"
 addgroup -S mympd
 apk add mympd
 adduser mympd audio
-
-echo "Installing myMPDos package"
-apk add mympdos-base
 
 echo "Installing basic packages"
 apk add mpc sudo alsa-utils

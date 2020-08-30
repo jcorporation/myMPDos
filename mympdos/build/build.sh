@@ -148,7 +148,7 @@ then
   echo "Build MDP master"
   su build -c "rm -rf mpd-master"
   su build -c "cp -r /media/vda1/mympdos/mympdos-mpd-master ."
-  cd mpd-master || exit 1
+  cd mympdos-mpd-master || exit 1
   su build -c "git clone -b master --depth=1 https://github.com/MusicPlayerDaemon/MPD.git"
   mv MPD "mympdos-mpd-master-${B_MPD_MASTER_VER}"
   tar -czf mympdos-mpd-master.tar.gz "mympdos-mpd-master-${B_MPD_MASTER_VER}"
@@ -165,7 +165,7 @@ then
   echo "Building MPD stable"
   su build -c "rm -rf mpd-stable"
   su build -c "cp -r /media/vda1/mympdos/mympdos-mpd-stable ."
-  cd mpd-stable || exit 1
+  cd mympdos-mpd-stable || exit 1
   su build -c "wget http://www.musicpd.org/download/mpd/0.21/mpd-${B_MPD_STABLE_VER}.tar.xz"
   tar -xf "mpd-${B_MPD_STABLE_VER}.tar.xz"
   rm "mpd-${B_MPD_STABLE_VER}.tar.xz"

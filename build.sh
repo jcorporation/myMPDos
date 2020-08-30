@@ -104,8 +104,13 @@ build_stage2()
   else
     echo "No existing packages found"
   fi
-  if [ -f ../apks/abuild.tgz ]
+  if [ -f ../keys/abuild.tgz ]
   then
+    echo "Using keys for public repository"
+    cp ../keys/abuild.tgz mnt/mympdos/
+  elif [ -f ../apks/abuild.tgz ]
+  then
+    echo "Using private build keys"
     cp ../apks/abuild.tgz mnt/mympdos/
   else
     echo "No saved abuild.tgz found"
