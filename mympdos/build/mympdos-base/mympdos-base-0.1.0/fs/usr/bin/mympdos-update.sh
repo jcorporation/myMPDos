@@ -1,37 +1,61 @@
 #!/bin/sh
 
-read -r VERSION < "/boot/myMPDos.version"
+read -r VERSION < "/media/mmcblk0p1/myMPDos.version"
+[ "$VERSION" = "" ] && exit 1
 
-check_signature() {
-  if wget -q "https://jcgames.de/stuff/mympdos/update/update-${VERSION}.sha256" \
-      -O "/tmp/update.sha256" 2>/dev/null
+TMPDIR=$(mktemp -d)
+cd $TMPDIR || exit 1
+
+download() {
+  URI="https://raw.githubusercontent.com/jcorporation/myMPDos/master/updates/${VERSION}"
+
+  if wget -q "$URI/update.sha256" -O "$TMPDIR/update.sha256" 2>/dev/null && \
+     wget -q "$URI" -O "$TMPDIR/update.tar.gz" 2>/dev/null
   then
-    openssl base64 -d -in /tmp/update.sha256 -out /tmp/update.sig
-    openssl dgst -sha256 -verify /etc/apk/keys/mail@jcgames.de.rsa.pub \
-      -signature /tmp/update.sig /tmp/update.sh
+    openssl base64 -d -in "$TMPDIR/update.sha256" -out "$TMPDIR/update.sig"
+    if openssl dgst -sha256 -verify /etc/apk/keys/mail@jcgames.de.rsa.pub \
+               -signature "$TMPDIR/update.sig" "$TMPDIR/update.tar.gz"
+    then
+      return 0
+    else
+      echo "  - Signature check failed"
+    fi
   fi
   return 1
 }
 
+do_update() {
+  echo "  - Unpacking update"
+  tar -xzf update.tar.gz
+  echo "  - Executing update script"
+  cd update || exit 1
+  eval update.sh
+
+  read -r NEWVERSION < myMPDos.version
+  echo "  - Setting version to $NEWVERSION"
+  mount -oremount,rw /media/mmcblk0p1
+  mv myMPDos.version /media/mmcblk0p1/myMPDos.version
+  mount -oremount,ro /media/mmcblk0p1
+  echo "Update finished"
+}
+
+echo "Updating apks"
+apk update
+apk upgrade
+
 echo "Starting myMPDos update"
 echo "  - Current version: $VERSION"
 echo "  - Checking for update"
-if wget -q "https://jcgames.de/stuff/mympdos/updates/update-${VERSION}.sh" \
-      -O "/tmp/update.sh" 2>/dev/null
+if download
 then
-  echo "  - Update found"
-  echo "  - Checking signature"
-  if check_signature
-  then
-    echo "  - Executing update script"
-    chmod +x /tmp/update.sh
-    /tmp/update.sh
-    echo "  - Update finished"
-    echo "  - Cleanup"
-    rm -f /tmp/update.sha256
-    rm -f /tmp/update.sig
-    rm -f /tmp/update.sh
-  fi
+  do_update
 else
   echo "  - No update found"
 fi
+
+cd /
+rm -fr "$TMPDIR"
+
+echo "  - Saving changes"
+lbu_commit
+exit 0
