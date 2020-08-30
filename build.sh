@@ -169,6 +169,7 @@ build_stage4()
   else
     echo "No APKINDEX.tar.gz found"
   fi
+  cp -r "../apks/$ARCH" ../repository/
   umount_retry mnt || exit 1
   sudo losetup -d "${LOOP}"
 }

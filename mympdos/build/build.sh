@@ -146,7 +146,7 @@ B_MPD_MASTER_VER=$(get_pkgver /media/vda1/mympdos/mympdos-mpd-master)
 if [ "$B_MPD_MASTER" = "1" ] && [ ! -f "packages/package/$ARCH/$MPD_MASTER_PACKAGE" ]
 then
   echo "Build MDP master"
-  su build -c "rm -rf mpd-master"
+  su build -c "rm -rf mympdos-mpd-master"
   su build -c "cp -r /media/vda1/mympdos/mympdos-mpd-master ."
   cd mympdos-mpd-master || exit 1
   su build -c "git clone -b master --depth=1 https://github.com/MusicPlayerDaemon/MPD.git"
@@ -163,7 +163,7 @@ B_MPD_STABLE_VER=$(get_pkgver /media/vda1/mympdos/mympdos-mpd-stable)
 if [ "$B_MPD_STABLE" = "1" ] && [ ! -f "packages/package/$ARCH/$MPD_STABLE_PACKAGE" ]
 then
   echo "Building MPD stable"
-  su build -c "rm -rf mpd-stable"
+  su build -c "rm -rf mympdos-mpd-stable"
   su build -c "cp -r /media/vda1/mympdos/mympdos-mpd-stable ."
   cd mympdos-mpd-stable || exit 1
   su build -c "wget http://www.musicpd.org/download/mpd/0.21/mpd-${B_MPD_STABLE_VER}.tar.xz"

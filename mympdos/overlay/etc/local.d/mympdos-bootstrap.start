@@ -332,8 +332,8 @@ echo "Installing myMPDos package"
 apk update
 apk add mympdos-base
 
-echo "Adding mympdos online repository"
-echo "https://jcgames.de/stuff/mympdos/repository" >> /etc/apk/repositories
+echo "Adding myMPDos online repository"
+echo "https://raw.githubusercontent.com/jcorporation/myMPDos/master/repository" >> /etc/apk/repositories
 apk update
 apk upgrade
 
