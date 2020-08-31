@@ -16,7 +16,7 @@ DATADEV="/dev/${SDCARD}${DATAPART}"
 DATAMEDIA="/media/${SDCARD}${DATAPART}"
 LBUMEDIA="${SDCARD}${DATAPART}"
 ARCH=$(uname -m)
-REBOOT="0"
+REBOOT="1"
 
 read -r VERSION < "$BOOTMEDIA/myMPDos.version" || { echo "$BOOTMEDIA/myMPDos.version not found"; exit 1; }
 
