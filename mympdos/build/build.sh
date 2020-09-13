@@ -12,7 +12,7 @@ ARCH=$(uname -m)
 #Build packages
 B_BUILD="1"
 B_MYMPD="1"
-B_MYMPD_BRANCH="devel"
+B_MYMPD_BRANCH="master"
 B_LIBMPDCLIENT="1"
 B_MPD_STABLE="1"
 B_MPD_MASTER="1"

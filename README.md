@@ -6,8 +6,6 @@ myMPDos is a turnkey music playback solution and is designed arround [MPD](https
 
 The initial configuration is done through a simple bootstrap file, that has sane default values preconfigured. Setting up myMPDos takes only a few minutes. Experts can use the advanced bootstrap file to customize the installation further.
 
-WARNING: myMPDOS is currently in an early development stage. If it evolves I will add prebuild images.
-
 ## Features
 
 - Based on latest Alpine Linux
