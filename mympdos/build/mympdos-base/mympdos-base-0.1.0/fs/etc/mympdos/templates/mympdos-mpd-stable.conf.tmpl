@@ -20,7 +20,7 @@ database {
 audio_output {
   type              "httpd"
   name              "HTTP Stream"
-  encoder           "lame"  #to support safari
+  encoder           "lame" #to support safari
   port              "8000"
   bitrate           "128"
   format            "44100:16:1"
@@ -36,4 +36,8 @@ input {
 input {
   plugin            "tidal"
   enabled           "no"
+}
+
+input_cache {
+  size              "256 MB"
 }

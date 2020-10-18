@@ -166,7 +166,7 @@ then
   su build -c "rm -rf mympdos-mpd-stable"
   su build -c "cp -r /media/vda1/mympdos/mympdos-mpd-stable ."
   cd mympdos-mpd-stable || exit 1
-  su build -c "wget http://www.musicpd.org/download/mpd/0.21/mpd-${B_MPD_STABLE_VER}.tar.xz"
+  su build -c "wget http://www.musicpd.org/download/mpd/0.22/mpd-${B_MPD_STABLE_VER}.tar.xz"
   tar -xf "mpd-${B_MPD_STABLE_VER}.tar.xz"
   rm "mpd-${B_MPD_STABLE_VER}.tar.xz"
   mv "mpd-${B_MPD_STABLE_VER}" "mympdos-mpd-stable-${B_MPD_STABLE_VER}"
