@@ -20,6 +20,16 @@ package() {
   exit 0
 }
 
+usage() {
+  echo "Usage: (skel|package) <from version> <to version>"
+}
+
+if [ "$2" = "" ] || [ "$3" = "" ]
+then
+  usage
+  exit 1
+fi
+
 case "$1" in
   skel)
     skel
@@ -28,7 +38,7 @@ case "$1" in
     package
   ;;
   *)
-    echo "Usage: (skel|package) <from version> <to version>"
+    usage
     exit 1
   ;;
 esac
