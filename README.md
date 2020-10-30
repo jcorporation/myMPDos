@@ -12,6 +12,7 @@ The initial configuration is done through a simple bootstrap file, that has sane
 - Runs entirely in RAM
 - Very small ressource usage
 - Preconfigured MPD and myMPD
+- Latest stable MPD and myMPD releases
 - HTTPS Streaming
 - Automounts USB devices and adds its contents to the mpd database
 - Configures MPD outputs automatically
