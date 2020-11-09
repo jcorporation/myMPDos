@@ -46,7 +46,6 @@ ENABLE_AUTOMOUNT="true"
 ENABLE_CONFIGMPD="true"
 ENABLE_MIXER="true"
 SOFTWARE_MIXER_FALLBACK="false"
-SHUTDOWN_ENABLE="false"
 if [ -f "$BOOTMEDIA/bootstrap.txt" ]
 then
 	source "$BOOTMEDIA/bootstrap.txt"
@@ -363,14 +362,13 @@ apk add mympd
 adduser mympd audio
 
 echo "Installing basic packages"
-apk add mpc sudo alsa-utilsi
-[ "$SHUTDOWN_ENABLE" = "true" ]] apk add evtest
+apk add mpc sudo alsa-utils
 [ "$ENABLE_RNGD" = "true" ] && apk add rng-tools
 
 if [ "$ADVANCED_SOFTWARE" = "true" ]
 then
 	echo "Installing advanced packages"
-	apk add usbutils raspberrypi busybox-extras net-tools mpg123
+	apk add usbutils raspberrypi busybox-extras net-tools mpg123 mygpiod
 fi
 
 [ "$HTTPS_STREAMING" = "true" ] && apk add stunnel
@@ -441,7 +439,6 @@ echo "Enabling default services"
 [ "$HTTPS_STREAMING" = "true" ] && rc-update add stunnel default
 rc-update add mpd default
 rc-update add mympd default
-[ "$SHUTDOWN_ENABLE" = "true" ] && rc-update add gpio-shutdownd
 
 if [ "$ROOT_PASSWORD" != "" ]
 then
@@ -458,7 +455,6 @@ then
 	[ "$WLAN_ENABLE" = "false" ] && echo "dtoverlay=disable-wifi" >> "$BOOTMEDIA/usercfg.txt"
 	[ "$BT_ENABLE" = "false" ] && echo "dtoverlay=disable-bt" >> "$BOOTMEDIA/usercfg.txt"
 	[ "$AUDIOHAT" != "" ] && echo "dtoverlay=$AUDIOHAT" >> "$BOOTMEDIA/usercfg.txt"
-	[ "$SHUTDOWN_ENABLE" = "true" ] && echo "dtoverlay=gpio-shutdown,gpio_pin=3,active_low=1,gpio_pull=up" >> "$BOOTMEDIA/usercfg.txt"
 fi
 
 echo "Removing installation files"

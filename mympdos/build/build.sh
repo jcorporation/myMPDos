@@ -16,6 +16,7 @@ B_MYMPD_BRANCH="master"
 B_LIBMPDCLIENT="1"
 B_MPD_STABLE="1"
 B_MPD_MASTER="1"
+B_MYGPIOD="1"
 
 get_pkgver()
 {
@@ -190,6 +191,23 @@ then
   sed -i "s/__VERSION__/$B_MYMPDOS_BASE_VER/g" mympdos-base.post-install
   su build -c "abuild checksum"
   su build -c "abuild -r"
+  cd ..
+fi
+
+if [ "$B_MYGPIOD" = "1" ]
+then
+  echo "Build myGPIOd"
+  su build -c "rm -rf myGPIOd"
+  su build -c "git clone -b master --depth=1 https://github.com/jcorporation/myGPIOd.git"
+  cd myGPIOd || exit 1
+  MYGPIOD_PACKAGE=$(get_pkgname contrib/packaging/alpine)
+  if [ ! -f "../packages/package/$ARCH/$MYMPD_PACKAGE" ]
+  then
+    ./build.sh installdeps
+    su build -c "./build.sh pkgalpine"
+  else
+    echo "myGPIOd is already up-to-date"
+  fi
   cd ..
 fi
 
