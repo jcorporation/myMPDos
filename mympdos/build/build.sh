@@ -142,42 +142,6 @@ then
   cd ..
 fi
 
-MPD_MASTER_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-mpd-master)
-B_MPD_MASTER_VER=$(get_pkgver /media/vda1/mympdos/mympdos-mpd-master)
-if [ "$B_MPD_MASTER" = "1" ] && [ ! -f "packages/package/$ARCH/$MPD_MASTER_PACKAGE" ]
-then
-  echo "Build MDP master"
-  su build -c "rm -rf mympdos-mpd-master"
-  su build -c "cp -r /media/vda1/mympdos/mympdos-mpd-master ."
-  cd mympdos-mpd-master || exit 1
-  su build -c "git clone -b master --depth=1 https://github.com/MusicPlayerDaemon/MPD.git"
-  mv MPD "mympdos-mpd-master-${B_MPD_MASTER_VER}"
-  tar -czf mympdos-mpd-master.tar.gz "mympdos-mpd-master-${B_MPD_MASTER_VER}"
-  rm -fr "mympdos-mpd-master-${B_MPD_MASTER_VER}"
-  su build -c "abuild checksum"
-  su build -c "abuild -r"
-  cd ..
-fi
-
-MPD_STABLE_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-mpd-stable)
-B_MPD_STABLE_VER=$(get_pkgver /media/vda1/mympdos/mympdos-mpd-stable)
-if [ "$B_MPD_STABLE" = "1" ] && [ ! -f "packages/package/$ARCH/$MPD_STABLE_PACKAGE" ]
-then
-  echo "Building MPD stable"
-  su build -c "rm -rf mympdos-mpd-stable"
-  su build -c "cp -r /media/vda1/mympdos/mympdos-mpd-stable ."
-  cd mympdos-mpd-stable || exit 1
-  su build -c "wget http://www.musicpd.org/download/mpd/0.22/mpd-${B_MPD_STABLE_VER}.tar.xz"
-  tar -xf "mpd-${B_MPD_STABLE_VER}.tar.xz"
-  rm "mpd-${B_MPD_STABLE_VER}.tar.xz"
-  mv "mpd-${B_MPD_STABLE_VER}" "mympdos-mpd-stable-${B_MPD_STABLE_VER}"
-  tar -czf mympdos-mpd-stable.tar.gz "mympdos-mpd-stable-${B_MPD_STABLE_VER}"
-  rm -fr "mympdos-mpd-stable-${B_MPD_STABLE_VER}"
-  su build -c "abuild checksum"
-  su build -c "abuild -r"
-  cd ..
-fi
-
 MYMPDOS_BASE_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-base)
 B_MYMPDOS_BASE_VER=$(get_pkgver /media/vda1/mympdos/mympdos-base)
 if [ "$B_BUILD" = "1" ] && [ ! -f "packages/package/$ARCH/$MYMPDOS_BASE_PACKAGE" ]
@@ -201,13 +165,49 @@ then
   su build -c "git clone -b master --depth=1 https://github.com/jcorporation/myGPIOd.git"
   cd myGPIOd || exit 1
   MYGPIOD_PACKAGE=$(get_pkgname contrib/packaging/alpine)
-  if [ ! -f "../packages/package/$ARCH/$MYMPD_PACKAGE" ]
+  if [ ! -f "../packages/package/$ARCH/$MYGPIOD_PACKAGE" ]
   then
     ./build.sh installdeps
     su build -c "./build.sh pkgalpine"
   else
     echo "myGPIOd is already up-to-date"
   fi
+  cd ..
+fi
+
+MPD_STABLE_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-mpd-stable)
+B_MPD_STABLE_VER=$(get_pkgver /media/vda1/mympdos/mympdos-mpd-stable)
+if [ "$B_MPD_STABLE" = "1" ] && [ ! -f "packages/package/$ARCH/$MPD_STABLE_PACKAGE" ]
+then
+  echo "Building MPD stable"
+  su build -c "rm -rf mympdos-mpd-stable"
+  su build -c "cp -r /media/vda1/mympdos/mympdos-mpd-stable ."
+  cd mympdos-mpd-stable || exit 1
+  su build -c "wget http://www.musicpd.org/download/mpd/0.22/mpd-${B_MPD_STABLE_VER}.tar.xz"
+  tar -xf "mpd-${B_MPD_STABLE_VER}.tar.xz"
+  rm "mpd-${B_MPD_STABLE_VER}.tar.xz"
+  mv "mpd-${B_MPD_STABLE_VER}" "mympdos-mpd-stable-${B_MPD_STABLE_VER}"
+  tar -czf mympdos-mpd-stable.tar.gz "mympdos-mpd-stable-${B_MPD_STABLE_VER}"
+  rm -fr "mympdos-mpd-stable-${B_MPD_STABLE_VER}"
+  su build -c "abuild checksum"
+  su build -c "abuild -r"
+  cd ..
+fi
+
+MPD_MASTER_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-mpd-master)
+B_MPD_MASTER_VER=$(get_pkgver /media/vda1/mympdos/mympdos-mpd-master)
+if [ "$B_MPD_MASTER" = "1" ] && [ ! -f "packages/package/$ARCH/$MPD_MASTER_PACKAGE" ]
+then
+  echo "Build MDP master"
+  su build -c "rm -rf mympdos-mpd-master"
+  su build -c "cp -r /media/vda1/mympdos/mympdos-mpd-master ."
+  cd mympdos-mpd-master || exit 1
+  su build -c "git clone -b master --depth=1 https://github.com/MusicPlayerDaemon/MPD.git"
+  mv MPD "mympdos-mpd-master-${B_MPD_MASTER_VER}"
+  tar -czf mympdos-mpd-master.tar.gz "mympdos-mpd-master-${B_MPD_MASTER_VER}"
+  rm -fr "mympdos-mpd-master-${B_MPD_MASTER_VER}"
+  su build -c "abuild checksum"
+  su build -c "abuild -r"
   cd ..
 fi
 
