@@ -13,9 +13,11 @@ ARCH=$(uname -m)
 B_BUILD="1"
 B_MYMPD="1"
 B_MYMPD_BRANCH="master"
+#B_MYMPD_BRANCH="devel"
 B_LIBMPDCLIENT="1"
 B_MPD_STABLE="1"
 B_MPD_MASTER="1"
+B_MYGPIOD="1"
 
 get_pkgver()
 {
@@ -141,20 +143,36 @@ then
   cd ..
 fi
 
-MPD_MASTER_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-mpd-master)
-B_MPD_MASTER_VER=$(get_pkgver /media/vda1/mympdos/mympdos-mpd-master)
-if [ "$B_MPD_MASTER" = "1" ] && [ ! -f "packages/package/$ARCH/$MPD_MASTER_PACKAGE" ]
+MYMPDOS_BASE_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-base)
+B_MYMPDOS_BASE_VER=$(get_pkgver /media/vda1/mympdos/mympdos-base)
+if [ "$B_BUILD" = "1" ] && [ ! -f "packages/package/$ARCH/$MYMPDOS_BASE_PACKAGE" ]
 then
-  echo "Build MDP master"
-  su build -c "rm -rf mympdos-mpd-master"
-  su build -c "cp -r /media/vda1/mympdos/mympdos-mpd-master ."
-  cd mympdos-mpd-master || exit 1
-  su build -c "git clone -b master --depth=1 https://github.com/MusicPlayerDaemon/MPD.git"
-  mv MPD "mympdos-mpd-master-${B_MPD_MASTER_VER}"
-  tar -czf mympdos-mpd-master.tar.gz "mympdos-mpd-master-${B_MPD_MASTER_VER}"
-  rm -fr "mympdos-mpd-master-${B_MPD_MASTER_VER}"
+  addgroup -S mympd
+  adduser -S -D -H -h /var/lib/mympd -s /sbin/nologin -G mympd -g myMPD mympd
+  su build -c "rm -rf mympdos-base"
+  su build -c "cp -r /media/vda1/mympdos/mympdos-base ."
+  cd mympdos-base || exit 1
+  tar -czf "mympdos-base-$B_MYMPDOS_BASE_VER.tar.gz" "mympdos-base-$B_MYMPDOS_BASE_VER"
+  sed -i "s/__VERSION__/$B_MYMPDOS_BASE_VER/g" mympdos-base.post-install
   su build -c "abuild checksum"
   su build -c "abuild -r"
+  cd ..
+fi
+
+if [ "$B_MYGPIOD" = "1" ]
+then
+  echo "Build myGPIOd"
+  su build -c "rm -rf myGPIOd"
+  su build -c "git clone -b master --depth=1 https://github.com/jcorporation/myGPIOd.git"
+  cd myGPIOd || exit 1
+  MYGPIOD_PACKAGE=$(get_pkgname contrib/packaging/alpine)
+  if [ ! -f "../packages/package/$ARCH/$MYGPIOD_PACKAGE" ]
+  then
+    ./build.sh installdeps
+    su build -c "./build.sh pkgalpine"
+  else
+    echo "myGPIOd is already up-to-date"
+  fi
   cd ..
 fi
 
@@ -177,17 +195,18 @@ then
   cd ..
 fi
 
-MYMPDOS_BASE_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-base)
-B_MYMPDOS_BASE_VER=$(get_pkgver /media/vda1/mympdos/mympdos-base)
-if [ "$B_BUILD" = "1" ] && [ ! -f "packages/package/$ARCH/$MYMPDOS_BASE_PACKAGE" ]
+MPD_MASTER_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-mpd-master)
+B_MPD_MASTER_VER=$(get_pkgver /media/vda1/mympdos/mympdos-mpd-master)
+if [ "$B_MPD_MASTER" = "1" ] && [ ! -f "packages/package/$ARCH/$MPD_MASTER_PACKAGE" ]
 then
-  addgroup -S mympd
-  adduser -S -D -H -h /var/lib/mympd -s /sbin/nologin -G mympd -g myMPD mympd
-  su build -c "rm -rf mympdos-base"
-  su build -c "cp -r /media/vda1/mympdos/mympdos-base ."
-  cd mympdos-base || exit 1
-  tar -czf "mympdos-base-$B_MYMPDOS_BASE_VER.tar.gz" "mympdos-base-$B_MYMPDOS_BASE_VER"
-  sed -i "s/__VERSION__/$B_MYMPDOS_BASE_VER/g" mympdos-base.post-install
+  echo "Build MDP master"
+  su build -c "rm -rf mympdos-mpd-master"
+  su build -c "cp -r /media/vda1/mympdos/mympdos-mpd-master ."
+  cd mympdos-mpd-master || exit 1
+  su build -c "git clone -b master --depth=1 https://github.com/MusicPlayerDaemon/MPD.git"
+  mv MPD "mympdos-mpd-master-${B_MPD_MASTER_VER}"
+  tar -czf mympdos-mpd-master.tar.gz "mympdos-mpd-master-${B_MPD_MASTER_VER}"
+  rm -fr "mympdos-mpd-master-${B_MPD_MASTER_VER}"
   su build -c "abuild checksum"
   su build -c "abuild -r"
   cd ..

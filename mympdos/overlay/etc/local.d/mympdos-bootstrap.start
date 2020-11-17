@@ -368,7 +368,7 @@ apk add mpc sudo alsa-utils
 if [ "$ADVANCED_SOFTWARE" = "true" ]
 then
 	echo "Installing advanced packages"
-	apk add usbutils raspberrypi busybox-extras net-tools mpg123
+	apk add usbutils raspberrypi busybox-extras net-tools mpg123 mygpiod
 fi
 
 [ "$HTTPS_STREAMING" = "true" ] && apk add stunnel
