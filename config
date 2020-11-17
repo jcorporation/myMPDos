@@ -2,7 +2,7 @@
 # myMPD (c) 2018-2020 Juergen Mang <mail@jcgames.de>
 # https://github.com/jcorporation/mympd
 #
-VERSION="0.2.0"
+VERSION="0.3.0"
 IMAGE="myMPDos-${VERSION}-$(date +%Y%m%d).img"
 BUILDIMAGE="myMPDos-build.img"
 ARCH="aarch64"
