@@ -16,6 +16,7 @@ The initial configuration is done through a simple bootstrap file, that has sane
 - HTTPS Streaming
 - Automounts USB devices and adds its contents to the mpd database
 - Configures MPD outputs automatically
+- Use GPIO buttons to control MPD and myMPD with myGPIOd
 
 ## Building the image
 
