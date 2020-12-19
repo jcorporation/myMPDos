@@ -18,27 +18,30 @@ The initial configuration is done through a simple bootstrap file, that has sane
 - Configures MPD outputs automatically
 - Use GPIO buttons to control MPD and myMPD with myGPIOd
 
-## Building the image
+## Usage
+
+1. Download the latest [release image](https://github.com/jcorporation/myMPDos/releases)
+2. Transfer the image to a sd-card, the `image.sh` script helps you
+3. Copy `bootstrap-simple.txt` or `bootstrap-advanced.txt` to `bootstrap.txt`
+4. Adapt `bootstrap.txt`
+5. Boot your Raspberry Pi
+
+## Advanced usage
+
+### Building the image
 
 The `build.sh` script creates a qemu image, starts it and compiles myMPD and MPD. The resulting packages are integrated in a custom overlay for the default Alpine Linux Raspberry image.
 
 1. Create the image with `./build.sh build`
 2. Optionally run `./build.sh cleanup` to cleanup things
 
-## Usage
-
-1. Transfer the image to a sd-card, the `image.sh` script helps you
-2. Copy `bootstrap-simple.txt` or `bootstrap-advanced.txt` to `bootstrap.txt`
-3. Adapt `bootstrap.txt`
-4. Boot your Raspberry Pi
-
-## Test
+### Test
 
 Qemu does not support a raspberry pi compatible network interface. Do not burn the image after test to the sd-card. After first start of an image all bootstrap files are removed.
 
 - Run `./image.sh start`
 
-## Build depedencies
+### Build depedencies
 
 - Qemu (qemu-system-aarch64)
 - DHCP server in your network
