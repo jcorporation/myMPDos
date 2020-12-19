@@ -48,6 +48,9 @@ Qemu does not support a raspberry pi compatible network interface. Do not burn t
 - Working internet connection
 - Standard linux tools
 
+## Wiki
+For further information on installation and configuration, see the [myMPDos wiki](https://github.com/jcorporation/myMPDos/wiki).
+
 ## Copyright
 
 2020 Juergen Mang <mail@jcgames.de>
