@@ -15,8 +15,8 @@ ENABLE_CONFIGMPD="true"
 
 #Software
 #MPD version
-#1 = MPD 21.x (stable)
-#2 = MPD 22.x (MPD master branch - unstable)
+#1 = MPD 22.x (stable)
+#2 = MPD 23.x (MPD master branch - unstable)
 MPD_VERSION="1"
 
 #Mixer
