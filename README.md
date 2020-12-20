@@ -26,28 +26,6 @@ The initial configuration is done through a simple bootstrap file, that has sane
 4. Adapt `bootstrap.txt`
 5. Boot your Raspberry Pi
 
-## Advanced usage
-
-### Building the image
-
-The `build.sh` script creates a qemu image, starts it and compiles myMPD and MPD. The resulting packages are integrated in a custom overlay for the default Alpine Linux Raspberry image.
-
-1. Create the image with `./build.sh build`
-2. Optionally run `./build.sh cleanup` to cleanup things
-
-### Test
-
-Qemu does not support a raspberry pi compatible network interface. Do not burn the image after test to the sd-card. After first start of an image all bootstrap files are removed.
-
-- Run `./image.sh start`
-
-### Build depedencies
-
-- Qemu (qemu-system-aarch64)
-- DHCP server in your network
-- Working internet connection
-- Standard linux tools
-
 ## Wiki
 For further information on installation and configuration, see the [myMPDos wiki](https://github.com/jcorporation/myMPDos/wiki).
 
