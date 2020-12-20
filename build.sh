@@ -48,7 +48,7 @@ build_stage1()
     wget -q "${ALPINE_MIRROR}/v${ALPINE_MAJOR_VERSION}/releases/${ARCH}/$NETBOOT_ARCHIVE" \
       -O "$NETBOOT_ARCHIVE"
   fi
-  if [ ! -d boot ]
+  if [ ! -d netboot ]
   then
     install -d netboot
     if ! tar -xzf "$NETBOOT_ARCHIVE" -C netboot
