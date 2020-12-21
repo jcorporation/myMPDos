@@ -7,6 +7,8 @@
 
 source config || { echo "config not found"; exit 1; }
 
+echo "Building for $ARCH"
+
 function check_deps()
 {
   echo "Checking dependencies"
@@ -33,8 +35,8 @@ umount_retry() {
 install_tmp() {
   if [ ! -f .mympdos-tmp ]
   then
-    install -d tmp
-    cd tmp || exit 1
+    install -d "$TMPDIR"
+    cd "$TMPDIR" || exit 1
     touch .mympdos-tmp
   fi
 }
@@ -89,29 +91,29 @@ build_stage2()
     echo "Extracting $ARCHIVE failed"
     exit 1
   fi
-  cp netboot/boot/modloop-lts mnt/boot
+  cp "netboot/boot/$MODLOOP" mnt/boot
 
   echo "Copy build scripts"
   install -d mnt/mympdos
-  cp -r ../mympdos/build/* mnt/mympdos
+  cp -r ../../mympdos/build/* mnt/mympdos
 
   echo "Copy existing packages"
   install -d mnt/mympdos-apks
-  if [ -f "../apks/$ARCH/APKINDEX.tar.gz" ]
+  if [ -f "../../apks/$ARCH/APKINDEX.tar.gz" ]
   then
-    cp "../apks/$ARCH/"*.apk mnt/mympdos-apks/
-    cp "../apks/$ARCH/APKINDEX.tar.gz" mnt/mympdos-apks/
+    cp "../../apks/$ARCH/"*.apk mnt/mympdos-apks/
+    cp "../../apks/$ARCH/APKINDEX.tar.gz" mnt/mympdos-apks/
   else
     echo "No existing packages found"
   fi
-  if [ -f ../keys/abuild.tgz ]
+  if [ -f ../../keys/abuild.tgz ]
   then
     echo "Using keys for public repository"
-    cp ../keys/abuild.tgz mnt/mympdos/
-  elif [ -f ../apks/abuild.tgz ]
+    cp ../../keys/abuild.tgz mnt/mympdos/
+  elif [ -f ../../apks/abuild.tgz ]
   then
     echo "Using private build keys"
-    cp ../apks/abuild.tgz mnt/mympdos/
+    cp ../../apks/abuild.tgz mnt/mympdos/
   else
     echo "No saved abuild.tgz found"
   fi
@@ -122,22 +124,22 @@ build_stage2()
   echo "Patching initramfs"
   cd netboot || exit 1
   rm -f init
-  gzip -dc boot/initramfs-lts | cpio -id init
-  if ! patch init ../../mympdos/netboot/init.patch
+  gzip -dc "boot/$INITRAMFS" | cpio -id init
+  if ! patch init ../../../mympdos/netboot/init.patch
   then
     echo "Patching netboot init failed"
     exit 1
   fi
-  echo ./init | cpio -H newc -o | gzip >> boot/initramfs-lts
-  cd .. || exit 1
+  echo ./init | cpio -H newc -o | gzip >> "boot/$INITRAMFS"
+  cd ../.. || exit 1
 }
 
 build_stage3()
 {
   echo "myMPDos build stage 3: Starting build"
-  qemu-system-aarch64 \
-    -M virt -m "$BUILDRAM" -cpu cortex-a57 -smp "$BUILDCPUS" \
-    -kernel netboot/boot/vmlinuz-lts -initrd netboot/boot/initramfs-lts \
+  $QEMU \
+    -M virt -m "$BUILDRAM" -cpu "$CPU" -smp "$BUILDCPUS" \
+    -kernel netboot/boot/$KERNEL -initrd netboot/boot/$INITRAMFS \
     -append "console=ttyAMA0 ip=dhcp" \
     -nographic \
     -drive "file=${BUILDIMAGE},format=raw" \
@@ -148,28 +150,28 @@ build_stage3()
 build_stage4()
 {
   echo "myMPDos build stage 4: Saving packages"
-  if [ -d ../apks ]
+  if [ -d ../../apks ]
   then
-    BACKUPDATE=$(stat -c"%Y" ../apks)
-    BACKUPDIR=../apks.$(date -d@"$BACKUPDATE" +%Y%m%d_%H%M)
-    mv ../apks "$BACKUPDIR"
+    BACKUPDATE=$(stat -c"%Y" ../../apks)
+    BACKUPDIR=../../apks.$(date -d@"$BACKUPDATE" +%Y%m%d_%H%M)
+    mv ../../apks "$BACKUPDIR"
   fi
-  install -d "../apks/$ARCH"
+  install -d "../../apks/$ARCH"
   LOOP=$(sudo losetup --partscan --show -f "$BUILDIMAGE")
   sudo mount -text4 "${LOOP}p2" mnt || exit 1
   if [ -f mnt/build/abuild.tgz ]
   then
-    cp mnt/build/abuild.tgz ../apks/
+    cp mnt/build/abuild.tgz ../../apks/
   else
     echo "No abuild.tgz found"
   fi
   if [ -f "mnt/build/packages/package/${ARCH}/APKINDEX.tar.gz" ]
   then
-    cp mnt/build/packages/package/"${ARCH}"/* "../apks/$ARCH/"
+    cp mnt/build/packages/package/"${ARCH}"/* "../../apks/$ARCH/"
   else
     echo "No APKINDEX.tar.gz found"
   fi
-  cp -r "../apks/$ARCH" ../repository/
+  cp -r "../../apks/$ARCH" ../../repository/
   umount_retry mnt || exit 1
   sudo losetup -d "${LOOP}"
 }
@@ -190,32 +192,32 @@ build_stage5()
     echo "Extracting $ARCHIVE failed"
     exit 1
   fi
-  cd ../mympdos/overlay || exit 1
-  if ! tar -czf ../../tmp/mnt/mympdos-bootstrap.apkovl.tar.gz .
+  cd ../../mympdos/overlay || exit 1
+  if ! tar -czf ../../$TMPDIR/mnt/mympdos-bootstrap.apkovl.tar.gz .
   then
     echo "Creating overlay failed"
     exit 1
   fi
-  cd ../../tmp || exit 1
+  cd ../../$TMPDIR || exit 1
   if [ "$PRIVATEIMAGE" = "true" ]
   then
     echo "Copy private bootstrap.txt"
-    cp ../mympdos/bootstrap.txt mnt/
+    cp ../../mympdos/bootstrap.txt mnt/
   else
     echo "Copy sample bootstrap.txt files"
-    cp ../mympdos/bootstrap-*.txt mnt/
+    cp ../../mympdos/bootstrap-*.txt mnt/
   fi
-  [ -f ../mympdos/mpd.replace ] && cp ../mympdos/mpd.replace mnt/
-  [ -f ../mympdos/mpd.conf ] && cp ../mympdos/mpd.conf mnt/
+  [ -f ../../mympdos/mpd.replace ] && cp ../../mympdos/mpd.replace mnt/
+  [ -f ../../mympdos/mpd.conf ] && cp ../../mympdos/mpd.conf mnt/
   echo "Setting version to $VERSION"
   echo "$VERSION" > mnt/myMPDos.version
   echo "Copy saved packages to image"
   install -d "mnt/mympdos-apks/$ARCH"
-  if [ -f "../apks/$ARCH/APKINDEX.tar.gz" ]
+  if [ -f "../../apks/$ARCH/APKINDEX.tar.gz" ]
   then
-    cp ../apks/"$ARCH"/*.apk "mnt/mympdos-apks/$ARCH/"
-    cp ../apks/"$ARCH"/APKINDEX.tar.gz "mnt/mympdos-apks/$ARCH/"
-    tar --wildcards -xzf ../apks/abuild.tgz -C mnt/mympdos-apks ".abuild/*.rsa.pub"
+    cp ../../apks/"$ARCH"/*.apk "mnt/mympdos-apks/$ARCH/"
+    cp ../../apks/"$ARCH"/APKINDEX.tar.gz "mnt/mympdos-apks/$ARCH/"
+    tar --wildcards -xzf ../../apks/abuild.tgz -C mnt/mympdos-apks ".abuild/*.rsa.pub"
   else
     echo "No myMPDos apks found"
   fi
@@ -224,7 +226,7 @@ build_stage5()
   sudo losetup -d "${LOOP}"
   install -d ../images
   mv "$IMAGE" ../images
-  [ "$COMPRESSIMAGE" = "true" ] && gzip "../images/$IMAGE"
+  [ "$COMPRESSIMAGE" = "true" ] && gzip "../../images/$IMAGE"
 
   echo ""
   echo "Image $IMAGE created successfully"
@@ -247,8 +249,8 @@ cleanup()
 {
   umountbuild
   echo "Removing tmp"
-  [ -f tmp/.mympdsos-tmp ] || exit 0
-  rm -fr tmp
+  [ -f $TMPDIR/.mympdsos-tmp ] || exit 0
+  rm -fr $TMPDIR
   echo "Removing old images"
   find ./images -name \*.img -mtime "$KEEPIMAGEDAYS" -delete
   find ./images -name \*.img.gz -mtime "$KEEPIMAGEDAYS" -delete
@@ -339,6 +341,8 @@ case "$1" in
     echo "  private|p:      creates a image with a productive bootstrap.txt file"
     echo "  public:         creates a image with samble bootstrap.txt files (default)"
     echo ""
+    echo "  architectures:  aarch64 (default), armhf, armv7"
+    echo "                  export ARCH=\"aarch64\""
     ;;
 esac
 

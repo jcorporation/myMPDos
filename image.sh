@@ -6,7 +6,7 @@
 #
 
 source config || { echo "config not found"; exit 1; }
-IMAGE=$(ls -t images/myMPDos-*.img | head -1)
+IMAGE=$(ls -t "images/myMPDos-$ARCH-*.img" | head -1)
 
 if [ "$IMAGE" = "" ]
 then
@@ -38,9 +38,9 @@ burnimage() {
 }
 
 startimage() {
-	install -d tmp/image
+	install -d "tmp/$ARCH/image"
 	
-	cd tmp || exit 1
+	cd "tmp/$ARCH" || exit 1
 	if [ ! -f "$ARCHIVE" ]
 	then
 		echo "Getting $ARCHIVE"
@@ -53,13 +53,13 @@ startimage() {
 		exit 1
 	fi
 
-	qemu-system-aarch64 -m 1024 \
-		-M raspi3 \
-		-sd "../$IMAGE" \
+	$QEMU -m 1024 \
+		-M "$MACHINE" \
+		-sd "../../$IMAGE" \
 		-kernel image/boot/vmlinuz-rpi \
 		-initrd image/boot/initramfs-rpi \
 		-append "console=ttyAMA0" \
-		-dtb image/bcm2837-rpi-3-b.dtb \
+		-dtb "image/$DTB" \
 		-nographic
 }
 

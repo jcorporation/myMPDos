@@ -3,15 +3,16 @@
 # https://github.com/jcorporation/mympd
 #
 VERSION="0.4.0"
-IMAGE="myMPDos-${VERSION}-$(date +%Y%m%d).img"
-BUILDIMAGE="myMPDos-build.img"
+
+ORG_ARCH="$ARCH"
 ARCH="aarch64"
+[ "$ORG_ARCH" != "" ] && ARCH="$ORG_ARCH"
+
+BUILDIMAGE="myMPDos-build.img"
 ALPINE_MAJOR_VERSION="3.12"
 ALPINE_MINOR_VERSION="3"
 ALPINE_VERSION="${ALPINE_MAJOR_VERSION}.${ALPINE_MINOR_VERSION}"
 ALPINE_MIRROR="http://dl-cdn.alpinelinux.org/alpine"
-NETBOOT_ARCHIVE="alpine-netboot-${ALPINE_VERSION}-${ARCH}.tar.gz"
-ARCHIVE="alpine-rpi-${ALPINE_VERSION}-${ARCH}.tar.gz"
 COMPRESSIMAGE="false"
 PRIVATEIMAGE="false"
 BUILDUSER="$USER"
@@ -23,3 +24,39 @@ BUILDCPUS="3"
 BUILDRAM="3072M"
 KEEPIMAGEDAYS="+7"
 KEEPPACKAGEDAYS="+7"
+TMPDIR="tmp/$ARCH"
+IMAGE="myMPDos-$ARCH-${VERSION}-$(date +%Y%m%d).img"
+NETBOOT_ARCHIVE="alpine-netboot-${ALPINE_VERSION}-${ARCH}.tar.gz"
+ARCHIVE="alpine-rpi-${ALPINE_VERSION}-${ARCH}.tar.gz"
+
+if [ "$ARCH" = "aarch64" ]
+then
+  CPU="cortex-a57"
+  KERNEL="vmlinuz-lts"
+  INITRAMFS="initramfs-lts"
+  MODLOOP="modloop-lts"
+  QEMU="qemu-system-aarch64"
+  #for use with image.sh
+  MACHINE="raspi3"
+  DTB="bcm2837-rpi-3-b.dtb"
+elif [ "$ARCH" = "armhf" ]
+then
+  CPU="cortex-a7"
+  KERNEL="vmlinuz-rpi2"
+  INITRAMFS="initramfs-rpi2"
+  MODLOOP="modloop-rpi2"
+  QEMU="qemu-system-arm"
+  #for use with image.sh
+  MACHINE="raspi2"
+  DTB="bcm2710-rpi-3-b.dtb"
+elif [ "$ARCH" = "armv7" ]
+then
+  CPU="cortex-a7"
+  KERNEL="vmlinuz-lts"
+  INITRAMFS="initramfs-lts"
+  MODLOOP="modloop-lts"  
+  QEMU="qemu-system-arm"
+  #for use with image.sh
+  MACHINE="raspi2"
+  DTB="bcm2708-rpi-zero-w.dtb"
+fi
