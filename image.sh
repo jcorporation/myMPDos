@@ -6,7 +6,7 @@
 #
 
 source config || { echo "config not found"; exit 1; }
-IMAGE=$(ls -t "images/myMPDos-$ARCH-*.img" | head -1)
+IMAGE=$(ls -t images/myMPDos-"$ARCH"-*.img | head -1)
 
 if [ "$IMAGE" = "" ]
 then

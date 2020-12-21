@@ -9,8 +9,7 @@ source config || { echo "config not found"; exit 1; }
 
 echo "Building for $ARCH"
 
-function check_deps()
-{
+function check_deps() {
   echo "Checking dependencies"
   for DEP in wget tar gzip cpio dd losetup sfdisk mkfs.vfat mkfs.ext4 sudo install sed patch
   do
@@ -41,8 +40,7 @@ install_tmp() {
   fi
 }
 
-build_stage1()
-{
+build_stage1() {
   echo "myMPDos build stage 1: Download"
   if [ ! -f "$NETBOOT_ARCHIVE" ]
   then
@@ -73,8 +71,7 @@ build_stage1()
   fi
 }
 
-build_stage2()
-{
+build_stage2() {
   echo "myMPDos build stage 2: Create build image"
   dd if=/dev/zero of="$BUILDIMAGE" bs=1M count="$IMAGESIZEBUILD"
   sfdisk "$BUILDIMAGE" <<< "1, ${BOOTPARTSIZEBUILD}, b, *"
@@ -134,12 +131,11 @@ build_stage2()
   cd ../.. || exit 1
 }
 
-build_stage3()
-{
+build_stage3() {
   echo "myMPDos build stage 3: Starting build"
   $QEMU \
     -M virt -m "$BUILDRAM" -cpu "$CPU" -smp "$BUILDCPUS" \
-    -kernel netboot/boot/$KERNEL -initrd netboot/boot/$INITRAMFS \
+    -kernel "netboot/boot/$KERNEL" -initrd "netboot/boot/$INITRAMFS" \
     -append "console=ttyAMA0 ip=dhcp" \
     -nographic \
     -drive "file=${BUILDIMAGE},format=raw" \
@@ -147,8 +143,7 @@ build_stage3()
     -nic user,id=mynet0
 }
 
-build_stage4()
-{
+build_stage4() {
   echo "myMPDos build stage 4: Saving packages"
   if [ -d ../../apks ]
   then
@@ -176,8 +171,7 @@ build_stage4()
   sudo losetup -d "${LOOP}"
 }
 
-build_stage5()
-{
+build_stage5() {
   echo "myMPDos build stage 5: Create image"
   dd if=/dev/zero of="$IMAGE" bs=1M count="$IMAGESIZE"
   sfdisk "$IMAGE" <<< "1, ${BOOTPARTSIZE}, b, *"
@@ -245,8 +239,7 @@ build_stage5()
   fi
 }
 
-cleanup()
-{
+cleanup() {
   umountbuild
   echo "Removing tmp"
   [ -f $TMPDIR/.mympdsos-tmp ] || exit 0
@@ -258,8 +251,7 @@ cleanup()
   find ./ -maxdepth 1 -type d -name apks.\* -mtime "$KEEPPACKAGEDAYS" -exec rm -rf {} \;
 }
 
-umountbuild() 
-{
+umountbuild() {
   echo "Umounting build environment"
   LOOPS=$(losetup | grep "myMPDos" | awk '{print $1}')
   for LOOP in $LOOPS
@@ -321,7 +313,8 @@ case "$1" in
     build_stage5
     ;;
   umountbuild|u)
-    umountbuild;;
+    umountbuild
+    ;;
   cleanup|c)
     cleanup
     ;;
