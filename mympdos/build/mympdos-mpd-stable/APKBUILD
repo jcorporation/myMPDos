@@ -13,7 +13,7 @@ license="GPL-2.0-or-later"
 makedepends="lame-dev glib-dev curl-dev libao-dev libmad-dev flac-dev
 	libogg-dev faad2-dev libid3tag-dev libvorbis-dev alsa-lib-dev soxr-dev
 	libsamplerate-dev boost-dev icu-dev sqlite-dev libnfs-dev samba-dev 
-	opus-dev ffmpeg-dev meson mympdos-libmpdclient-dev libcap wavpack-dev"
+	opus-dev meson mympdos-libmpdclient-dev libcap"
 checkdepends="gtest-dev gtest"
 install="$pkgname.pre-install"
 subpackages="$pkgname-doc $pkgname-dbg $pkgname-openrc"
