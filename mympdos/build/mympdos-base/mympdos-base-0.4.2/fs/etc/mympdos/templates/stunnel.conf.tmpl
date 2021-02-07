@@ -1,0 +1,13 @@
+cert = /var/lib/mympd/ssl/server.pem
+key = /var/lib/mympd/ssl/server.key
+
+setuid = mympd
+setgid = mympd
+pid = /run/stunnel/stunnel.pid
+
+socket = l:TCP_NODELAY=1
+socket = r:TCP_NODELAY=1
+
+[mpd-https]
+accept = 8443 
+connect = 127.0.0.1:8000
