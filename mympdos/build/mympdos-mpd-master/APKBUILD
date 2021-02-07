@@ -10,9 +10,9 @@ pkggroups="mpd audio"
 provides="mpd"
 arch="all"
 license="GPL-2.0-or-later"
-makedepends="lame-dev glib-dev curl-dev libao-dev libmad-dev flac-dev
+makedepends="lame-dev glib-dev curl-dev libmad-dev flac-dev
 	libogg-dev faad2-dev libid3tag-dev libvorbis-dev alsa-lib-dev soxr-dev
-	libsamplerate-dev boost-dev icu-dev sqlite-dev libnfs-dev samba-dev 
+	libsamplerate-dev boost-dev icu-dev sqlite-dev libnfs-dev 
 	opus-dev meson mympdos-libmpdclient-dev libcap"
 install="$pkgname.pre-install"
 subpackages="$pkgname-doc $pkgname-dbg $pkgname-openrc"
@@ -30,6 +30,11 @@ build() {
 		--mandir=/usr/share/man \
 		--localstatedir=/var \
 		--buildtype=release \
+		-Dqobuz=disabled \
+		-Dsoundcloud=disabled \
+		-Dtidal=disabled \
+		-Dneighbor=false \
+		-Ddbus=disabled \
 		. output
 	ninja -C output
 }
