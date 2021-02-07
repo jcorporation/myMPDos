@@ -36,6 +36,9 @@ build() {
         -Dtidal=disabled \
         -Dneighbor=false \
         -Ddbus=disabled \
+		-Dbzip2=disabled \
+		-Diso9660=disabled \
+		-Dzzip=disabled \
 		. output
 	ninja -C output
 }

@@ -24,18 +24,21 @@ source="mympdos-mpd-master.tar.gz
 options="!check"
 
 build() {
-	meson \
-		--prefix=/usr \
-		--sysconfdir=/etc \
-		--mandir=/usr/share/man \
-		--localstatedir=/var \
-		--buildtype=release \
-		-Dqobuz=disabled \
-		-Dsoundcloud=disabled \
-		-Dtidal=disabled \
-		-Dneighbor=false \
-		-Ddbus=disabled \
-		. output
+    meson \
+        --prefix=/usr \
+        --sysconfdir=/etc \
+        --mandir=/usr/share/man \
+        --localstatedir=/var \
+        --buildtype=release \
+        -Dqobuz=disabled \
+        -Dsoundcloud=disabled \
+        -Dtidal=disabled \
+        -Dneighbor=false \
+        -Ddbus=disabled \
+        -Dbzip2=disabled \
+        -Diso9660=disabled \
+        -Dzzip=disabled \
+        . output
 	ninja -C output
 }
 
