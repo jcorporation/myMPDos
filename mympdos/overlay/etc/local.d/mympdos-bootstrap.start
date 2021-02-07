@@ -427,6 +427,7 @@ echo "Configuring MPD"
 install -d /etc/mympdos/custom
 [ -f "$BOOTMEDIA/mpd.replace" ] && cp "$BOOTMEDIA/mpd.replace" /etc/mympdos/custom/
 [ -f "$BOOTMEDIA/mpd.conf" ] && cp "$BOOTMEDIA/mpd.conf" /etc/mympdos/custom/
+[ -f "$BOOTMEDIA/mpd.custom.conf" ] && cp "$BOOTMEDIA/mpd.custom.conf" /etc/
 /usr/bin/configmpd.sh
 
 echo "Enabling boot services"
