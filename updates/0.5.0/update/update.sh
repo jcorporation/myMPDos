@@ -19,7 +19,10 @@ then
     echo " - Extracting"
     tar -xzf "$ARCHIVE" -C "$BOOTDEV"
     echo " - Mounting $BOOTDEV ro"
-    mount -oremount,ro "$BOOTDEV"
+    if ! mount -oremount,ro "$BOOTDEV"
+    then
+      echo "Remounting ro failed, please reboot system after update"
+    fi
     echo " - Cleaning up"
     rm "$ARCHIVE"
   else
