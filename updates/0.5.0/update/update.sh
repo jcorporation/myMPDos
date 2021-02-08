@@ -33,3 +33,8 @@ else
   echo "Error downloading alpine base image"
   exit 1
 fi
+
+echo "Updating repositories"
+sed -i -e 's/v3\.12/v3.13/g' /etc/apk/repositories
+apk update
+apk upgrade
