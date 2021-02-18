@@ -1,0 +1,36 @@
+music_directory     "/media/mmcblk0p2/library"
+playlist_directory  "/var/lib/mpd/playlists"
+log_file            "syslog"
+pid_file            "/run/mpd/pid"
+state_file          "/var/lib/mpd/state"
+sticker_file        "/var/lib/mpd/sticker.sql"
+bind_to_address     "any"
+bind_to_address     "/run/mpd/socket"
+log_level           "default"
+metadata_to_use     "albumartist,artist,album,title,track,genre,disc,date"
+auto_update         "yes"
+max_connections     "10"
+
+database {
+  plugin            "simple"
+  path              "/var/lib/mpd/mpd.db"
+  cache_directory   "/var/lib/mpd/cache"
+}
+
+audio_output {
+  type              "httpd"
+  name              "HTTP Stream"
+  encoder           "lame" #to support safari
+  port              "8000"
+  bitrate           "128"
+  format            "44100:16:1"
+  always_on         "yes"
+  tags              "yes"
+}
+
+input_cache {
+  size              "256 MB"
+}
+
+include_optional "/etc/mpd.custom.conf"
+
