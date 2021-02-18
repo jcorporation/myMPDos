@@ -61,13 +61,8 @@ echo "Setup apkcache"
 install -d /usr/build/distfiles -g abuild -m775
 setup-apkcache /usr/build/distfiles
 
-if [ "$B_BUILD" = "1" ]
-then
-  echo "Installing build packages"
-  apk add git alpine-sdk perl sudo build-base
-else
-  apk add abuild sudo
-fi
+echo "Installing build packages"
+apk add git alpine-sdk perl sudo build-base xz
 
 echo "Adding build user"
 adduser -D build -h "$BUILDDIR"
@@ -117,6 +112,7 @@ then
   cd ..
 fi
 
+#install freshly build libmpdclient
 echo "/usr/build/packages/package/" >> /etc/apk/repositories
 apk update
 apk add mympdos-libmpdclient
