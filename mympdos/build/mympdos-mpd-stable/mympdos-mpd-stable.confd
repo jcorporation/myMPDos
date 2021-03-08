@@ -5,3 +5,6 @@
 #
 
 OPTS=""
+
+# set memlock limit to 64 MB
+rc_ulimit="-l 65536"
