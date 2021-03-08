@@ -26,6 +26,24 @@ The initial configuration is done through a simple bootstrap file, that has sane
 4. Adapt `bootstrap.txt`
 5. Boot your Raspberry Pi
 
+## Processlist
+
+```
+init-+-getty
+     |-mpd-+-{decoder:mad}
+     |     |-{io}
+     |     |-{output:U24XL US}
+     |     |-{player}
+     |     `-{rtio}
+     |-mympd-+-{mympd_mpdclient}
+     |       |-{mympd_mpdworker}
+     |       |-{mympd_mympdapi}
+     |       `-{mympd_webserver}
+     |-ntpd
+     |-rngd
+     `-syslogd
+```
+
 ## Wiki
 For further information on installation and configuration, see the [myMPDos wiki](https://github.com/jcorporation/myMPDos/wiki).
 
