@@ -148,6 +148,7 @@ then
   su build -c "rm -rf mympdos-base"
   su build -c "cp -r /media/vda1/mympdos/mympdos-base ."
   cd mympdos-base || exit 1
+  mv mympdos-base "mympdos-base-$B_MYMPDOS_BASE_VER"
   tar -czf "mympdos-base-$B_MYMPDOS_BASE_VER.tar.gz" "mympdos-base-$B_MYMPDOS_BASE_VER"
   sed -i "s/__VERSION__/$B_MYMPDOS_BASE_VER/g" mympdos-base.post-install
   su build -c "abuild checksum"
