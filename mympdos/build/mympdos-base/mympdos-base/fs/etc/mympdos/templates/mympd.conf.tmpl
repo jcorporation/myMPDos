@@ -19,11 +19,12 @@ playlistdirectory = /var/lib/mpd/playlists
 
 #MPD compiled with regex support
 regex = true
+streamport = 8000
 
 
 [webserver]
 #Webserver options
-webport = 80
+httpport = 80
 
 #Enable ssl
 #Certificates are generated under /var/lib/mympd/ssl/
@@ -32,11 +33,6 @@ sslport = 443
 
 #Publishes some mpd and myMPD directories
 publish = true
-
-#Webdav support, publish must be set to true
-webdav = true
-
-redirect = true
 
 [mympd]
 loglevel = 4
@@ -70,7 +66,6 @@ covercache = false
 notificationpage = true
 
 localplayer = true
-streamport = 8443
 
 [theme]
 theme = theme-dark

@@ -46,9 +46,6 @@ EXTRA_SOFTWARE=""
 ENABLE_CRON="false"
 ENABLE_RNGD="true"
 
-#MPD and myMPD settings
-HTTPS_STREAMING="true"
-
 #Network settings
 IP_HOSTNAME="myMPDos"
 #If WLAN is not set to true eth0 is configured

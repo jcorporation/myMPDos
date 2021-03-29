@@ -33,7 +33,6 @@ MPD_VERSION="1"
 KEYBOARD_LAYOUT="us"
 KEYBOARD_VARIANT="us"
 BT_ENABLE="false"
-HTTPS_STREAMING="true"
 ADVANCED_SOFTWARE="true"
 TIMEZONE="UTC"
 ENABLE_RNGD="true"
@@ -371,8 +370,6 @@ then
 	apk add usbutils raspberrypi busybox-extras net-tools mpg123 mygpiod
 fi
 
-[ "$HTTPS_STREAMING" = "true" ] && apk add stunnel
-
 if [ "$EXTRA_SOFTWARE" != "" ]
 then
 	echo "Installing user defined software"
@@ -390,7 +387,6 @@ echo "Setting defaults"
 install -d /var/lib/mpd/cache -o mpd -g mpd
 cat /usr/local/defaults/etc/sudoers >> /etc/sudoers
 cp /etc/mympdos/templates/mympd.conf.tmpl /etc/mympd.conf
-[ "$HTTPS_STREAMING" = "true" ] && cp /etc/mympdos/templates/stunnel.conf.tmpl /etc/stunnel/stunnel.conf
 [ "$DISABLE_IPV6" = "true" ] && cp /usr/local/defaults/etc/sysctl_disable_ipv6.conf /etc/sysctl.d/disable_ipv6.conf
 
 if [ "$ENABLE_CONFIGMPD" = "true" ]
@@ -437,7 +433,6 @@ rc-update add urandom boot
 rc-update add alsa boot
 [ "$ENABLE_CRON" = "true" ] && rc-update add crond boot
 echo "Enabling default services"
-[ "$HTTPS_STREAMING" = "true" ] && rc-update add stunnel default
 rc-update add mpd default
 rc-update add mympd default
 
