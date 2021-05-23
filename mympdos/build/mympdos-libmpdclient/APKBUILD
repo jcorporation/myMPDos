@@ -2,7 +2,7 @@
 # Maintainer: Natanael Copa <ncopa@alpinelinux.org>
 pkgname=mympdos-libmpdclient
 pkgver=2.20
-pkgrel=1
+pkgrel=2
 pkgdesc="An asynchronous API library for interfacing MPD in the C, C++ & Objective C languages"
 url="https://www.musicpd.org/libs/libmpdclient"
 arch="all"
