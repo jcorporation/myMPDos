@@ -35,9 +35,7 @@ init-+-getty
      |     |-{output:U24XL US}
      |     |-{player}
      |     `-{rtio}
-     |-mympd-+-{mympd_mpdclient}
-     |       |-{mympd_mpdworker}
-     |       |-{mympd_mympdapi}
+     |-mympd-+-{mympd_api}
      |       `-{mympd_webserver}
      |-ntpd
      |-rngd
