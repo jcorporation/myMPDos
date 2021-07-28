@@ -69,6 +69,12 @@ IP_TYPE="dhcp"
 DISABLE_IPV6="true"
 
 #Pi settings
+#Install bluetooth packages
 BT_ENABLE="false"
-AUDIOHAT="allo-digione"
+
+#Enable internal bluetooth chip
+BT_INTERNAL="false"
+
+#List of audio hats: https://github.com/jcorporation/myMPDos/wiki/Audio-hats
+AUDIOHAT=""
 DISABLE_HDMI="false"
