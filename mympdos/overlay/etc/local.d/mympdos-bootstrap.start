@@ -340,6 +340,8 @@ if [ "$BT_ENABLE" = "true" ]
 then
 	apk add bluez bluez-alsa
 	rc-update add bluetooth boot
+	echo 'command_args="--profile=a2dp-source"' >> /etc/init.d/bluealsa
+	sed -i 's/^#ttyAMA0/ttyAMA0/' /etc/mdev.conf
 fi
 
 echo "Installing MPD"
@@ -494,6 +496,11 @@ for INCLUDE in $LBU_INCLUDES
 do
   lbu_include "$INCLUDE"
 done
+lbu exclude /var/lib/mympd/covercache
+if [ "$BT_ENABLE" = "true" ]
+then
+	lbu include /var/lib/bluetooth
+fi
 alsactl store
 lbu_commit
 echo "myMPDos installation is finished"
