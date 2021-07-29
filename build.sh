@@ -333,9 +333,6 @@ case "$1" in
     echo ""
     echo "  private|p:      creates a image with a productive bootstrap.txt file"
     echo "  public:         creates a image with samble bootstrap.txt files (default)"
-    echo ""
-    echo "  architectures:  aarch64 (default), armhf, armv7"
-    echo "                  export ARCH=\"aarch64\""
     ;;
 esac
 
