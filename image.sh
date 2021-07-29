@@ -38,29 +38,19 @@ burnimage() {
 }
 
 startimage() {
-	install -d "tmp/$ARCH/image"
-	
-	cd "tmp/$ARCH" || exit 1
-	if [ ! -f "$ARCHIVE" ]
-	then
-		echo "Getting $ARCHIVE"
-		wget -q "${ALPINE_MIRROR}/v${ALPINE_MAJOR_VERSION}/releases/${ARCH}/$ARCHIVE" \
-			-O "alpine-rpi-${ALPINE_VERSION}-${ARCH}.tar.gz"
-	fi
-	if ! tar -xzf "$ARCHIVE" -C image
-	then
-		echo "Error unpacking $ARCHIVE"
-		exit 1
-	fi
-
-	$QEMU -m 1024 \
-		-M "$MACHINE" \
-		-sd "../../$IMAGE" \
-		-kernel image/boot/vmlinuz-rpi \
-		-initrd image/boot/initramfs-rpi \
-		-append "console=ttyAMA0" \
-		-dtb "image/$DTB" \
-		-nographic
+	mountimage
+	rm tmp/mnt/boot/modloop-*
+	cp "tmp/$ARCH/netboot/boot/modloop-lts" tmp/mnt/boot/
+	umountimage
+	$QEMU \
+    	-M virt -m "$BUILDRAM" -cpu "$CPU" -smp "$BUILDCPUS" \
+    	-kernel "tmp/$ARCH/netboot/boot/$KERNEL" \
+    	-initrd "tmp/$ARCH/netboot/boot/$INITRAMFS" \
+    	-append "console=ttyAMA0 ip=dhcp" \
+    	-nographic \
+    	-drive "file=${IMAGE},format=raw" \
+    	-netdev user,id=mynet0,net=192.168.76.0/24,dhcpstart=192.168.76.9 \
+    	-nic user,id=mynet0
 }
 
 case "$1" in
