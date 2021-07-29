@@ -242,7 +242,7 @@ build_stage5() {
 cleanup() {
   umountbuild
   echo "Removing tmp"
-  [ -f $TMPDIR/.mympdsos-tmp ] || exit 0
+  [ -f $TMPDIR/.mympdos-tmp ] || exit 0
   rm -fr $TMPDIR
   echo "Removing old images"
   find ./images -name \*.img -mtime "$KEEPIMAGEDAYS" -delete
