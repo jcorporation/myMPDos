@@ -6,12 +6,23 @@
 #
 
 export BOOTSTRAP="true"
+if [ -e /dev/mmcblk0 ]
+then
+	SDCARD="mmcblk0"
+	BOOTPART="p1"
+	DATAPART="p2"
+elif [ -e /dev/vda ]
+then
+	SDCARD="vda"
+	BOOTPART="1"
+	DATAPART="2"
+else
+	echo "Unsupported drive"
+	exit 1
+fi
 
-SDCARD="mmcblk0"
-BOOTPART="p1"
-BOOTDEV="/dev/${SDCARD}p1"
+BOOTDEV="/dev/${SDCARD}${BOOTPART}"
 BOOTMEDIA="/media/${SDCARD}${BOOTPART}"
-DATAPART="p2"
 DATADEV="/dev/${SDCARD}${DATAPART}"
 DATAMEDIA="/media/${SDCARD}${DATAPART}"
 LBUMEDIA="${SDCARD}${DATAPART}"
@@ -461,7 +472,7 @@ fi
 
 echo "Removing installation files"
 rm "$BOOTMEDIA/mympdos-bootstrap.apkovl.tar.gz"
-rm "$BOOTMEDIA/bootstrap.txt"
+rm -f "$BOOTMEDIA/bootstrap.txt"
 
 mount -o remount,ro "$BOOTMEDIA"
 
@@ -490,8 +501,8 @@ do
 	rm -rf "$DIR"
 done
 
-echo "Creating certificate"
-mympd certs_create
+echo "Create myMPD configuration"
+mympd -c
 
 echo "Saving configuration"
 echo "LBU_MEDIA=$LBUMEDIA" > /etc/lbu/lbu.conf
