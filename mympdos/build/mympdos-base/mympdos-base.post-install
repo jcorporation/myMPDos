@@ -1,10 +1,5 @@
 #!/bin/sh
 
-if [ -d /media/mmcblk0p1 ]
-then
-  mount -oremount,rw /media/mmcblk0p1
-  echo "__VERSION__" > /media/mmcblk0p1/myMPDos.version
-  mount -oremount,ro /media/mmcblk0p1
-fi
+chown mympd.mympd /var/lib/mympd/scripts
 
 exit 0
