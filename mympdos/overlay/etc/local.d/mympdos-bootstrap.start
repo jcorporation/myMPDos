@@ -280,17 +280,14 @@ while ! ping -c 1 dl-cdn.alpinelinux.org > /dev/null 2>&1
 do
 	echo -n "."
 	I=$((I+1))
-	[ "$I" = "15" ] && break;
+	if [ "$I" = "15" ]
+	then
+		echo "ERROR"
+		exit 1
+	fi
 	sleep 2
 done
-
-if ping -c 1 dl-cdn.alpinelinux.org
-then
-	echo "OK"
-else
-	echo "ERROR"
-	exit 1
-fi
+echo "OK"
 
 echo -n "Setup NTP"
 I=0
@@ -327,71 +324,35 @@ setup-apkcache "$DATAMEDIA/apkcache"
 echo "Adding repositories and upgrade"
 setup-apkrepos -1
 sed -r -e's/^#(.*\d\/community)/\1/' -i /etc/apk/repositories
-if [ -f "$BOOTMEDIA/mympdos-apks/$ARCH/APKINDEX.tar.gz" ]
-then
-	if cp "$BOOTMEDIA"/mympdos-apks/.abuild/*.rsa.pub /etc/apk/keys/
-	then
-		echo "$BOOTMEDIA/mympdos-apks" >> /etc/apk/repositories
-	else
-		echo "No package signing key for myMPDos repository found"
-	fi
-else
-	echo "Local myMPDos package repository is empty"
-fi
-
-echo "Installing myMPDos package"
-apk update
-apk add mympdos-base
-
-echo "Adding myMPDos online repository"
 echo "https://raw.githubusercontent.com/jcorporation/myMPDos/master/repository" >> /etc/apk/repositories
+echo "Adding myMPDos archiv signing public key"
+cp "$BOOTMEDIA"/mympdos-apks/.abuild/*.rsa.pub /etc/apk/keys/
+
+echo "Upgrading all packages"
 apk update
 apk upgrade
 
-if [ "$BT_ENABLE" = "true" ]
-then
-	apk add bluez bluez-alsa
-	rc-update add bluetooth boot
-	echo 'command_args="--profile=a2dp-source"' >> /etc/init.d/bluealsa
-fi
-if [ "$BT_INTERNAL" = "true" ]
-then
-	sed -i 's/^#ttyAMA0/ttyAMA0/' /etc/mdev.conf
-fi
-
-echo "Installing MPD"
-apk add mympdos-libmpdclient
+echo "Creating user and groups"
+addgroup -S mympd
+adduser mympd audio
 addgroup -S mpd
+
+echo "Installing packages"
+PKGLIST_ADV="usbutils raspberrypi busybox-extras net-tools mpg123 mygpiod"
+PKGLIST="mympdos-base mympd mympdos-libmpdclient mpc sudo alsa-utils"
+[ "$BT_ENABLE" = "true" ] && PKGLIST="$PKGLIST bluez bluez-alsa"
+[ "$ENABLE_RNGD" = "true" ] && PKGLIST="$PKGLIST rng-tools"
+[ "$ADVANCED_SOFTWARE" = "true" ] && PKGLIST="$PKGLIST $PKGLIST_ADV"
+[ "$EXTRA_SOFTWARE" != "" ] && PKGLIST="$PKGLIST $EXTRA_SOFTWARE"
 case "$MPD_VERSION" in
 	1)
-		MPD_PACKAGE="mympdos-mpd-stable";;
+		PKGLIST="$PKGLIST mympdos-mpd-stable";;
 	2)
-  	MPD_PACKAGE="mympdos-mpd-master";;
+		PKGLIST="$PKGLIST mympdos-mpd-master";;
 	*)
 		echo "Invalid MPD package configured";;
 esac
-[ "$MPD_PACKAGE" != "" ] && apk add "$MPD_PACKAGE"
-
-echo "Installing myMPD"
-addgroup -S mympd
-apk add mympd
-adduser mympd audio
-
-echo "Installing basic packages"
-apk add mpc sudo alsa-utils
-[ "$ENABLE_RNGD" = "true" ] && apk add rng-tools
-
-if [ "$ADVANCED_SOFTWARE" = "true" ]
-then
-	echo "Installing advanced packages"
-	apk add usbutils raspberrypi busybox-extras net-tools mpg123 mygpiod
-fi
-
-if [ "$EXTRA_SOFTWARE" != "" ]
-then
-	echo "Installing user defined software"
-	apk add $EXTRA_SOFTWARE
-fi
+apk add $PKGLIST
 
 echo "Creating files in data partition"
 mount -oremount,rw "$DATAMEDIA"
@@ -449,6 +410,16 @@ rc-update add networking boot
 rc-update add urandom boot
 rc-update add alsa boot
 [ "$ENABLE_CRON" = "true" ] && rc-update add crond boot
+if [ "$BT_ENABLE" = "true" ]
+then
+	rc-update add bluetooth boot
+	rc-update add bluealsa boot
+fi
+if [ "$BT_INTERNAL" = "true" ]
+then
+	sed -i 's/^#ttyAMA0/ttyAMA0/' /etc/mdev.conf
+fi
+
 echo "Enabling default services"
 rc-update add mpd default
 rc-update add mympd default
@@ -473,11 +444,15 @@ fi
 echo "Removing installation files"
 rm "$BOOTMEDIA/mympdos-bootstrap.apkovl.tar.gz"
 rm -f "$BOOTMEDIA/bootstrap.txt"
+rm -rf "$BOOTMEDIA/mympdos-apks"
 
 mount -o remount,ro "$BOOTMEDIA"
 
-echo "Removing obsolet packages"
-[ "$WLAN_ENABLE" = "false" ] && apk del wpa_supplicant wpa_supplicant-openrc dbus-libs
+if [ "$WLAN_ENABLE" = "false" ]
+then
+	echo "Removing wlan packages"
+	apk del wpa_supplicant wpa_supplicant-openrc dbus-libs
+fi
 
 echo "Removing obsolet users and groups"
 for DU in lp mail postmaster ftp at squid xfs games cyrus vpopmail smmsp guest news operator
