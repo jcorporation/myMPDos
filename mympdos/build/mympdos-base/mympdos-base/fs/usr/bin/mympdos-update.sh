@@ -1,6 +1,19 @@
 #!/bin/sh
 
-read -r VERSION < "/media/mmcblk0p1/myMPDos.version"
+if [ -e /dev/mmcblk0 ]
+then
+	BOOTMEDIA="/media/mmcblk0p1"
+	BOOTDEV="/dev/mmcblk0p1"
+elif [ -e /dev/vda ]
+then
+	BOOTMEDIA="/media/vda1"
+	BOOTDEV="/dev/vda1"
+else
+        echo "Unsupported drive"
+        exit 1
+fi
+
+read -r VERSION < "${BOOTMEDIA}/myMPDos.version"
 [ "$VERSION" = "" ] && exit 1
 
 TMPDIR=$(mktemp -d)
@@ -38,9 +51,9 @@ do_update() {
   then
     read -r NEWVERSION < myMPDos.version
     echo "  - Setting version to $NEWVERSION"
-    mount -oremount,rw /media/mmcblk0p1
-    cp myMPDos.version /media/mmcblk0p1/myMPDos.version
-    mount -oremount,ro /media/mmcblk0p1
+    mount -oremount,rw "${BOOTDEV}"
+    cp myMPDos.version "${BOOTMEDIA}/myMPDos.version"
+    mount -oremount,ro "${BOOTDEV}"
     echo "Update finished"
     return 0
   else
