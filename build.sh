@@ -205,16 +205,10 @@ build_stage5() {
   [ -f ../../mympdos/mpd.conf ] && cp ../../mympdos/mpd.conf mnt/
   echo "Setting version to $VERSION"
   echo "$VERSION" > mnt/myMPDos.version
-  echo "Copy saved packages to image"
+
+  echo "Copy myMPDos archive signing public key"
   install -d "mnt/mympdos-apks/$ARCH"
-  if [ -f "../../apks/$ARCH/APKINDEX.tar.gz" ]
-  then
-    cp ../../apks/"$ARCH"/*.apk "mnt/mympdos-apks/$ARCH/"
-    cp ../../apks/"$ARCH"/APKINDEX.tar.gz "mnt/mympdos-apks/$ARCH/"
-    tar --wildcards -xzf ../../apks/abuild.tgz -C mnt/mympdos-apks ".abuild/*.rsa.pub"
-  else
-    echo "No myMPDos apks found"
-  fi
+  tar --wildcards -xzf ../../apks/abuild.tgz -C mnt/mympdos-apks ".abuild/*.rsa.pub"
 
   umount_retry mnt || exit 1
   sudo losetup -d "${LOOP}"
