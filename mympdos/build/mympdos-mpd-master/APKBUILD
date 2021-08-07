@@ -2,8 +2,8 @@
 # Based on: https://pkgs.alpinelinux.org/package/edge/community/x86_64/mpd
 pkgname=mympdos-mpd-master
 pkgver=0.23.0
-pkgrel=5
-pkgdesc="Music daemon that plays MP3, FLAC, Ogg Vorbis files and Audio CDs"
+pkgrel=6
+pkgdesc="Music daemon that plays MP3, FLAC and Ogg Vorbis files"
 url="https://musicpd.org"
 pkgusers="mpd"
 pkggroups="mpd audio"
@@ -32,7 +32,6 @@ build() {
         --buildtype=release \
         -Dqobuz=disabled \
         -Dsoundcloud=disabled \
-        -Dtidal=disabled \
         -Dneighbor=false \
         -Ddbus=disabled \
         -Dbzip2=disabled \
