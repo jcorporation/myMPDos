@@ -444,7 +444,9 @@ fi
 echo "Removing installation files"
 rm "$BOOTMEDIA/mympdos-bootstrap.apkovl.tar.gz"
 rm -f "$BOOTMEDIA/bootstrap.txt"
-rm -rf "$BOOTMEDIA/mympdos-apks"
+rm -f "$BOOTMEDIA/mpd.replace"
+rm -f "$BOOTMEDIA/mpd.conf"
+rm -f "$BOOTMEDIA/mpd.custom.conf"
 
 mount -o remount,ro "$BOOTMEDIA"
 
