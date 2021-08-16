@@ -72,6 +72,6 @@ fi
 
 echo "Updating repositories"
 cp /etc/apk/repositories /etc/apk/repositories.bak
-sed -i -r 's/v\d+.\d+/v${V_MAJOR}.${V_MINOR}/g' /etc/apk/repositories
+sed -i -r "s/v\d+.\d+/v${V_MAJOR}.${V_MINOR}/g" /etc/apk/repositories
 apk update
 apk upgrade --available
