@@ -13,6 +13,7 @@ skel() {
 
 package() {
   cd "$FROM" || exit 1
+  find ./ -name \*~ -delete
   tar -czf "update.tar.gz" update
   openssl dgst -sha256 -sign "$KEY" -out "update.sig" "update.tar.gz"
   openssl base64 -in "update.sig" -out "update.sha256"
