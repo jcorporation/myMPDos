@@ -139,8 +139,7 @@ build_stage3() {
     -append "console=ttyAMA0 ip=dhcp" \
     -nographic \
     -drive "file=${BUILDIMAGE},format=raw" \
-    -netdev user,id=mynet0,net=192.168.76.0/24,dhcpstart=192.168.76.9 \
-    -nic user,id=mynet0
+    -nic user,id=mynet0,net=192.168.76.0/24,dhcpstart=192.168.76.9
 }
 
 build_stage4() {
