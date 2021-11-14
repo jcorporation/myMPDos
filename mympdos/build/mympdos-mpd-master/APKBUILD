@@ -16,7 +16,7 @@ makedepends="lame-dev glib-dev curl-dev libmad-dev flac-dev
 	opus-dev meson mympdos-libmpdclient-dev libcap liburing-dev
 	expat-dev"
 install="$pkgname.pre-install"
-subpackages="$pkgname-doc $pkgname-dbg $pkgname-openrc"
+subpackages="$pkgname-dbg $pkgname-doc $pkgname-openrc"
 source="mympdos-mpd-master.tar.gz
 	${pkgname}.initd
 	${pkgname}.confd
@@ -38,6 +38,7 @@ build() {
         -Dbzip2=disabled \
         -Diso9660=disabled \
         -Dzzip=disabled \
+		-Db_ndebug=true \
         . output
 	ninja -C output
 }
