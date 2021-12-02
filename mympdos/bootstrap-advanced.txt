@@ -77,6 +77,7 @@ BT_INTERNAL="false"
 
 #myMPDos repository
 MYMPDOS_REPOSITORY="https://raw.githubusercontent.com/jcorporation/myMPDos/master/repository"
+#MYMPDOS_REPOSITORY="https://raw.githubusercontent.com/jcorporation/myMPDos/devel/repository"
 
 #List of audio hats: https://github.com/jcorporation/myMPDos/wiki/Audio-hats
 AUDIOHAT=""
