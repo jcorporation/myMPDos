@@ -36,6 +36,7 @@ echo "myMPDos $VERSION bootstrap script"
 echo ""
 
 #Bootstrap configuration
+MYMPDOS_REPOSITORY="https://raw.githubusercontent.com/jcorporation/myMPDos/master/repository"
 IP_TYPE="dhcp"
 WLAN_ENABLE="false"
 WLAN_KEYMGMT="WPA-PSK"
@@ -322,9 +323,19 @@ echo "Setting up apk cache"
 setup-apkcache "$DATAMEDIA/apkcache"
 
 echo "Adding repositories and upgrade"
+echo "${BOOTMEDIA}/apks" > /etc/apk/repositories
 setup-apkrepos -1
-sed -r -e's/^#(.*\d\/community)/\1/' -i /etc/apk/repositories
-echo "https://raw.githubusercontent.com/jcorporation/myMPDos/master/repository" >> /etc/apk/repositories
+sed -r -e's/^#\s?(.*\d\/community)/\1/' -i /etc/apk/repositories
+while apk update 2>&1 | grep WARNING
+do
+  echo "Error...trying new random repository"
+  echo "${BOOTMEDIA}/apks" > /etc/apk/repositories
+  setup-apkrepos -r
+  sed -r -e's/^#\s?(.*\d\/community)/\1/' -i /etc/apk/repositories
+done
+
+echo "$MYMPDOS_REPOSITORY" >> /etc/apk/repositories
+
 echo "Adding myMPDos archiv signing public key"
 cp "$BOOTMEDIA"/mympdos-apks/.abuild/*.rsa.pub /etc/apk/keys/
 
@@ -332,14 +343,9 @@ echo "Upgrading all packages"
 apk update
 apk upgrade
 
-echo "Creating user and groups"
-addgroup -S mympd
-adduser mympd audio
-addgroup -S mpd
-
 echo "Installing packages"
 PKGLIST_ADV="usbutils raspberrypi busybox-extras net-tools mpg123 mygpiod"
-PKGLIST="mympdos-base mympd mympdos-libmpdclient mpc sudo alsa-utils"
+PKGLIST="mympdos-base mympd mympdos-libmpdclient mpc doas alsa-utils"
 [ "$BT_ENABLE" = "true" ] && PKGLIST="$PKGLIST bluez bluez-alsa"
 [ "$ENABLE_RNGD" = "true" ] && PKGLIST="$PKGLIST rng-tools"
 [ "$ADVANCED_SOFTWARE" = "true" ] && PKGLIST="$PKGLIST $PKGLIST_ADV"
@@ -354,6 +360,11 @@ case "$MPD_VERSION" in
 esac
 apk add $PKGLIST
 
+echo "Creating user and groups"
+addgroup -S mympd
+adduser mympd audio
+addgroup -S mpd
+
 echo "Creating files in data partition"
 mount -oremount,rw "$DATAMEDIA"
 install -d "$DATAMEDIA/apkcache"
@@ -363,7 +374,7 @@ mount -oremount,ro "$DATAMEDIA"
 
 echo "Setting defaults"
 install -d /var/lib/mpd/cache -o mpd -g mpd
-cat /usr/local/defaults/etc/sudoers >> /etc/sudoers
+cp /usr/local/defaults/etc/doas.conf >> /etc/doas.d/mympd.conf
 cp /etc/mympdos/templates/mympd.conf.tmpl /etc/mympd.conf
 [ "$DISABLE_IPV6" = "true" ] && cp /usr/local/defaults/etc/sysctl_disable_ipv6.conf /etc/sysctl.d/disable_ipv6.conf
 

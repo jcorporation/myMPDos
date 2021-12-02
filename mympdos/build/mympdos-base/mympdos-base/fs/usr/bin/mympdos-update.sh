@@ -9,8 +9,8 @@ then
 	BOOTMEDIA="/media/vda1"
 	BOOTDEV="/dev/vda1"
 else
-        echo "Unsupported drive"
-        exit 1
+  echo "Unsupported drive"
+  exit 1
 fi
 
 read -r VERSION < "${BOOTMEDIA}/myMPDos.version"

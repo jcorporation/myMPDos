@@ -46,9 +46,16 @@ then
 fi
 
 echo "Setup repositories and upgrade"
+echo "/media/vda1/apks" > /etc/apk/repositorie
 setup-apkrepos -1
-sed -r -e's/^#(.*\d\/community)/\1/' -i /etc/apk/repositories
-apk update
+sed -r -e's/^#\s?(.*\d\/community)/\1/' -i /etc/apk/repositories
+while apk update 2>&1 | grep WARNING
+do
+  echo "Error...trying new random repository"
+  echo "/media/vda1/apks" > /etc/apk/repositorie
+  setup-apkrepos -r
+  sed -r -e's/^#\s?(.*\d\/community)/\1/' -i /etc/apk/repositories
+done
 apk upgrade
 
 echo "Moving /usr to /dev/vda2"
@@ -62,12 +69,11 @@ install -d /usr/build/distfiles -g abuild -m775
 setup-apkcache /usr/build/distfiles
 
 echo "Installing build packages"
-apk add git alpine-sdk perl sudo build-base xz
+apk add git alpine-sdk perl build-base xz
 
 echo "Adding build user"
 adduser -D build -h "$BUILDDIR"
 addgroup build abuild
-echo "build    ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 cd "$BUILDDIR" || exit 1
 
 echo "Setting up package signing key"
@@ -181,7 +187,7 @@ then
   su build -c "rm -rf mympdos-mpd-stable"
   su build -c "cp -r /media/vda1/mympdos/mympdos-mpd-stable ."
   cd mympdos-mpd-stable || exit 1
-  su build -c "wget http://www.musicpd.org/download/mpd/0.22/mpd-${B_MPD_STABLE_VER}.tar.xz"
+  su build -c "wget http://www.musicpd.org/download/mpd/0.23/mpd-${B_MPD_STABLE_VER}.tar.xz"
   tar -xf "mpd-${B_MPD_STABLE_VER}.tar.xz"
   rm "mpd-${B_MPD_STABLE_VER}.tar.xz"
   mv "mpd-${B_MPD_STABLE_VER}" "mympdos-mpd-stable-${B_MPD_STABLE_VER}"

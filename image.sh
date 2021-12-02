@@ -49,8 +49,7 @@ startimage() {
     	-append "console=ttyAMA0 ip=dhcp" \
     	-nographic \
     	-drive "file=${IMAGE},format=raw" \
-    	-netdev user,id=mynet0,net=192.168.76.0/24,dhcpstart=192.168.76.9 \
-    	-nic user,id=mynet0
+		-nic user,id=mynet0,net=192.168.76.0/24,dhcpstart=192.168.76.9
 }
 
 case "$1" in

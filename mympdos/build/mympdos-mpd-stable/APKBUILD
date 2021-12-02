@@ -1,7 +1,7 @@
 # Maintainer: Juergen Mang <mail@jcgames.de>
-# Based on: https://git.alpinelinux.org/aports/tree/community/mpd
+# Based on: https://pkgs.alpinelinux.org/package/edge/community/x86_64/mpd
 pkgname=mympdos-mpd-stable
-pkgver=0.22.11
+pkgver=0.23.5
 pkgrel=0
 pkgdesc="Music daemon that plays MP3, FLAC and Ogg Vorbis files"
 url="https://musicpd.org"
@@ -11,34 +11,35 @@ provides="mpd"
 arch="all"
 license="GPL-2.0-or-later"
 makedepends="lame-dev glib-dev curl-dev libmad-dev flac-dev
-    libogg-dev faad2-dev libid3tag-dev libvorbis-dev alsa-lib-dev soxr-dev
-    libsamplerate-dev boost-dev icu-dev sqlite-dev libnfs-dev 
-    opus-dev meson mympdos-libmpdclient-dev libcap liburing-dev"
-checkdepends="gtest-dev gtest"
+	libogg-dev faad2-dev libid3tag-dev libvorbis-dev alsa-lib-dev soxr-dev
+	libsamplerate-dev boost-dev icu-dev sqlite-dev libnfs-dev fmt-dev
+	opus-dev meson mympdos-libmpdclient-dev libcap liburing-dev
+	expat-dev pcre2-dev"
 install="$pkgname.pre-install"
-subpackages="$pkgname-doc $pkgname-dbg $pkgname-openrc"
+subpackages="$pkgname-dbg $pkgname-doc $pkgname-openrc"
 source="mympdos-mpd-stable.tar.gz
-	stacksize.patch
 	${pkgname}.initd
 	${pkgname}.confd
+	stacksize.patch
 	"
 options="!check"
 
 build() {
-	meson \
-		--prefix=/usr \
-		--sysconfdir=/etc \
-		--mandir=/usr/share/man \
-		--localstatedir=/var \
-		--buildtype=release \
+    meson \
+        --prefix=/usr \
+        --sysconfdir=/etc \
+        --mandir=/usr/share/man \
+        --localstatedir=/var \
+        --buildtype=release \
         -Dqobuz=disabled \
         -Dsoundcloud=disabled \
         -Dneighbor=false \
         -Ddbus=disabled \
-		-Dbzip2=disabled \
-		-Diso9660=disabled \
-		-Dzzip=disabled \
-		. output
+        -Dbzip2=disabled \
+        -Diso9660=disabled \
+        -Dzzip=disabled \
+		-Db_ndebug=true \
+        . output
 	ninja -C output
 }
 

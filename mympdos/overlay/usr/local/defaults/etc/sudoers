@@ -1,2 +1,0 @@
-Cmnd_Alias MYMPD_CMDS = /usr/bin/savereboot.sh, /usr/bin/saveshutdown.sh, /usr/bin/rwdata.sh
-mympd ALL=NOPASSWD: MYMPD_CMDS

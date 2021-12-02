@@ -75,6 +75,9 @@ BT_ENABLE="false"
 #Enable internal bluetooth chip
 BT_INTERNAL="false"
 
+#myMPDos repository
+MYMPDOS_REPOSITORY="https://raw.githubusercontent.com/jcorporation/myMPDos/master/repository"
+
 #List of audio hats: https://github.com/jcorporation/myMPDos/wiki/Audio-hats
 AUDIOHAT=""
 DISABLE_HDMI="false"

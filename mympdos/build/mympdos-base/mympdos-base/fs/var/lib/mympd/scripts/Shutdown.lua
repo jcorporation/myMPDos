@@ -1,2 +1,2 @@
 -- {"order":3,"arguments":[]}
-os.execute("sudo /usr/bin/saveshutdown.sh")
+os.execute("doas /usr/bin/saveshutdown.sh")
