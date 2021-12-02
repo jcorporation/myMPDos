@@ -361,7 +361,6 @@ esac
 apk add $PKGLIST
 
 echo "Creating user and groups"
-addgroup -S mympd
 adduser mympd audio
 addgroup -S mpd
 
@@ -374,7 +373,7 @@ mount -oremount,ro "$DATAMEDIA"
 
 echo "Setting defaults"
 install -d /var/lib/mpd/cache -o mpd -g mpd
-cp /usr/local/defaults/etc/doas.conf >> /etc/doas.d/mympd.conf
+cp /usr/local/defaults/etc/doas.conf /etc/doas.d/mympd.conf
 cp /etc/mympdos/templates/mympd.conf.tmpl /etc/mympd.conf
 [ "$DISABLE_IPV6" = "true" ] && cp /usr/local/defaults/etc/sysctl_disable_ipv6.conf /etc/sysctl.d/disable_ipv6.conf
 
@@ -455,6 +454,8 @@ fi
 echo "Removing installation files"
 rm "$BOOTMEDIA/mympdos-bootstrap.apkovl.tar.gz"
 rm -f "$BOOTMEDIA/bootstrap.txt"
+rm -f "$BOOTMEDIA/bootstrap-simple.txt"
+rm -f "$BOOTMEDIA/bootstrap-advanced.txt"
 rm -f "$BOOTMEDIA/mpd.replace"
 rm -f "$BOOTMEDIA/mpd.conf"
 rm -f "$BOOTMEDIA/mpd.custom.conf"
@@ -505,6 +506,6 @@ then
 	lbu include /var/lib/bluetooth
 fi
 alsactl store
-lbu_commit
+lbu_commit -v
 echo "myMPDos installation is finished"
 [ "$REBOOT" = "1" ] && reboot
