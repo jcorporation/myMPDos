@@ -374,7 +374,6 @@ mount -oremount,ro "$DATAMEDIA"
 echo "Setting defaults"
 install -d /var/lib/mpd/cache -o mpd -g mpd
 cp /usr/local/defaults/etc/doas.conf /etc/doas.d/mympd.conf
-cp /etc/mympdos/templates/mympd.conf.tmpl /etc/mympd.conf
 [ "$DISABLE_IPV6" = "true" ] && cp /usr/local/defaults/etc/sysctl_disable_ipv6.conf /etc/sysctl.d/disable_ipv6.conf
 
 if [ "$ENABLE_CONFIGMPD" = "true" ]

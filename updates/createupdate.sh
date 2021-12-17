@@ -9,6 +9,7 @@ skel() {
   mkdir -p "$FROM"/update
   cat > "$FROM/update/update.sh" << EOL
 #!/bin/sh
+
 #export V_MAJOR=3
 #export V_MINOR=14
 #export V_POINT=1
