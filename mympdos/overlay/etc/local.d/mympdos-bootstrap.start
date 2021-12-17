@@ -500,7 +500,6 @@ for INCLUDE in $LBU_INCLUDES
 do
   lbu_include "$INCLUDE"
 done
-lbu exclude /var/lib/mympd/covercache
 if [ "$BT_ENABLE" = "true" ]
 then
 	lbu include /var/lib/bluetooth
