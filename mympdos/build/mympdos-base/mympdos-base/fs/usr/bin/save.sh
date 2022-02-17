@@ -2,6 +2,8 @@
 
 #dump myMPD state
 killall -HUP mympd
+#myMPD needs some time to write the state files
+sleep 1
 
 #dump alsa state
 alsactl store
