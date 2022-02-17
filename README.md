@@ -39,6 +39,7 @@ init-+-getty
      |       `-{mympd_webserver}
      |-ntpd
      |-rngd
+     |-sshd
      `-syslogd
 ```
 
