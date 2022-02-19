@@ -92,6 +92,7 @@ build_stage2() {
 
   echo "Copy build scripts"
   install -d mnt/mympdos
+  find mnt/mympdos/ -name \*~ -delete
   cp -r ../../mympdos/build/* mnt/mympdos
 
   echo "Copy existing packages"
