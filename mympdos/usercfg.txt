@@ -1,0 +1,3 @@
+[pi0]
+kernel=boot/vmlinuz-rpi
+initramfs boot/initramfs-rpi

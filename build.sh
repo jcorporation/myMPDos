@@ -201,8 +201,11 @@ build_stage5() {
     echo "Copy sample bootstrap.txt files"
     cp ../../mympdos/bootstrap-*.txt mnt/
   fi
+  echo "Copy mpd.conf configurations"
   [ -f ../../mympdos/mpd.replace ] && cp ../../mympdos/mpd.replace mnt/
   [ -f ../../mympdos/mpd.conf ] && cp ../../mympdos/mpd.conf mnt/
+  echo "Copy usercfg.txt"
+  cp ../../mympdos/usercfg.txt mnt/
   echo "Setting version to $VERSION"
   echo "$VERSION" > mnt/myMPDos.version
 
