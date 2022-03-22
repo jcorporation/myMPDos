@@ -441,14 +441,10 @@ fi
 
 mount -o remount,rw "$BOOTMEDIA"
 
-if [ ! -f "$BOOTMEDIA/usercfg.txt" ]
-then
-	echo "Setting usercfg.txt"
-	cp /usr/local/defaults/boot/usercfg.txt "$BOOTMEDIA/"
-	[ "$WLAN_ENABLE" = "false" ] && echo "dtoverlay=disable-wifi" >> "$BOOTMEDIA/usercfg.txt"
-	[ "$BT_INTERNAL" = "false" ] && echo "dtoverlay=disable-bt" >> "$BOOTMEDIA/usercfg.txt"
-	[ "$AUDIOHAT" != "" ] && echo "dtoverlay=$AUDIOHAT" >> "$BOOTMEDIA/usercfg.txt"
-fi
+echo "Setting usercfg.txt"
+[ "$WLAN_ENABLE" = "false" ] && echo "dtoverlay=disable-wifi" >> "$BOOTMEDIA/usercfg.txt"
+[ "$BT_INTERNAL" = "false" ] && echo "dtoverlay=disable-bt" >> "$BOOTMEDIA/usercfg.txt"
+[ "$AUDIOHAT" != "" ] && echo "dtoverlay=$AUDIOHAT" >> "$BOOTMEDIA/usercfg.txt"
 
 echo "Removing installation files"
 rm "$BOOTMEDIA/mympdos-bootstrap.apkovl.tar.gz"
