@@ -442,6 +442,7 @@ fi
 mount -o remount,rw "$BOOTMEDIA"
 
 echo "Setting usercfg.txt"
+echo "" >> "$BOOTMEDIA/usercfg.txt"
 [ "$WLAN_ENABLE" = "false" ] && echo "dtoverlay=disable-wifi" >> "$BOOTMEDIA/usercfg.txt"
 [ "$BT_INTERNAL" = "false" ] && echo "dtoverlay=disable-bt" >> "$BOOTMEDIA/usercfg.txt"
 [ "$AUDIOHAT" != "" ] && echo "dtoverlay=$AUDIOHAT" >> "$BOOTMEDIA/usercfg.txt"

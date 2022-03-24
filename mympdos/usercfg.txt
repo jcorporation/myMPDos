@@ -12,3 +12,4 @@ dtparam=audio=off
 dtparam=i2c1=off
 dtparam=spi=off
 enable_uart=1
+
