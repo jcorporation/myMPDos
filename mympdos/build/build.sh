@@ -6,7 +6,7 @@
 #
 
 BUILDDIR="/usr/build"
-POWEROFF="0"
+POWEROFF="1"
 ARCH=$(uname -m)
 
 #Build packages
