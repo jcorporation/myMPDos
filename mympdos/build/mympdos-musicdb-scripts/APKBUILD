@@ -1,12 +1,13 @@
 # Maintainer: Juergen Mang <mail@jcgames.de>
 pkgname=mympdos-musicdb-scripts
 pkgver=0.1.0
-pkgrel=0
+pkgrel=1
 pkgdesc="myMPDos musicdb-scripts"
 url="https://github.com/jcorporation/musicdb-scripts"
 arch="noarch"
 license="GPL-3.0-or-later"
 makedepends=""
+depends="python3"
 install=""
 source="$pkgname-$pkgver.tar.gz"
 options="!check" #No testsuite exists
