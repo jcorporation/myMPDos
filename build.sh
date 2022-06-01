@@ -97,10 +97,10 @@ build_stage2() {
 
   echo "Copy existing packages"
   install -d mnt/mympdos-apks
-  if [ -f "../../apks/$ARCH/APKINDEX.tar.gz" ]
+  if [ -f "../../repository/$ARCH/APKINDEX.tar.gz" ]
   then
-    cp "../../apks/$ARCH/"*.apk mnt/mympdos-apks/
-    cp "../../apks/$ARCH/APKINDEX.tar.gz" mnt/mympdos-apks/
+    cp "../../repository/$ARCH/"*.apk mnt/mympdos-apks/
+    cp "../../repository/$ARCH/APKINDEX.tar.gz" mnt/mympdos-apks/
   else
     echo "No existing packages found"
   fi
@@ -163,10 +163,10 @@ build_stage4() {
   if [ -f "mnt/build/packages/package/${ARCH}/APKINDEX.tar.gz" ]
   then
     cp mnt/build/packages/package/"${ARCH}"/* "../../apks/$ARCH/"
+    cp mnt/build/packages/package/"${ARCH}"/* "../../repository/$ARCH/"
   else
     echo "No APKINDEX.tar.gz found"
   fi
-  cp -r "../../apks/$ARCH" ../../repository/
   umount_retry mnt || exit 1
   sudo losetup -d "${LOOP}"
 }
