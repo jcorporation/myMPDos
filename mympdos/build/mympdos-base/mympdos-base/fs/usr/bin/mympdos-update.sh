@@ -45,9 +45,7 @@ do_update() {
   echo "  - Executing update script"
   cd update || return 1
   chmod +x update.sh
-  eval ./update.sh
-  RETVAL=$?
-  if [ "$RETVAL" = "0" ]
+  if eval ./update.sh
   then
     read -r NEWVERSION < myMPDos.version
     echo "  - Setting version to $NEWVERSION"
@@ -62,24 +60,22 @@ do_update() {
   fi
 }
 
-echo "Updating apks"
-apk update
-apk upgrade
-
 echo "Starting myMPDos update"
 echo "  - Current version: $VERSION"
 echo "  - Checking for update"
 if download
 then
-  do_update
-  RETVAL=$?
-  if [ "$RETVAL" = "0" ]
+  if do_update
   then
     echo "  - Saving changes"
     lbu_commit
   fi
 else
   echo "  - No update found"
+  echo ""
+  echo "Updating apks"
+  apk update
+  apk upgrade
 fi
 
 cd /
