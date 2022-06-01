@@ -19,14 +19,12 @@ B_MPD_STABLE="1"
 B_MPD_MASTER="1"
 B_MYGPIOD="1"
 
-get_pkgver()
-{
+get_pkgver() {
   PKGVER=$(grep ^pkgver "$1/APKBUILD" | cut -d= -f2)
   echo "${PKGVER}"
 }
 
-get_pkgname()
-{
+get_pkgname() {
   PKGNAME=$(grep ^pkgname "$1/APKBUILD" | cut -d= -f2)
   PKGVER=$(grep ^pkgver "$1/APKBUILD" | cut -d= -f2)
   PKGREL=$(grep ^pkgrel "$1/APKBUILD" | cut -d= -f2)
