@@ -1,0 +1,24 @@
+# Maintainer: Juergen Mang <mail@jcgames.de>
+pkgname=mympdos-musicdb-scripts
+pkgver=0.1.0
+pkgrel=2
+pkgdesc="myMPDos musicdb-scripts"
+url="https://github.com/jcorporation/musicdb-scripts"
+arch="noarch"
+license="GPL-3.0-or-later"
+makedepends=""
+depends="python3"
+install=""
+source="$pkgname-$pkgver.tar.gz"
+options="!check" #No testsuite exists
+
+package() {
+	install -d -g root -o root -m775 \
+		"$pkgdir/usr/bin"
+	install -g root -o root -m755 "$srcdir/$pkgname-$pkgver/"*.sh \
+		"$pkgdir/usr/bin/"
+	install -d -g root -o root -m775 \
+		"$pkgdir/usr/lib/lyrics"
+	install -g root -o root -m755 "$srcdir/$pkgname-$pkgver/lyrics/"*.py \
+		"$pkgdir/usr/lib/lyrics/"
+}

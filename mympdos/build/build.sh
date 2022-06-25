@@ -18,6 +18,7 @@ B_LIBMPDCLIENT="1"
 B_MPD_STABLE="1"
 B_MPD_MASTER="1"
 B_MYGPIOD="1"
+B_MUSICDB_SCRIPTS="1"
 
 get_pkgver() {
   PKGVER=$(grep ^pkgver "$1/APKBUILD" | cut -d= -f2)
@@ -208,6 +209,23 @@ then
   mv MPD "mympdos-mpd-master-${B_MPD_MASTER_VER}"
   tar -czf mympdos-mpd-master.tar.gz "mympdos-mpd-master-${B_MPD_MASTER_VER}"
   rm -fr "mympdos-mpd-master-${B_MPD_MASTER_VER}"
+  su build -c "abuild checksum"
+  su build -c "abuild -r"
+  cd ..
+fi
+
+MUSICDB_SCRIPTS_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-musicdb-scripts)
+B_MUSICDB_SCRIPTS_VER=$(get_pkgver /media/vda1/mympdos/mympdos-musicdb-scripts)
+if [ "$B_MUSICDB_SCRIPTS" = "1" ] && [ ! -f "packages/package/$ARCH/$MUSICDB_SCRIPTS_PACKAGE" ]
+then
+  echo "Build musicdb-scripts"
+  su build -c "rm -rf mympdos-musicdb-scripts"
+  su build -c "cp -r /media/vda1/mympdos/mympdos-musicdb-scripts ."
+  cd mympdos-musicdb-scripts || exit 1
+  su build -c "git clone -b master --depth=1 https://github.com/jcorporation/musicdb-scripts.git"
+  mv musicdb-scripts "mympdos-musicdb-scripts-${B_MUSICDB_SCRIPTS_VER}"
+  tar -czf "mympdos-musicdb-scripts-${B_MUSICDB_SCRIPTS_VER}.tar.gz" "mympdos-musicdb-scripts-${B_MUSICDB_SCRIPTS_VER}"
+  rm -fr "mympdos-musicdb-scripts-${B_MUSICDB_SCRIPTS_VER}"
   su build -c "abuild checksum"
   su build -c "abuild -r"
   cd ..
