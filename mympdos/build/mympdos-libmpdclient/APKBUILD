@@ -1,7 +1,7 @@
 # Maintainer: Juergen Mang <mail@jcgames.de>
 pkgname=mympdos-libmpdclient
 pkgver=2.21
-pkgrel=2
+pkgrel=3
 pkgdesc="An asynchronous API library for interfacing MPD in the C, C++ & Objective C languages"
 url="https://www.musicpd.org/libs/libmpdclient"
 arch="all"
