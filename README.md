@@ -44,7 +44,8 @@ init-+-getty
 ```
 
 ## Wiki
-For further information on installation and configuration, see the [myMPDos wiki](https://github.com/jcorporation/myMPDos/wiki).
+
+For further information on installation and configuration, see the [myMPDos documentation](https://jcorporation.github.io/myMPDos/).
 
 ## Copyright
 
