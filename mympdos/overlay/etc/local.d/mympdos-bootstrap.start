@@ -337,7 +337,7 @@ done
 echo "$MYMPDOS_REPOSITORY" >> /etc/apk/repositories
 
 echo "Adding myMPDos archiv signing public key"
-cp "$BOOTMEDIA"/mympdos-apks/.abuild/*.rsa.pub /etc/apk/keys/
+cp "$BOOTMEDIA"/mympdos-apk-keys/*.rsa.pub /etc/apk/keys/
 
 echo "Upgrading all packages"
 apk update
