@@ -210,6 +210,7 @@ build_stage5() {
   echo "$VERSION" > mnt/myMPDos.version
 
   echo "Copy myMPDos archive signing public key"
+  install -d mnt/mympdos-apk-keys/
   tar --wildcards --strip-components=1 -xzf ../../apks/abuild.tgz -C mnt/mympdos-apk-keys/ ".abuild/*.rsa.pub"
 
   umount_retry mnt || exit 1
