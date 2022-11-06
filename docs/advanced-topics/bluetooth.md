@@ -6,7 +6,7 @@ title: Bluetooth
 
 Using bluetooth speakers with myMPDos.
 
-The best is to attach a bluetooth dongle to the raspberry but you can also try to use the [internal bluetooth]({{site.baserurl}}/advanced-topics/bluetooth-internal) chip.
+The best is to attach a bluetooth dongle to the raspberry but you can also try to use the [internal bluetooth]({{site.baseurl}}/advanced-topics/bluetooth-internal) chip.
 
 ## Install packages
 
