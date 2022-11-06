@@ -14,3 +14,4 @@ title: Filesystem layout
 | /media/mmcblk0p2 | Data partition (ext4) on sd-card |
 | /media/mmcblk0p2/library | Music library |
 | /mnt | Path for automounter |
+{: .table .table-sm }

@@ -1,30 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="author" content="mail@jcgames.de">
-  <title>{% if page.title %}{{ page.title }} – {% endif %}{{ site.name }}</title>
-  <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/style.css" />
-</head>
-<body>
-  <header>
-    <nav class="navbar navbar-expand navbar-dark fixed-top bg-dark">
-      <a class="navbar-brand" href="{{ site.baseurl }}/">
-        myMPDos Documentation
-      </a>
-    </nav>
-  </header>
-  <main role="main" class="container-fluid text-break">
-    <div class="card">
-      <div class="card-header">{% include breadcrumbs %}</div>
-      <div class="card-body">
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% if page.title %}{{ page.title }} – {% endif %}{{ site.title }}</title>
+    <link rel="stylesheet" type="text/css" href="{{ site.baseurl }}/assets/css/style.css" />
+  </head>
+  <body>
+    <header class="navbar navbar-dark bg-dark p-0 fixed-top">
+      <nav class="px-3 py-4 w-100 nav1">
+        <a class="navbar-brand p-0 me-4" href="{{ site.baseurl }}/">
+          myMPDos documentation
+        </a>
+      </nav>
+      <nav class="px-3 py-2 bg-green text-light mb-0 w-100 nav2">
+        {% include breadcrumbs.md %}
+      </nav>
+    </header>
+    <div>
+      <aside class="p-3 border-end border-bottom bg-light">
+        {% include nav.html %}
+      </aside>
+      <main class="p-3">
+        <h1>{{ page.title }}</h1>
         {{ content }}
-      </div>
-      <div class="card-footer">
-      &copy; 2020-2022 Juergen Mang &lt;mail@jcgames.de&gt;
-      </div>
+      </main>
     </div>
-  </main>
-</body>
+  </body>
 </html>

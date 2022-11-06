@@ -36,4 +36,4 @@ myMPDos supports following audio hats.
 - rpi-dac
 - rpi-proto
 
-The list is generated from https://raw.githubusercontent.com/raspberrypi/firmware/master/boot/overlays/README and NOT tested.
+The list is generated from [https://raw.githubusercontent.com/raspberrypi/firmware/master/boot/overlays/README](https://raw.githubusercontent.com/raspberrypi/firmware/master/boot/overlays/README) and NOT tested.

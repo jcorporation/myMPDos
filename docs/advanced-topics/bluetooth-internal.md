@@ -1,6 +1,7 @@
 ## Enabling bluetooth
 
 If bluetooth is disabled, enable it.
+
 ```
 mount -oremount,rw /boot
 sed -i 's/dtoverlay=disable-bt/#dtoverlay=disable-bt/' /boot/usercfg.txt

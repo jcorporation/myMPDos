@@ -18,3 +18,4 @@ This scripts are installed by the mympdos-base package in the directory `/usr/bi
 | savereboot.sh | Save settings and reboot |
 | saveshutdown.sh | Save settings and poweroff |
 | status.sh | Shows status informations from your raspberry |
+{: .table .table-sm }

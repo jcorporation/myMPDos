@@ -19,9 +19,11 @@ myMPDos has an extra repository for custom packages. This repository can also be
 | mympdos-musicdb-scripts | https://github.com/jcorporation/musicdb-scripts |
 | mympd | Latest stable myMPD: https://github.com/jcorporation/myMPD |
 | mygpiod | Latest stable myGPIOd: https://github.com/jcorporation/myGPIOd |
+{: .table .table-sm }
 
 ## Experimental packages
 
 | PACKAGE | DESCRIPTION |
 | ------- | ----------- |
 | mympdos-mpd-master | MPD from master branch: https://github.com/MusicPlayerDaemon/MPD |
+{: .table .table-sm }

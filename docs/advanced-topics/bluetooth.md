@@ -62,4 +62,4 @@ Restart MPD: `service mpd restart`
 
 ***
 
-Reference: https://wiki.alpinelinux.org/wiki/Raspberry_Pi_3_-_Setting_Up_Bluetooth
+Reference: <a href="https://wiki.alpinelinux.org/wiki/Raspberry_Pi_3_-_Setting_Up_Bluetooth">https://wiki.alpinelinux.org/wiki/Raspberry_Pi_3_-_Setting_Up_Bluetooth</a>

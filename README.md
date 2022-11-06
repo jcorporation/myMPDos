@@ -43,7 +43,7 @@ init-+-getty
      `-syslogd
 ```
 
-## Wiki
+## Documentation
 
 For further information on installation and configuration, see the [myMPDos documentation](https://jcorporation.github.io/myMPDos/).
 
