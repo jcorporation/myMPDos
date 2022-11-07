@@ -15,8 +15,8 @@ ENABLE_CONFIGMPD="true"
 
 #Software
 #MPD version
-#1 = MPD 22.x (stable)
-#2 = MPD 23.x (MPD master branch - unstable)
+#1 = MPD stable
+#2 = MPD master branch - unstable
 MPD_VERSION="1"
 
 #Mixer
@@ -79,6 +79,6 @@ BT_INTERNAL="false"
 MYMPDOS_REPOSITORY="https://raw.githubusercontent.com/jcorporation/myMPDos/master/repository"
 #MYMPDOS_REPOSITORY="https://raw.githubusercontent.com/jcorporation/myMPDos/devel/repository"
 
-#List of audio hats: https://github.com/jcorporation/myMPDos/wiki/Audio-hats
+#List of audio hats: https://jcorporation.github.io/myMPDos/references/audio-hats
 AUDIOHAT=""
 DISABLE_HDMI="false"
