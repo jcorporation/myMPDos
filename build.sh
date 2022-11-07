@@ -329,7 +329,7 @@ case "$1" in
     echo "  umountbuild|u:  removes dangling mounts and loop devices"
     echo ""
     echo "  private|p:      creates a image with a productive bootstrap.txt file"
-    echo "  public:         creates a image with samble bootstrap.txt files (default)"
+    echo "  public:         creates a image with sample bootstrap.txt files (default)"
     ;;
 esac
 
