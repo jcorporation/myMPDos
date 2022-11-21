@@ -8,6 +8,6 @@ myMPDos has no configuration dialogs or web ui for initial and further configura
 
 - [GitHub Repository](https://github.com/jcorporation/myMPD)
 
-<div class="d-none toc">
+<div class="d-none" id="toc">
 {% include nav.html %}
 </div>
