@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # this is the init script version
-VERSION=3.4.5-r3
+VERSION=3.7.0-r0
 SINGLEMODE=no
 sysroot=/sysroot
 splashfile=/.splash.ctrl
@@ -10,16 +10,19 @@ repofile=/tmp/repositories
 # some helpers
 ebegin() {
 	last_emsg="$*"
+	echo "$last_emsg..." > /dev/kmsg
 	[ "$KOPT_quiet" = yes ] && return 0
 	echo -n " * $last_emsg: "
 }
 eend() {
 	local msg
 	if [ "$1" = 0 ] || [ $# -lt 1 ] ; then
+		echo "$last_emsg: ok." > /dev/kmsg
 		[ "$KOPT_quiet" = yes ] && return 0
 		echo "ok."
 	else
 		shift
+		echo "$last_emsg: failed. $*" > /dev/kmsg
 		if [ "$KOPT_quiet" = "yes" ]; then
 			echo -n "$last_emsg "
 		fi
@@ -106,7 +109,8 @@ list_console_devices() {
 setup_inittab_console(){
 	term=vt100
 	# Inquire the kernel for list of console= devices
-	for tty in $(list_console_devices console); do
+	consoles="$(for c in console $KOPT_consoles; do list_console_devices $c; done)"
+	for tty in $consoles; do
 		# do nothing if inittab already have the tty set up
 		if ! grep -q "^$tty:" $sysroot/etc/inittab; then
 			echo "# enable login on alternative console" \
@@ -190,14 +194,14 @@ configure_ip() {
 			echo "ERROR: DHCP requested but not present in initrd"
 			return 1
 		fi
-		ebegin "Obtaining IP via DHCP ($device)..."
+		ebegin "Obtaining IP via DHCP ($device)"
 		ifconfig "$device" 0.0.0.0
 		udhcpc -i "$device" -f -q
 		eend $?
 	else
 		# manual configuration
 		[ -n "$client_ip" -a -n "$netmask" ] || return
-		ebegin "Setting IP ($device)..."
+		ebegin "Setting IP ($device)"
 		if ifconfig "$device" "$client_ip" netmask "$netmask"; then
 			[ -z "$gw_ip" ] || ip route add 0.0.0.0/0 via "$gw_ip" dev "$device"
 		fi
@@ -219,9 +223,9 @@ relocate_mount() {
 	if ! [ -e $repofile ]; then
 		return
 	fi
-	while read dir; do
+	echo "$ovl" | cat - $repofile | while read dir; do
 		# skip http(s)/ftp repos for netboot
-		if ! [ -d "$dir" ]; then
+		if ! [ -d "$dir" -o -f "$dir" ]; then
 			continue
 		fi
 		local dev=$(df -P "$dir" | tail -1 | awk '{print $1}')
@@ -233,7 +237,7 @@ relocate_mount() {
 				mount -o move "$oldmnt" "$mnt"
 			fi
 		fi
-	done < $repofile
+	done
 }
 
 # find the dirs under ALPINE_MNT that are boot repositories
@@ -282,12 +286,16 @@ is_url() {
 # Do some tasks to make sure mounting the ZFS pool is A-OK
 prepare_zfs_root() {
 	local _root_vol=${KOPT_root#ZFS=}
-	local _root_pool=${_rool_vol%%/*}
+	local _root_pool=${_root_vol%%/*}
 
-	# Force import if this has been imported on a different system previously
+	# Force import if this has been imported on a different system previously.
+	# Import normally otherwise
 	if [ "$KOPT_zfs_force" = 1 ]; then
-		zpool import -N -f $_root_vol
+		zpool import -N -d /dev -f $_root_pool
+	else
+		zpool import -N -d /dev $_root_pool
 	fi
+
 
 	# Ask for encryption password
 	if [ $(zpool list -H -o feature@encryption $_root_pool) = "active" ]; then
@@ -299,7 +307,7 @@ prepare_zfs_root() {
 }
 
 /bin/busybox mkdir -p /usr/bin /usr/sbin /proc /sys /dev $sysroot \
-        /media/cdrom /media/usb /tmp /run/cryptsetup
+	/media/cdrom /media/usb /tmp /run/cryptsetup
 
 # Spread out busybox symlinks and make them available without full path
 /bin/busybox --install -s
@@ -311,11 +319,16 @@ export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 # error message.
 [ -c /dev/null ] || mknod -m 666 /dev/null c 1 3
 
-mount -t proc -o noexec,nosuid,nodev proc /proc
 mount -t sysfs -o noexec,nosuid,nodev sysfs /sys
 mount -t devtmpfs -o exec,nosuid,mode=0755,size=2M devtmpfs /dev 2>/dev/null \
 	|| mount -t tmpfs -o exec,nosuid,mode=0755,size=2M tmpfs /dev
 
+# Make sure /dev/kmsg is a device node. Writing to /dev/kmsg allows the use of the
+# earlyprintk kernel option to monitor early init progress. As above, the -c check
+# prevents an error if the device node has already been seeded.
+[ -c /dev/kmsg ] || mknod -m 660 /dev/kmsg c 1 11
+
+mount -t proc -o noexec,nosuid,nodev proc /proc
 # pty device nodes (later system will need it)
 [ -c /dev/ptmx ] || mknod -m 666 /dev/ptmx c 5 2
 [ -d /dev/pts ] || mkdir -m 755 /dev/pts
@@ -333,13 +346,19 @@ set -- $(cat /proc/cmdline)
 myopts="alpine_dev autodetect autoraid chart cryptroot cryptdm cryptheader cryptoffset
 	cryptdiscards cryptkey debug_init dma init init_args keep_apk_new modules ovl_dev
 	pkgs quiet root_size root usbdelay ip alpine_repo apkovl alpine_start splash
-	blacklist overlaytmpfs rootfstype rootflags nbd resume s390x_net dasd ssh_key
-	BOOTIF"
+	blacklist overlaytmpfs overlaytmpfsflags rootfstype rootflags nbd resume s390x_net
+	dasd ssh_key BOOTIF zfcp"
 
 for opt; do
 	case "$opt" in
 	s|single|1)
 		SINGLEMODE=yes
+		continue
+		;;
+	console=*)
+		opt="${opt#*=}"
+		KOPT_consoles="${opt%%,*} $KOPT_consoles"
+		switch_root_opts="-c /dev/${opt%%,*}"
 		continue
 		;;
 	esac
@@ -353,6 +372,7 @@ for opt; do
 	done
 done
 
+echo "Alpine Init $VERSION" > /dev/kmsg
 [ "$KOPT_quiet" = yes ] || echo "Alpine Init $VERSION"
 
 # enable debugging if requested
@@ -379,7 +399,7 @@ if [ "$KOPT_chart" = yes ]; then
 fi
 
 # The following values are supported:
-#   alpine_repo=auto         -- default, search for .boot_repository
+#   alpine_repo=auto	 -- default, search for .boot_repository
 #   alpine_repo=http://...   -- network repository
 ALPINE_REPO=${KOPT_alpine_repo}
 [ "$ALPINE_REPO" = "auto" ] && ALPINE_REPO=
@@ -399,6 +419,13 @@ if [ -n "$KOPT_ip" ] || [ -n "$KOPT_nbd" ] || \
 	do_networking=true
 else
 	do_networking=false
+fi
+
+if [ -n "$KOPT_zfcp" ]; then
+	modprobe zfcp
+	for _zfcp in $(echo "$KOPT_zfcp" | tr ',' ' ' | tr [A-Z] [a-z]); do
+		echo 1 > /sys/bus/ccw/devices/"${_zfcp%%:*}"/online
+	done
 fi
 
 if [ -n "$KOPT_dasd" ]; then
@@ -431,7 +458,7 @@ fi
 # load available drivers to get access to modloop media
 ebegin "Loading boot drivers"
 
-modprobe -a $(echo "$KOPT_modules $rootfstype" | tr ',' ' ' ) loop squashfs 2> /dev/null
+modprobe -a $(echo "$KOPT_modules $rootfstype" | tr ',' ' ' ) loop squashfs simpledrm 2> /dev/null
 if [ -f /etc/modules ] ; then
 	sed 's/\#.*//g' < /etc/modules |
 	while read module args; do
@@ -439,6 +466,11 @@ if [ -f /etc/modules ] ; then
 	done
 fi
 eend 0
+
+# workaround for vmware
+if grep -q VMware /sys/devices/virtual/dmi/id/sys_vendor 2>/dev/null; then
+	modprobe -a ata_piix mptspi sr-mod
+fi
 
 if [ -n "$KOPT_cryptroot" ]; then
 	cryptopts="-c ${KOPT_cryptroot}"
@@ -472,14 +504,15 @@ ln -s /proc/mounts /etc/mtab
 
 # check if root=... was set
 if [ -n "$KOPT_root" ]; then
+	# run nlplug-findfs before SINGLEMODE so we load keyboard drivers
+	ebegin "Mounting root"
+	nlplug-findfs $cryptopts -p /sbin/mdev ${KOPT_debug_init:+-d} \
+		$KOPT_root
+
 	if [ "$SINGLEMODE" = "yes" ]; then
 		echo "Entering single mode. Type 'exit' to continue booting."
 		sh
 	fi
-
-	ebegin "Mounting root"
-	nlplug-findfs $cryptopts -p /sbin/mdev ${KOPT_debug_init:+-d} \
-		$KOPT_root
 
 	if echo "$KOPT_modules $rootfstype" | grep -qw btrfs; then
 		/sbin/btrfs device scan >/dev/null || \
@@ -489,19 +522,32 @@ if [ -n "$KOPT_root" ]; then
 	if [ -n "$KOPT_resume" ]; then
 		echo "Resume from disk"
 		if [ -e /sys/power/resume ]; then
-			printf "%d:%d" $(stat -Lc "0x%t 0x%T" "$KOPT_resume") >/sys/power/resume
+			case "$KOPT_resume" in
+			UUID*|LABEL*) resume_dev=$(findfs "$KOPT_resume");;
+			*) resume_dev="$KOPT_resume";;
+			esac
+			printf "%d:%d" $(stat -Lc "0x%t 0x%T" "$resume_dev") >/sys/power/resume
 		else
 			echo "resume: no hibernation support found"
 		fi
 	fi
 
 	if [ "$KOPT_overlaytmpfs" = "yes" ]; then
+		# Create mountpoints
 		mkdir -p /media/root-ro /media/root-rw $sysroot/media/root-ro \
 			$sysroot/media/root-rw
-		mount -o ro $KOPT_root /media/root-ro
-		mount -t tmpfs root-tmpfs /media/root-rw
+		# Mount read-only underlying rootfs
+		rootflags="${KOPT_rootflags:+$KOPT_rootflags,}ro"
+		mount ${KOPT_rootfstype:+-t $KOPT_rootfstype} -o $rootflags \
+			$KOPT_root /media/root-ro
+		# Mount writable overlay tmpfs
+		overlaytmpfsflags="mode=0755,${KOPT_overlaytmpfsflags:+$KOPT_overlaytmpfsflags,}rw"
+		mount -t tmpfs -o $overlaytmpfsflags root-tmpfs /media/root-rw
+		# Create additional mountpoints and do the overlay mount
 		mkdir -p /media/root-rw/work /media/root-rw/root
-		mount -t overlay -o lowerdir=/media/root-ro,upperdir=/media/root-rw/root,workdir=/media/root-rw/work overlayfs $sysroot
+		mount -t overlay -o \
+			lowerdir=/media/root-ro,upperdir=/media/root-rw/root,workdir=/media/root-rw/work \
+			overlayfs $sysroot
 	else
 		if [ "$rootfstype" = "zfs" ]; then
 			prepare_zfs_root
@@ -519,7 +565,7 @@ if [ -n "$KOPT_root" ]; then
 		fi
 	done
 	sync
-	exec /bin/busybox switch_root $sysroot $chart_init "$KOPT_init" $KOPT_init_args
+	exec /bin/busybox switch_root $switch_root_opts $sysroot $chart_init "$KOPT_init" $KOPT_init_args
 	echo "initramfs emergency recovery shell launched"
 	exec /bin/busybox sh
 fi
@@ -539,7 +585,7 @@ eend $?
 
 # Setup network interfaces
 if $do_networking; then
-        configure_ip
+	configure_ip
 fi
 
 # early console?
@@ -613,6 +659,12 @@ if [ -f "$sysroot/etc/.default_boot_services" -o ! -f "$ovl" ]; then
 	rc_add savecache shutdown
 
 	rc_add firstboot default
+
+	# add openssh
+	if [ -n "$KOPT_ssh_key" ]; then
+		pkgs="$pkgs openssh"
+		rc_add sshd default
+	fi
 
 	rm -f "$sysroot/etc/.default_boot_services"
 fi
@@ -693,12 +745,6 @@ if [ "$KOPT_chart" = yes ]; then
 	pkgs="$pkgs acct"
 fi
 
-# add openssh
-if [ -n "$KOPT_ssh_key" ]; then
-	pkgs="$pkgs openssh"
-	rc_add sshd default
-fi
-
 # use swclock if no RTC is found
 if rtc_exists || [ "$(uname -m)" = "s390x" ]; then
 	rc_add hwclock boot
@@ -773,7 +819,7 @@ setup_inittab_console
 #fi
 
 ! [ -f "$sysroot"/etc/resolv.conf ] && [ -f /etc/resolv.conf ] && \
-  cp /etc/resolv.conf "$sysroot"/etc
+	cp /etc/resolv.conf "$sysroot"/etc
 
 # setup bootchart for switch_root
 chart_init=""
@@ -790,7 +836,7 @@ if [ ! -x "${sysroot}${KOPT_init}" ]; then
 fi
 
 #mympd build
-echo "Adding myMPD-os build service to firstboot"
+echo "Adding myMPDos build service to firstboot"
 sed -i -e 's|eend $rc|/media/vda1/mympdos/build.sh\n\teend $rc|' "${sysroot}/etc/init.d/firstboot"
 
 # switch over to new root
@@ -804,7 +850,7 @@ sync
 
 [ "$KOPT_splash" = "init" ] && echo exit > $sysroot/$splashfile
 echo ""
-exec /bin/busybox switch_root $sysroot $chart_init "$KOPT_init" $KOPT_init_args
+exec /bin/busybox switch_root $switch_root_opts $sysroot $chart_init "$KOPT_init" $KOPT_init_args
 
 [ "$KOPT_splash" != "no" ] && echo exit > $sysroot/$splashfile
 echo "initramfs emergency recovery shell launched"

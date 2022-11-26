@@ -45,7 +45,7 @@ then
 fi
 
 echo "Setup repositories and upgrade"
-echo "/media/vda1/apks" > /etc/apk/repositorie
+echo "/media/vda1/apks" > /etc/apk/repositories
 setup-apkrepos -1
 sed -r -e's/^#\s?(.*\d\/community)/\1/' -i /etc/apk/repositories
 while apk update 2>&1 | grep WARNING
