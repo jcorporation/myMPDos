@@ -5,7 +5,15 @@
 # https://github.com/jcorporation/myMPDos
 #
 
+#save script path and change to it
+STARTPATH=$(dirname "$(realpath "$0")")
+cd "$STARTPATH" || exit 1
+
+#get config
 source config || { echo "config not found"; exit 1; }
+
+#redefine TMPDIR to make it absolute
+TMPDIR="$STARTPATH/$TMPDIR"
 
 echo "Building for $ARCH"
 
@@ -32,38 +40,39 @@ umount_retry() {
 }
 
 install_tmp() {
-  if [ ! -f .mympdos-tmp ]
+  if [ ! -f "$TMPDIR/.mympdos-tmp" ]
   then
     install -d "$TMPDIR"
-    cd "$TMPDIR" || exit 1
-    touch .mympdos-tmp
+    touch "$TMPDIR/.mympdos-tmp"
   fi
+  cd "$TMPDIR" || exit 1
 }
 
 build_stage1() {
   echo "myMPDos build stage 1: Download"
-  if [ ! -f "$NETBOOT_ARCHIVE" ]
+  install_tmp
+  if [ ! -f "$TMPDIR/$NETBOOT_ARCHIVE" ]
   then
     echo "Getting $NETBOOT_ARCHIVE"
     wget -q "${ALPINE_MIRROR}/v${ALPINE_MAJOR_VERSION}/releases/${ARCH}/$NETBOOT_ARCHIVE" \
-      -O "$NETBOOT_ARCHIVE"
+      -O "$TMPDIR/$NETBOOT_ARCHIVE"
   fi
-  if [ ! -d netboot ]
+  if [ ! -d "$TMPDIR/netboot" ]
   then
-    install -d netboot
-    if ! tar -xzf "$NETBOOT_ARCHIVE" -C netboot
+    install -d "$TMPDIR/netboot"
+    if ! tar -xzf "$TMPDIR/$NETBOOT_ARCHIVE" -C "$TMPDIR/netboot"
     then
       echo "Can not extract $NETBOOT_ARCHIVE"
       exit 1
     fi
   fi
 
-  if [ ! -f "$ARCHIVE" ]
+  if [ ! -f "$TMPDIR/$ARCHIVE" ]
   then
     echo "Getting $ARCHIVE"
     wget -q "${ALPINE_MIRROR}/v${ALPINE_MAJOR_VERSION}/releases/${ARCH}/$ARCHIVE" \
-      -O "$ARCHIVE"
-    if ! tar -tzf "$ARCHIVE" > /dev/null
+      -O "$TMPDIR/$ARCHIVE"
+    if ! tar -tzf "$TMPDIR/$ARCHIVE" > /dev/null
     then
       echo "Can not extract $ARCHIVE"
       exit 1
@@ -73,97 +82,98 @@ build_stage1() {
 
 build_stage2() {
   echo "myMPDos build stage 2: Create build image"
-  dd if=/dev/zero of="$BUILDIMAGE" bs=1M count="$IMAGESIZEBUILD"
-  sfdisk "$BUILDIMAGE" <<< "1, ${BOOTPARTSIZEBUILD}, b, *"
-  sfdisk -a "$BUILDIMAGE" <<< ","
+  install_tmp
+  dd if=/dev/zero of="$TMPDIR/$BUILDIMAGE" bs=1M count="$IMAGESIZEBUILD"
+  sfdisk "$TMPDIR/$BUILDIMAGE" <<< "1, ${BOOTPARTSIZEBUILD}, b, *"
+  sfdisk -a "$TMPDIR/$BUILDIMAGE" <<< ","
 
   LOOP=$(sudo losetup --partscan --show -f "$BUILDIMAGE")
   [ "$LOOP" = "" ] && exit 1
   sudo mkfs.vfat "${LOOP}p1"
   sudo mkfs.ext4 "${LOOP}p2"
-  install -d mnt
-  sudo mount -ouid="$BUILDUSER" "${LOOP}p1" mnt || exit 1
-  if ! tar -xzf "$ARCHIVE" -C mnt
+  install -d "$TMPDIR/mnt"
+  sudo mount -ouid="$BUILDUSER" "${LOOP}p1" "$TMPDIR/mnt" || exit 1
+  if ! tar -xzf "$TMPDIR/$ARCHIVE" -C "$TMPDIR/mnt"
   then
-    echo "Extracting $ARCHIVE failed"
+    echo "Extracting $TMPDIR/$ARCHIVE failed"
     exit 1
   fi
-  cp "netboot/boot/$MODLOOP" mnt/boot
+  cp "$TMPDIR/netboot/boot/$MODLOOP" "$TMPDIR/mnt/boot"
 
   echo "Copy build scripts"
-  install -d mnt/mympdos
-  find mnt/mympdos/ -name \*~ -delete
-  cp -r ../../mympdos/build/* mnt/mympdos
+  install -d "$TMPDIR/mnt/mympdos"
+  find "$TMPDIR/mnt/mympdos/" -name \*~ -delete
+  cp -r "$STARTPATH"/mympdos/build/* "$TMPDIR/mnt/mympdos"
 
   echo "Copy existing packages"
-  install -d mnt/mympdos-apks
-  if [ -f "../../repository/$ARCH/APKINDEX.tar.gz" ]
+  install -d "$TMPDIR/mnt/mympdos-apks"
+  if [ -f "$STARTPATH/repository/$ARCH/APKINDEX.tar.gz" ]
   then
-    cp "../../repository/$ARCH/"*.apk mnt/mympdos-apks/
-    cp "../../repository/$ARCH/APKINDEX.tar.gz" mnt/mympdos-apks/
+    cp "$STARTPATH/repository/$ARCH/"*.apk "$TMPDIR/mnt/mympdos-apks/"
+    cp "$STARTPATH/repository/$ARCH/APKINDEX.tar.gz" "$TMPDIR/mnt/mympdos-apks/"
   else
     echo "No existing packages found"
   fi
-  if [ -f ../../keys/abuild.tgz ]
+  if [ -f "$STARTPATH/keys/abuild.tgz" ]
   then
     echo "Using keys for public repository"
-    cp ../../keys/abuild.tgz mnt/mympdos/
-  elif [ -f ../../apks/abuild.tgz ]
+    cp "$STARTPATH/keys/abuild.tgz" "$TMPDIR/mnt/mympdos/"
+  elif [ -f "$STARTPATH/apks/abuild.tgz" ]
   then
     echo "Using private build keys"
-    cp ../../apks/abuild.tgz mnt/mympdos/
+    cp "$STARTPATH/apks/abuild.tgz" "$TMPDIR/mnt/mympdos/"
   else
     echo "No saved abuild.tgz found"
   fi
-  date +%s > mnt/date
-  umount_retry mnt || exit 1
+  date +%s > "$TMPDIR/mnt/date"
+  umount_retry "$TMPDIR/mnt" || exit 1
   sudo losetup -d "${LOOP}"
 
   echo "Patching initramfs"
-  cd netboot || exit 1
-  rm -f init
+  cd "$TMPDIR/netboot" || exit 1
   gzip -dc "boot/$INITRAMFS" | cpio -id init
-  if ! patch init ../../../mympdos/netboot/init.patch
+  if ! patch init "$STARTPATH/mympdos/netboot/init.patch"
   then
     echo "Patching netboot init failed"
     exit 1
   fi
-  echo ./init | cpio -H newc -o | gzip >> "boot/$INITRAMFS"
-  cd ../.. || exit 1
+  echo ./init | cpio -H newc -o | gzip >> "$TMPDIR/netboot/boot/$INITRAMFS"
 }
 
 build_stage3() {
   echo "myMPDos build stage 3: Starting build"
+  install_tmp
   $QEMU \
     -M virt -m "$BUILDRAM" -cpu "$CPU" -smp "$BUILDCPUS" \
-    -kernel "netboot/boot/$KERNEL" -initrd "netboot/boot/$INITRAMFS" \
+    -kernel "$TMPDIR/netboot/boot/$KERNEL" -initrd "$TMPDIR/netboot/boot/$INITRAMFS" \
     -append "console=ttyAMA0 ip=dhcp" \
     -nographic \
-    -drive "file=${BUILDIMAGE},format=raw" \
+    -drive "file=$TMPDIR/${BUILDIMAGE},format=raw" \
     -nic user,id=mynet0,net=192.168.76.0/24,dhcpstart=192.168.76.9
 }
 
 build_stage4() {
   echo "myMPDos build stage 4: Saving packages"
-  if [ -d ../../apks ]
+  install_tmp
+  if [ -d "$STARTPATH/apks" ]
   then
-    BACKUPDATE=$(stat -c"%Y" ../../apks)
-    BACKUPDIR=../../apks.$(date -d@"$BACKUPDATE" +%Y%m%d_%H%M)
-    mv ../../apks "$BACKUPDIR"
+    BACKUPDATE=$(stat -c"%Y" "$STARTPATH/apks")
+    BACKUPDIR="$STARTPATH"/apks.$(date -d@"$BACKUPDATE" +%Y%m%d_%H%M)
+    mv "$STARTPATH/apks" "$BACKUPDIR"
   fi
-  install -d "../../apks/$ARCH"
-  LOOP=$(sudo losetup --partscan --show -f "$BUILDIMAGE")
+  install -d "$STARTPATH/apks/$ARCH"
+  LOOP=$(sudo losetup --partscan --show -f "$TMPDIR/$BUILDIMAGE")
   sudo mount -text4 "${LOOP}p2" mnt || exit 1
-  if [ -f mnt/build/abuild.tgz ]
+  if [ -f "$TMPDIR/mnt/build/abuild.tgz" ]
   then
-    cp mnt/build/abuild.tgz ../../apks/
+    cp "$TMPDIR/mnt/build/abuild.tgz" "$STARTPATH/apks/"
   else
     echo "No abuild.tgz found"
   fi
   if [ -f "mnt/build/packages/package/${ARCH}/APKINDEX.tar.gz" ]
   then
-    cp mnt/build/packages/package/"${ARCH}"/* "../../apks/$ARCH/"
-    cp mnt/build/packages/package/"${ARCH}"/* "../../repository/$ARCH/"
+    cp "$TMPDIR"/mnt/build/packages/package/"${ARCH}"/* "$STARTPATH/apks/$ARCH/"
+    cp "$TMPDIR"/mnt/build/packages/package/"${ARCH}"/* "$STARTPATH/repository/$ARCH/"
   else
     echo "No APKINDEX.tar.gz found"
   fi
@@ -173,51 +183,52 @@ build_stage4() {
 
 build_stage5() {
   echo "myMPDos build stage 5: Create image"
-  dd if=/dev/zero of="$IMAGE" bs=1M count="$IMAGESIZE"
-  sfdisk "$IMAGE" <<< "1, ${BOOTPARTSIZE}, b, *"
+  install_tmp
+  dd if=/dev/zero of="$TMPDIR/$IMAGE" bs=1M count="$IMAGESIZE"
+  sfdisk "$TMPDIR/$IMAGE" <<< "1, ${BOOTPARTSIZE}, b, *"
 
-  LOOP=$(sudo losetup --partscan --show -f "$IMAGE")
+  LOOP=$(sudo losetup --partscan --show -f "$TMPDIR/$IMAGE")
   [ "$LOOP" = "" ] && exit 1
   sudo mkfs.vfat "${LOOP}p1"
-  install -d mnt
-  sudo mount -ouid="$BUILDUSER" "${LOOP}p1" mnt || exit 1
-  if ! tar -xzf "$ARCHIVE" -C mnt
+  install -d "$TMPDIR/mnt"
+  sudo mount -ouid="$BUILDUSER" "${LOOP}p1" "$TMPDIR/mnt" || exit 1
+  if ! tar -xzf "$ARCHIVE" -C "$TMPDIR/mnt"
   then
     echo "Extracting $ARCHIVE failed"
     exit 1
   fi
-  cd ../../mympdos/overlay || exit 1
-  if ! tar -czf ../../$TMPDIR/mnt/mympdos-bootstrap.apkovl.tar.gz .
+  cd "$STARTPATH/mympdos/overlay" || exit 1
+  if ! tar -czf "$TMPDIR/mnt/mympdos-bootstrap.apkovl.tar.gz" .
   then
     echo "Creating overlay failed"
     exit 1
   fi
-  cd ../../$TMPDIR || exit 1
+  cd "$TMPDIR" || exit 1
   if [ "$PRIVATEIMAGE" = "true" ]
   then
     echo "Copy private bootstrap.txt"
-    cp ../../mympdos/bootstrap.txt mnt/
+    cp "$STARTPATH/mympdos/bootstrap.txt" "$TMPDIR/mnt/"
   else
     echo "Copy sample bootstrap.txt files"
-    cp ../../mympdos/bootstrap-*.txt mnt/
+    cp "$STARTPATH"/mympdos/bootstrap-*.txt "$TMPDIR/mnt/"
   fi
   echo "Copy mpd.conf configurations"
-  [ -f ../../mympdos/mpd.replace ] && cp ../../mympdos/mpd.replace mnt/
-  [ -f ../../mympdos/mpd.conf ] && cp ../../mympdos/mpd.conf mnt/
+  [ -f "$STARTPATH/mympdos/mpd.replace" ] && cp "$STARTPATH/mympdos/mpd.replace" "$TMPDIR/mnt/"
+  [ -f "$STARTPATH/mympdos/mpd.conf" ] && cp "$STARTPATH/mympdos/mpd.conf" "$TMPDIR/mnt/"
   echo "Copy usercfg.txt"
-  cp ../../mympdos/usercfg.txt mnt/
+  cp "$STARTPATH/mympdos/usercfg.txt" "$TMPDIR/mnt/"
   echo "Setting version to $VERSION"
-  echo "$VERSION" > mnt/myMPDos.version
+  echo "$VERSION" > "$TMPDIR/mnt/myMPDos.version"
 
   echo "Copy myMPDos archive signing public key"
-  install -d mnt/mympdos-apk-keys/
-  tar --wildcards --strip-components=1 -xzf ../../apks/abuild.tgz -C mnt/mympdos-apk-keys/ ".abuild/*.rsa.pub"
+  install -d "$TMPDIR/mnt/mympdos-apk-keys/"
+  tar --wildcards --strip-components=1 -xzf "$STARTPATH/apks/abuild.tgz" -C "$TMPDIR/mnt/mympdos-apk-keys/" ".abuild/*.rsa.pub"
 
   umount_retry mnt || exit 1
   sudo losetup -d "${LOOP}"
-  install -d ../images
-  mv "$IMAGE" ../images
-  [ "$COMPRESSIMAGE" = "true" ] && gzip "../../images/$IMAGE"
+  install -d "$STARTPATH/images"
+  mv "$TMPDIR/$IMAGE" "$STARTPATH/images"
+  [ "$COMPRESSIMAGE" = "true" ] && gzip "$STARTPATH/images/$IMAGE"
 
   echo ""
   echo "Image $IMAGE created successfully"
@@ -239,17 +250,18 @@ build_stage5() {
 cleanup() {
   umountbuild
   echo "Removing tmp"
-  [ -f $TMPDIR/.mympdos-tmp ] || exit 0
-  rm -fr $TMPDIR
+  [ -f "$TMPDIR/.mympdos-tmp" ] || exit 0
+  rm -fr "$TMPDIR"
   echo "Removing old images"
-  find ./images -name \*.img -mtime "$KEEPIMAGEDAYS" -delete
-  find ./images -name \*.img.gz -mtime "$KEEPIMAGEDAYS" -delete
+  find "$STARTPATH/images" -name \*.img -mtime "$KEEPIMAGEDAYS" -delete
+  find "$STARTPATH/images" -name \*.img.gz -mtime "$KEEPIMAGEDAYS" -delete
   echo "Removing old package directories"
-  find ./ -maxdepth 1 -type d -name apks.\* -mtime "$KEEPPACKAGEDAYS" -exec rm -rf {} \;
+  find "$STARTPATH" -maxdepth 1 -type d -name apks.\* -mtime "$KEEPPACKAGEDAYS" -exec rm -rf {} \;
 }
 
 umountbuild() {
   echo "Umounting build environment"
+  install_tmp
   LOOPS=$(losetup | grep "myMPDos" | awk '{print $1}')
   for LOOP in $LOOPS
   do
@@ -277,32 +289,26 @@ esac
 case "$1" in
   stage1|1)
     check_deps
-    install_tmp
     build_stage1
     ;;
   stage2|2)
     check_deps
-    install_tmp
     build_stage2
     ;;
   stage3|3)
     check_deps
-    install_tmp
     build_stage3
     ;;
   stage4|4)
     check_deps
-    install_tmp
     build_stage4
     ;;
   stage5|5)
     check_deps
-    install_tmp
     build_stage5
     ;;
   build|b)
     check_deps
-    install_tmp
     build_stage1
     build_stage2
     build_stage3
