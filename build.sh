@@ -163,7 +163,7 @@ build_stage4() {
   fi
   install -d "$STARTPATH/apks/$ARCH"
   LOOP=$(sudo losetup --partscan --show -f "$TMPDIR/$BUILDIMAGE")
-  sudo mount -text4 "${LOOP}p2" mnt || exit 1
+  sudo mount -text4 "${LOOP}p2" "$TMPDIR/mnt" || exit 1
   if [ -f "$TMPDIR/mnt/build/abuild.tgz" ]
   then
     cp "$TMPDIR/mnt/build/abuild.tgz" "$STARTPATH/apks/"
@@ -177,7 +177,7 @@ build_stage4() {
   else
     echo "No APKINDEX.tar.gz found"
   fi
-  umount_retry mnt || exit 1
+  umount_retry "$TMPDIR/mnt" || exit 1
   sudo losetup -d "${LOOP}"
 }
 
