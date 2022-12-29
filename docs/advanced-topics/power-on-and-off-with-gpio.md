@@ -20,7 +20,7 @@ myMPDos can be configured to shutdown the Raspberry Pi safely with a press of a 
 
 The WAKE_ON_GPIO powers on the the Raspberry Pi if you shortend pin 5 (GPIO 3 SCL) to ground. 
 
-Reference: https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2711_bootloader_config.md
+Reference: [https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2711_bootloader_config.md](https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2711_bootloader_config.md)
 
 ### Power off
 
