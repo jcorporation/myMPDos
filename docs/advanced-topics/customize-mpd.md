@@ -12,7 +12,7 @@ If the scripts finds a `/etc/mympdos/custom/mpd.conf` then this file is used as 
 
 ## Using the default template
 
-The script uses the template in `/etc/mympdos/templates/mympdos-mpd-(table|master).conf.tmpl and reads configuration values from `/etc/mympdos/mympdos.conf`.
+The script uses the template in `/etc/mympdos/templates/mympdos-mpd-(stable|master).conf.tmpl` and reads configuration values from `/etc/mympdos/mympdos.conf`.
 
 It processes the template and adds detected soundcards to the mpd configuration.
 
