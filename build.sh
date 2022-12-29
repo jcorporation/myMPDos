@@ -231,7 +231,7 @@ build_stage5() {
   [ "$COMPRESSIMAGE" = "true" ] && gzip "$STARTPATH/images/$IMAGE"
 
   echo ""
-  echo "Image $IMAGE created successfully"
+  echo "Image $STARTPATH/images/$IMAGE created successfully."
   if [ "$PRIVATEIMAGE" = "true" ]
   then
     echo ""
