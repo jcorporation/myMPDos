@@ -10,7 +10,7 @@ STARTPATH=$(dirname "$(realpath "$0")")
 cd "$STARTPATH" || exit 1
 
 source config || { echo "config not found"; exit 1; }
-IMAGE=$(ls -t "$STARTPATH"/images/myMPDos-"$ARCH"-*.img | head -1)
+IMAGE=$(ls -t "$STARTPATH"/images/myMPDos-"$ARCH"-*.img 2>/dev/null | head -1)
 
 if [ "$IMAGE" = "" ]
 then
