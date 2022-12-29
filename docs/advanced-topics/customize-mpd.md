@@ -6,11 +6,11 @@ title: Customize MPD
 
 The MPD configuration is created by the script `/usr/bin/configmpd.sh`. This script is executes as soon an audio device was changed (executed by mdev).
 
-# Fully custom mpd.conf
+## Fully custom mpd.conf
 
 If the scripts finds a `/etc/mympdos/custom/mpd.conf` then this file is used as mpd configuration file and no further customization appears.
 
-# Using the default template
+## Using the default template
 
 The script uses the template in `/etc/mympdos/templates/mympdos-mpd-(table|master).conf.tmpl and reads configuration values from `/etc/mympdos/mympdos.conf`.
 

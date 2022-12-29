@@ -11,3 +11,4 @@ If you run myMPD on an other device please drop me a note, so I can add it to th
 - Raspberry Pi 4B
 - Raspberry Pi 3B
 - Raspberry Pi 2B
+- Raspberry Pi Zero 2W
