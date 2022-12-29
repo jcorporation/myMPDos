@@ -6,7 +6,7 @@ title: Packages
 
 myMPDos has an extra repository for custom packages. This repository can also be used by standard Alpine Linux aarch64 installations.
 
-- URI: https://raw.githubusercontent.com/jcorporation/myMPDos/master/repository
+- URI: [https://raw.githubusercontent.com/jcorporation/myMPDos/master/repository](https://raw.githubusercontent.com/jcorporation/myMPDos/master/repository)
 - Signing public key: [mail@jcgames.de.rsa.pub](https://github.com/jcorporation/myMPDos/blob/master/mympdos/build/mympdos-base/mympdos-base/fs/etc/apk/keys/mail%40jcgames.de.rsa.pub)
 
 ## Stable packages
