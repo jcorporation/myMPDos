@@ -220,9 +220,16 @@ build_stage5() {
   echo "Setting version to $VERSION"
   echo "$VERSION" > "$TMPDIR/mnt/myMPDos.version"
 
-  echo "Copy myMPDos archive signing public key"
   install -d "$TMPDIR/mnt/mympdos-apk-keys/"
+  echo "Copy local archive signing public key"
   tar --wildcards --strip-components=1 -xzf "$STARTPATH/apks/abuild.tgz" -C "$TMPDIR/mnt/mympdos-apk-keys/" ".abuild/*.rsa.pub"
+  
+  if [ -f "$STARTPATH/repository/mail@jcgames.de.rsa.pub" ] &&
+     [ ! -f "$TMPDIR/mnt/mympdos-apk-keys/mail@jcgames.de.rsa.pub" ]
+  then
+    echo "Copy myMPDos archive signing public key"
+    cp "$STARTPATH/repository/mail@jcgames.de.rsa.pub" "$TMPDIR/mnt/mympdos-apk-keys/"
+  fi
 
   umount_retry mnt || exit 1
   sudo losetup -d "${LOOP}"
