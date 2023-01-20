@@ -170,7 +170,7 @@ build_stage4() {
   else
     echo "No abuild.tgz found"
   fi
-  if [ -f "mnt/build/packages/package/${ARCH}/APKINDEX.tar.gz" ]
+  if [ -f "$TMPDIR/mnt/build/packages/package/${ARCH}/APKINDEX.tar.gz" ]
   then
     cp "$TMPDIR"/mnt/build/packages/package/"${ARCH}"/* "$STARTPATH/apks/$ARCH/"
     cp "$TMPDIR"/mnt/build/packages/package/"${ARCH}"/* "$STARTPATH/repository/$ARCH/"
