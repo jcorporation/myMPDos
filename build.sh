@@ -131,6 +131,7 @@ build_stage2() {
 
   echo "Patching initramfs"
   cd "$TMPDIR/netboot" || exit 1
+  rm -f "init"
   gzip -dc "boot/$INITRAMFS" | cpio -id init
   if ! patch init "$STARTPATH/mympdos/netboot/init.patch"
   then
