@@ -233,7 +233,7 @@ fi
 
 echo "Creating repository index"
 rm -f packages/package/aarch64/APKINDEX.tar.gz
-apk index --arch aarch64 --no-warnings -d "myMPDos" -o packages/package/aarch64/APKINDEX.tar.gz packages/package/aarch64/*.apk
+apk index --rewrite-arch aarch64 --no-warnings -d "myMPDos" -o packages/package/aarch64/APKINDEX.tar.gz packages/package/aarch64/*.apk
 abuild-sign -k /usr/build/$(echo .abuild/*.rsa) packages/package/aarch64/APKINDEX.tar.gz
 
 [ "$POWEROFF" = "1" ] && poweroff
