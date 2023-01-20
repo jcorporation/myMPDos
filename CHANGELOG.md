@@ -10,7 +10,7 @@ This release is build up on Alpine Linux 3.17.1.
 
 ### Changelog
 
-- Alpine Linx 3.17.1
+- Alpine Linux 3.17.1
 - myMPD 10.2.0
 - MPD 0.23.12
 
