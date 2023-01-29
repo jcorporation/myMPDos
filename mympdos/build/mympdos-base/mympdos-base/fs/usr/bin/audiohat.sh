@@ -8,7 +8,7 @@ OVERLAY_FILE="/tmp/overlays.txt"
 echo "Downloading audio hats description"
 cd /tmp
 wget -q https://raw.githubusercontent.com/raspberrypi/firmware/master/boot/overlays/README \
-  -O - | grep -B1 "audio card" | grep "^Name" | awk '{print $2}' > "$OVERLAY_FILE"
+  -O - | grep -B1 -E "(audio card|soundcard|sound card)" | grep "^Name" | awk '{print $2}' > "$OVERLAY_FILE"
 
 if [ ! -s "$OVERLAY_FILE" ]
 then
