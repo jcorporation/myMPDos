@@ -4,7 +4,18 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
-## myMPD v1.1.1 (2022-01-19)
+## myMPD v1.1.2 (2023-02-17)
+
+This release is build up on Alpine Linux 3.17.2.
+
+### Changelog
+
+- Alpine Linux 3.17.2
+- myMPD 10.2.3
+
+***
+
+## myMPD v1.1.1 (2023-01-19)
 
 This release is build up on Alpine Linux 3.17.1.
 
