@@ -345,7 +345,7 @@ apk upgrade
 
 echo "Installing packages"
 PKGLIST_ADV="usbutils raspberrypi busybox-extras net-tools mpg123 mygpiod mympdos-musicdb-scripts"
-PKGLIST="mympdos-base mympd mympdos-libmpdclient mpc doas alsa-utils"
+PKGLIST="mympdos-base mympd mympdos-libmpdclient mympdos-mpc doas alsa-utils"
 [ "$BT_ENABLE" = "true" ] && PKGLIST="$PKGLIST bluez bluez-alsa"
 [ "$ENABLE_RNGD" = "true" ] && PKGLIST="$PKGLIST rng-tools"
 [ "$ADVANCED_SOFTWARE" = "true" ] && PKGLIST="$PKGLIST $PKGLIST_ADV"

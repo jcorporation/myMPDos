@@ -15,6 +15,7 @@ B_MYMPD="1"
 B_MYMPD_BRANCH="master"
 #B_MYMPD_BRANCH="devel"
 B_LIBMPDCLIENT="1"
+B_MPC="1"
 B_MPD_STABLE="1"
 B_MPD_MASTER="1"
 B_MYGPIOD="1"
@@ -108,8 +109,8 @@ then
   su build -c "rm -rf libmpdclient"
   su build -c "cp -r /media/vda1/mympdos/mympdos-libmpdclient ."
   cd mympdos-libmpdclient || exit 1
-  su build -c "git clone -b master --depth=1 https://github.com/MusicPlayerDaemon/libmpdclient.git"
-  mv libmpdclient "mympdos-libmpdclient-${B_LIBMPDCLIENT_VER}"
+  su build -c "git clone -b libmympdclient --depth=1 https://github.com/jcorporation/libmympdclient.git"
+  mv libmympdclient "mympdos-libmpdclient-${B_LIBMPDCLIENT_VER}"
   tar -czf mympdos-libmpdclient.tar.gz "mympdos-libmpdclient-${B_LIBMPDCLIENT_VER}"
   rm -fr "mympdos-libmpdclient-${B_LIBMPDCLIENT_VER}"
   su build -c "abuild checksum"
@@ -121,6 +122,23 @@ fi
 echo "/usr/build/packages/package/" >> /etc/apk/repositories
 apk update
 apk add mympdos-libmpdclient
+
+MPC_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-mpc)
+B_MPC_VER=$(get_pkgver /media/vda1/mympdos/mympdos-mpc)
+if [ "$B_MPC" = "1" ] && [ ! -f "packages/package/$ARCH/$MPC_PACKAGE" ]
+then
+  echo "Building mpc"
+  su build -c "rm -rf mympdos-mpc"
+  su build -c "cp -r /media/vda1/mympdos/mympdos-mpc ."
+  cd mympdos-mpc || exit 1
+  su build -c "git clone -b master --depth=1 https://github.com/jcorporation/mpc.git"
+  mv "mpc" "mympdos-mpc-${B_MPC_VER}"
+  tar -czf mympdos-mpc.tar.gz "mympdos-mpc-${B_MPC_VER}"
+  rm -fr "mympdos-mpc-${B_MPC_VER}"
+  su build -c "abuild checksum"
+  su build -c "abuild -r"
+  cd ..
+fi
 
 if [ "$B_MYMPD" = "1" ]
 then

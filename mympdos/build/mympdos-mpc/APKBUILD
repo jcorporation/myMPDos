@@ -1,0 +1,39 @@
+# Maintainer: Juergen Mang <mail@jcgames.de>
+# Based on: https://git.alpinelinux.org/aports/tree/community/mpc/APKBUILD?h=3.18-stable
+pkgname=mympdos-mpc
+pkgver=0.34
+pkgrel=0
+pkgdesc="Minimalist command line interface to MPD"
+url="https://www.musicpd.org/clients/mpc/"
+arch="all"
+license="GPL-2.0-or-later"
+makedepends="mympdos-libmpdclient-dev meson check-dev"
+subpackages="$pkgname-bash-completion:bashcomp:noarch $pkgname-doc"
+source="mympdos-mpc.tar.gz"
+
+build() {
+	abuild-meson \
+		-Dtest=true \
+		. output
+	meson compile ${JOBS:+-j ${JOBS}} -C output
+}
+
+check() {
+	meson test --no-rebuild --print-errorlogs -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+bashcomp() {
+	depends=""
+	pkgdesc="Bash completions for $pkgname"
+	install_if="$pkgname=$pkgver-r$pkgrel bash-completion"
+
+	mkdir -p "$subpkgdir"/usr/share/bash-completion/completions
+	mv "$pkgdir"/usr/share/doc/mpc/contrib/mpc-completion.bash \
+		"$subpkgdir"/usr/share/bash-completion/completions/$pkgname
+}
+
+sha512sums=""

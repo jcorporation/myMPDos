@@ -4,6 +4,19 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
+## myMPDos v1.2.2 (not yet released)
+
+This release adds bleeding edge versions of libmpdclient and mpc to the repositories.
+
+Replace mympdos-mpd-stable with mympdos-mpd-master to enjoy the latest features.
+
+### Changelog
+
+- Replace libmpdclient with [libmympdclient](https://github.com/jcorporation/libmympdclient)
+- Add [mympdos-mpc](https://github.com/jcorporation/mpc)
+
+***
+
 ## myMPDos v1.2.1 (2023-06-14)
 
 This release is build up on Alpine Linux 3.18.2.
