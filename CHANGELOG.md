@@ -4,7 +4,7 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
-## myMPDos v1.2.2 (not yet released)
+## myMPDos v1.2.2 (2023-07-23)
 
 This release adds bleeding edge versions of libmpdclient and mpc to the repositories.
 
