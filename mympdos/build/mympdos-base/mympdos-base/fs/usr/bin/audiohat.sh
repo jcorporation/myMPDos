@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# SPDX-License-Identifier: GPL-3.0-or-later
+# myMPDos (c) 2020-2023 Juergen Mang <mail@jcgames.de>
+# https://github.com/jcorporation/myMPDos
+
 BOOTMEDIA="/media/mmcblk0p1"
 USERCFG="$BOOTMEDIA/usercfg.txt"
 TMP_USERCFG="/tmp/usercfg.txt"

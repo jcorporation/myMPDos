@@ -1,5 +1,12 @@
 #!/bin/sh
-#
+
+# SPDX-License-Identifier: GPL-3.0-or-later
+# myMPDos (c) 2020-2023 Juergen Mang <mail@jcgames.de>
+# https://github.com/jcorporation/myMPDos
+
+# Upgrades alpine to a new version
+
+# Set following environment variables to set the version to update:
 #export V_MAJOR=3
 #export V_MINOR=14
 #export V_POINT=0

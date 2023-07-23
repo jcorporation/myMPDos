@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# SPDX-License-Identifier: GPL-3.0-or-later
+# myMPDos (c) 2020-2023 Juergen Mang <mail@jcgames.de>
+# https://github.com/jcorporation/myMPDos
+
 CPU_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp)
 GPU_TEMP=$(/opt/vc/bin/vcgencmd measure_temp | cut -d= -f2)
 VOLTS_CORE=$(/opt/vc/bin/vcgencmd measure_volts core | cut -d= -f2)

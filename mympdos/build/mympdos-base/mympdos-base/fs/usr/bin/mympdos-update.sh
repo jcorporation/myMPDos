@@ -1,13 +1,19 @@
 #!/bin/sh
 
+# SPDX-License-Identifier: GPL-3.0-or-later
+# myMPDos (c) 2020-2023 Juergen Mang <mail@jcgames.de>
+# https://github.com/jcorporation/myMPDos
+
+# Updates myMPDos and installs updates packages
+
 if [ -e /dev/mmcblk0 ]
 then
-	BOOTMEDIA="/media/mmcblk0p1"
-	BOOTDEV="/dev/mmcblk0p1"
+  BOOTMEDIA="/media/mmcblk0p1"
+  BOOTDEV="/dev/mmcblk0p1"
 elif [ -e /dev/vda ]
 then
-	BOOTMEDIA="/media/vda1"
-	BOOTDEV="/dev/vda1"
+  BOOTMEDIA="/media/vda1"
+  BOOTDEV="/dev/vda1"
 else
   echo "Unsupported drive"
   exit 1
