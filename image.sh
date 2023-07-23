@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-# myMPDos (c) 2020-2022 Juergen Mang <mail@jcgames.de>
+# myMPDos (c) 2020-2023 Juergen Mang <mail@jcgames.de>
 # https://github.com/jcorporation/myMPDos
 #
 
