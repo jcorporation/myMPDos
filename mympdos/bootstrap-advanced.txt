@@ -66,7 +66,6 @@ IP_TYPE="dhcp"
 #IP_DNS_DOMAIN=""
 #IP_DNS_SEARCH=""
 #IP_COPY_DHCP_TO_STATIC="true"
-DISABLE_IPV6="true"
 
 #Pi settings
 #Install bluetooth packages

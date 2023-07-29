@@ -4,6 +4,12 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
+## myMPDos v1.2.3 (2023-07-29)
+
+This release enables IPv6.
+
+***
+
 ## myMPDos v1.2.2 (2023-07-23)
 
 This release adds bleeding edge versions of libmpdclient and mpc to the repositories.

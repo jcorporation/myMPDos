@@ -49,7 +49,6 @@ BT_INTERNAL="false"
 ADVANCED_SOFTWARE="true"
 TIMEZONE="UTC"
 ENABLE_RNGD="true"
-DISABLE_IPV6="true"
 DISABLE_HDMI="false"
 UPSAMPLING="false"
 RESAMPLER="libsamplerate"
@@ -374,7 +373,6 @@ mount -oremount,ro "$DATAMEDIA"
 echo "Setting defaults"
 install -d /var/lib/mpd/cache -o mpd -g mpd
 cp /usr/local/defaults/etc/doas.conf /etc/doas.d/mympd.conf
-[ "$DISABLE_IPV6" = "true" ] && cp /usr/local/defaults/etc/sysctl_disable_ipv6.conf /etc/sysctl.d/disable_ipv6.conf
 
 if [ "$ENABLE_CONFIGMPD" = "true" ]
 then
