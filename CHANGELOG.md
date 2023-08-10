@@ -4,6 +4,16 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
+## myMPDos v1.2.4 (2023-08-10)
+
+This release is build up on Alpine Linux 3.18.3.
+
+### Changelog
+
+- Alpine Linux 3.18.3
+
+***
+
 ## myMPDos v1.2.3 (2023-07-29)
 
 This release enables IPv6.
