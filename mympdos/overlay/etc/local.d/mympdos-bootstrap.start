@@ -26,7 +26,8 @@ BOOTMEDIA="/media/${SDCARD}${BOOTPART}"
 DATADEV="/dev/${SDCARD}${DATAPART}"
 DATAMEDIA="/media/${SDCARD}${DATAPART}"
 LBUMEDIA="${SDCARD}${DATAPART}"
-REBOOT="1"
+REBOOT=1
+NETWORK_CHECK=1
 
 read -r VERSION < "$BOOTMEDIA/myMPDos.version" || { echo "$BOOTMEDIA/myMPDos.version not found"; exit 1; }
 
@@ -273,20 +274,23 @@ then
     fi
 fi
 
-#printf "Checking network connectivity"
-#I=0
-#while ! ping -c 1 dl-cdn.alpinelinux.org > /dev/null 2>&1
-#do
-#    printf "."
-#    I=$((I+1))
-#    if [ "$I" = "15" ]
-#    then
-#        echo "ERROR"
-#        exit 1
-#    fi
-#    sleep 2
-#done
-#echo "OK"
+if [ "$NETWORK_CHECK" -eq 1 ]
+then
+    printf "Checking network connectivity"
+    I=0
+    while ! ping -c 1 dl-cdn.alpinelinux.org > /dev/null 2>&1
+    do
+        printf "."
+        I=$((I+1))
+        if [ "$I" = "15" ]
+        then
+            echo "ERROR"
+            exit 1
+        fi
+        sleep 2
+    done
+    echo "OK"
+fi
 
 printf "Setup NTP"
 I=0
@@ -505,4 +509,4 @@ fi
 alsactl store
 lbu_commit -v
 echo "myMPDos installation is finished"
-[ "$REBOOT" = "1" ] && reboot
+[ "$REBOOT" -eq 1 ] && reboot
