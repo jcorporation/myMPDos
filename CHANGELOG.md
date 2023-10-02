@@ -4,6 +4,14 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
+## myMPDos v1.3.0 (not yet released)
+
+This release is build up on Alpine Linux 3.18.4.
+
+### Changelog
+
+- Install myMPD scripts through bootstrap script #28
+
 ## myMPDos v1.2.4 (2023-08-10)
 
 This release is build up on Alpine Linux 3.18.3.
@@ -156,7 +164,6 @@ This release updates the base to Alpine Linux 3.15.1.
 
 - default usercfg.txt file to support RPI Zero and 2B
 - based on Alpine Linux 3.15.1
-
 
 ***
 
