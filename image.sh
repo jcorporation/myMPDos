@@ -55,7 +55,7 @@ startimage() {
         -initrd "$STARTPATH/tmp/$ARCH/netboot/boot/$INITRAMFS" \
         -append "console=ttyAMA0 ip=dhcp" \
         -nographic \
-        -drive "file=$STARTPATH/${IMAGE},format=raw" \
+        -drive "file=${IMAGE},format=raw" \
         -nic user,id=mynet0,net=192.168.76.0/24,dhcpstart=192.168.76.9
 }
 
