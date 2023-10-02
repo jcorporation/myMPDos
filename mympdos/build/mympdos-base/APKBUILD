@@ -1,13 +1,12 @@
 # Maintainer: Juergen Mang <mail@jcgames.de>
 pkgname=mympdos-base
-pkgver=0.8.1
+pkgver=0.9.0
 pkgrel=0
 pkgdesc="myMPDos base package"
 url="https://github.com/jcorporation/myMPDos"
 arch="noarch"
 license="GPL-3.0-or-later"
 makedepends=""
-install="$pkgname.pre-install $pkgname.post-install"
 source="$pkgname-$pkgver.tar.gz"
 options="!check" #No testsuite exists
 
@@ -15,7 +14,6 @@ package() {
 	install -d "$pkgdir"
 	cp -a "$srcdir"/$pkgname-$pkgver/fs/* "$pkgdir/"
 	chown -R root.root "$pkgdir"/*
-	chown -R mympd.mympd "$pkgdir/var/lib/mympd"
 	chmod 755 "$pkgdir"/etc/local.d/*.start
 	chmod 755 "$pkgdir"/usr/bin/*.sh
 }

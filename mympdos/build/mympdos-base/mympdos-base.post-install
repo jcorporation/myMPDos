@@ -1,5 +1,0 @@
-#!/bin/sh
-
-chown mympd.mympd /var/lib/mympd/scripts
-
-exit 0

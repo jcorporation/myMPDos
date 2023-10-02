@@ -146,8 +146,8 @@ for CARD in $(grep "^\s\d" /proc/asound/cards | sed -r 's/^\s(\d+)\s.*/\1/')
 do
   for F in $(amixer -c "$CARD" | grep -B1 pvolume | grep "mixer control" | sed -r "s/.+'([^']+)'.*/\1/")
   do
-	  echo "$CARD:$F"
-	  amixer -c "$CARD" set "$F" 100% unmute > /dev/null
+    echo "$CARD:$F"
+    amixer -c "$CARD" set "$F" 100% unmute > /dev/null
   done
 done
 
