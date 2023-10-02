@@ -326,10 +326,10 @@ setup-apkrepos -1
 sed -r -e's/^#\s?(.*\d\/community)/\1/' -i /etc/apk/repositories
 while apk update 2>&1 | grep WARNING
 do
-  echo "Error...trying new random repository"
-  echo "${BOOTMEDIA}/apks" > /etc/apk/repositories
-  setup-apkrepos -r
-  sed -r -e's/^#\s?(.*\d\/community)/\1/' -i /etc/apk/repositories
+    echo "Error...trying new random repository"
+    echo "${BOOTMEDIA}/apks" > /etc/apk/repositories
+    setup-apkrepos -r
+    sed -r -e's/^#\s?(.*\d\/community)/\1/' -i /etc/apk/repositories
 done
 
 echo "$MYMPDOS_REPOSITORY" >> /etc/apk/repositories
