@@ -19,27 +19,3 @@ This scripts are installed by the mympdos-base package in the directory `/usr/bi
 | saveshutdown.sh | Save settings and poweroff |
 | status.sh | Shows status informations from your raspberry |
 {: .table .table-sm }
-
-# Running a custom script from myMPD client
-
-To run a script from the myMPD client, the script must be configured to be able to run through `doas`.
-A script located at `~/my-script.sh` will typically have an absolute path of `/root/my-script.sh`.
-First, configure the script for use with `doas`:
-
-```
-# Append line to /etc/doas.d/mympd.conf
-permit nopass mympd cmd /root/my-script.sh
-```
-
-Next, check compilation of `doas`:
-
-```
-doas -C /etc/doas.d/mympd.conf
-```
-
-Finally, add the script in the myMPD client, calling it with `doas`:
-
-```
-result = mympd.os_capture("doas /root/my-script.sh")
-return result
-```
