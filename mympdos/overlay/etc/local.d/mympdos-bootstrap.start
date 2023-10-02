@@ -26,7 +26,6 @@ BOOTMEDIA="/media/${SDCARD}${BOOTPART}"
 DATADEV="/dev/${SDCARD}${DATAPART}"
 DATAMEDIA="/media/${SDCARD}${DATAPART}"
 LBUMEDIA="${SDCARD}${DATAPART}"
-ARCH=$(uname -m)
 REBOOT="1"
 
 read -r VERSION < "$BOOTMEDIA/myMPDos.version" || { echo "$BOOTMEDIA/myMPDos.version not found"; exit 1; }
@@ -59,23 +58,23 @@ ENABLE_MIXER="true"
 SOFTWARE_MIXER_FALLBACK="false"
 if [ -f "$BOOTMEDIA/bootstrap.txt" ]
 then
-    source "$BOOTMEDIA/bootstrap.txt"
+    . "$BOOTMEDIA/bootstrap.txt"
 else
     echo "No bootstrap.txt found, using defaults"
     WLAN_ENABLE="false"
 fi
 
-[ "WLAN_SSID" = "" ] && WLAN_ENABLE="false"
+[ -z "$WLAN_SSID" ] && WLAN_ENABLE="false"
 
 #Setup sdcard
 wait_for_device()
 {
-    echo -n "Waiting for $1 "
+    printf "Waiting for %s" "$1"
     #first check device exists and is a block device
     I=0
     while [ ! -b "$1" ]
     do
-        echo -n "."
+        printf "."
         I=$((I+1))
         sleep 1
         if [ "$I" = "10" ]
@@ -90,7 +89,7 @@ wait_for_device()
     then
         while [ "$(blkid "$1")" = "" ]
         do
-            echo -n "."
+            printf "."
             I=$((I+1))
             sleep 1
             if [ "$I" = "10" ]
@@ -111,14 +110,14 @@ then
     umount "$BOOTDEV"
     echo "Creating data partition on sd card"
     fdisk "/dev/$SDCARD" <<-EOF
-    n
-    p
-    2
+	n
+	p
+	2
 
 
-    w
+	w
 
-    EOF
+	EOF
     #wait for devices to appear
     if ! wait_for_device "$BOOTDEV" FS
     then
@@ -180,28 +179,28 @@ find_wlan_device()
 write_interfaces_dhcp()
 {
     cat <<-EOF > /etc/network/interfaces
-    auto lo
-    iface lo inet loopback
+	auto lo
+	iface lo inet loopback
 
-    auto ${IFACE}
-    iface ${IFACE} inet dhcp
-            hostname myMPDos
-    EOF
+	auto ${IFACE}
+	iface ${IFACE} inet dhcp
+		hostname myMPDos
+	EOF
 }
 
 write_interfaces_static()
 {
     cat <<-EOF > /etc/network/interfaces
-    auto lo
-    iface lo inet loopback
+	auto lo
+	iface lo inet loopback
 
-    auto ${IFACE}
-    iface ${IFACE} inet static
-                    address $IP_ADDRESS
-                    netmask $IP_NETMASK
-                    gateway $IP_GATEWAY
-            hostname $IP_HOSTNAME
-    EOF
+	auto ${IFACE}
+	iface ${IFACE} inet static
+		address $IP_ADDRESS
+		netmask $IP_NETMASK
+		gateway $IP_GATEWAY
+		hostname $IP_HOSTNAME
+	EOF
 }
 
 if [ "$WLAN_ENABLE" = "true" ]
@@ -212,12 +211,12 @@ then
     then
         apk add wpa_supplicant
         cat <<-EOF > /etc/wpa_supplicant/wpa_supplicant.conf
-        network={
-                        ssid="$WLAN_SSID"
-                        key_mgmt=$WLAN_KEYMGMT
-                        psk="$WLAN_PSK"
-        }
-        EOF
+		network={
+			ssid="$WLAN_SSID"
+			key_mgmt=$WLAN_KEYMGMT
+			psk="$WLAN_PSK"
+		}
+		EOF
         rc-service wpa_supplicant start
         rc-update add wpa_supplicant boot
     else
@@ -274,26 +273,26 @@ then
     fi
 fi
 
-echo -n "Checking network connectivity"
-I=0
-while ! ping -c 1 dl-cdn.alpinelinux.org > /dev/null 2>&1
-do
-    echo -n "."
-    I=$((I+1))
-    if [ "$I" = "15" ]
-    then
-        echo "ERROR"
-        exit 1
-    fi
-    sleep 2
-done
-echo "OK"
+#printf "Checking network connectivity"
+#I=0
+#while ! ping -c 1 dl-cdn.alpinelinux.org > /dev/null 2>&1
+#do
+#    printf "."
+#    I=$((I+1))
+#    if [ "$I" = "15" ]
+#    then
+#        echo "ERROR"
+#        exit 1
+#    fi
+#    sleep 2
+#done
+#echo "OK"
 
-echo -n "Setup NTP"
+printf "Setup NTP"
 I=0
 while ! ntpd -n -q -p pool.ntp.org > /dev/null 2>&1
 do
-    echo -n "."
+    printf "."
     I=$((I+1))
     [ "$I" = "5" ] && break;
 done
@@ -311,9 +310,9 @@ echo "Setting keymap to ${KEYBOARD_LAYOUT} ${KEYBOARD_VARIANT}"
 apk add kbd-bkeymaps
 if [ -f "/usr/share/bkeymaps/${KEYBOARD_LAYOUT}/${KEYBOARD_VARIANT}.bmap.gz" ]
 then
-  setup-keymap "$KEYBOARD_LAYOUT" "$KEYBOARD_VARIANT"
+    setup-keymap "$KEYBOARD_LAYOUT" "$KEYBOARD_VARIANT"
 else
-  echo "Invalid keyboard layout or variant configured."
+    echo "Invalid keyboard layout or variant configured."
     exit 1
 fi
 apk del kbd-bkeymaps
@@ -372,7 +371,7 @@ mount -oremount,ro "$DATAMEDIA"
 
 echo "Installing myMPD scripts"
 install -d /var/lib/mympd/scripts
-cp /usr/local/defaults/mympd-scripts/*.lua /var/lib/mympd/scripts
+cp -v /usr/local/defaults/mympd-scripts/*.lua /var/lib/mympd/scripts
 chown -R mympd.mympd /var/lib/mympd/scripts
 
 echo "Setting defaults"
@@ -439,7 +438,7 @@ rc-update add mympd default
 if [ "$ROOT_PASSWORD" != "" ]
 then
   echo "Setting root password"
-  echo -e "$ROOT_PASSWORD\n$ROOT_PASSWORD\n" | passwd
+  printf "%s\n%s\n" "$ROOT_PASSWORD" "$ROOT_PASSWORD" | passwd
 fi
 
 mount -o remount,rw "$BOOTMEDIA"
@@ -497,7 +496,7 @@ echo "LBU_MEDIA=$LBUMEDIA" > /etc/lbu/lbu.conf
 LBU_INCLUDES="/var/lib/mympd /var/lib/mpd /var/lib/alsa"
 for INCLUDE in $LBU_INCLUDES
 do
-  lbu_include "$INCLUDE"
+    lbu_include "$INCLUDE"
 done
 if [ "$BT_ENABLE" = "true" ]
 then
