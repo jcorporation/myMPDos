@@ -1,12 +1,12 @@
-#
-#Simple bootstrap configuration file for myMPDos
-#
+# Simple bootstrap configuration file for myMPDos
+# For all available options refer to bootstrap-advanced.txt
+
 ROOT_PASSWORD="your_secure_password"
 TIMEZONE="UTC"
 
-#If WLAN is not set to true eth0 is configured
+# If WLAN_ENABLED is not set to true eth0 is configured
 WLAN_ENABLE="true"
 WLAN_SSID="ssid of your wlan"
 WLAN_PSK="psk of the ssid"
 
-AUDIOHAT="allo-digione"
+#AUDIOHAT="allo-digione"
