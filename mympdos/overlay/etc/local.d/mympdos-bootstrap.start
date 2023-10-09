@@ -493,6 +493,25 @@ do
 done
 
 echo "Create myMPD configuration"
+export MYMPD_ACL
+export MYMPD_ALBUM_GROUP_TAG
+export MYMPD_ALBUM_MODE
+export MYMPD_COVERCACHE_KEEP_DAYS
+export MYMPD_HTTP
+export MYMPD_HTTP_HOST
+export MYMPD_HTTP_PORT
+export MYMPD_LOGLEVEL
+export MYMPD_LUALIBS
+export MYMPD_URI
+export MYMPD_SAVE_CACHES
+export MYMPD_SCRIPTACL
+export MYMPD_STICKERS
+export MYMPD_SSL
+export MYMPD_SSL_PORT
+export MYMPD_SSL_SAN
+export MYMPD_CUSTOM_CERT
+export MYMPD_SSL_CERT
+export MYMPD_SSL_KEY
 mympd -c
 
 echo "Saving configuration"

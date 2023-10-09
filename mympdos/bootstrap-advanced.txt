@@ -1,34 +1,46 @@
-#
-#Advanced bootstrap configuration file for myMPDos
-#
+# Advanced bootstrap configuration file for myMPDos
+
 ROOT_PASSWORD="your_secure_password"
 
 TIMEZONE="UTC"
 
-#Keybord layout
+# Keybord layout
 KEYBOARD_LAYOUT="de"
 KEYBOARD_VARIANT="de-nodeadkeys"
 
-#Enables some magic
+# Automounting of USB devices
 ENABLE_AUTOMOUNT="true"
+
+# Automatic MPD configuration (outputs)
 ENABLE_CONFIGMPD="true"
 
-#Software
+# Software
 #MPD version
 #1 = MPD stable
 #2 = MPD master branch - unstable
 MPD_VERSION="1"
 
-#Mixer
+# Add packages: usbutils raspberrypi busybox-extras net-tools
+ADVANCED_SOFTWARE="true"
+
+# Add user defined packages (space separated list)
+EXTRA_SOFTWARE=""
+
+# Services to start
+ENABLE_CRON="false"
+ENABLE_RNGD="true"
+
+# MPD settings
+# Mixer
 ENABLE_MIXER="true"
 SOFTWARE_MIXER_FALLBACK="false"
 
-#Upsampling
+# Upsampling
 UPSAMPLING="false"
 AUDIO_OUTPUT_FORMAT="192000:24:2"
 SAMPLERATE_CONVERTER="soxr very high"
 
-#Or use the Resampler
+# Or use the Resampler
 RESAMPLER="libsamplerate"
 LIBSAMPLERATE_TYPE="0"
 
@@ -36,25 +48,16 @@ LIBSAMPLERATE_TYPE="0"
 #SOXR_QUALITY="high"
 #SOXR_THREADS="1"
 
-#add packages: usbutils raspberrypi busybox-extras net-tools
-ADVANCED_SOFTWARE="true"
-
-#add user defined packages
-EXTRA_SOFTWARE=""
-
-#services to start
-ENABLE_CRON="false"
-ENABLE_RNGD="true"
-
-#Network settings
+# Network settings
 IP_HOSTNAME="myMPDos"
-#If WLAN is not set to true eth0 is configured
+#If WLAN_ENABLED is not set to true eth0 is configured
 WLAN_ENABLE="true"
 WLAN_SSID="ssid of your wlan"
 WLAN_KEYMGMT="WPA-PSK"
 WLAN_PSK="psk of the ssid"
 IP_TYPE="dhcp"
-#Comment above line and uncomment other IP_* settings to configure a static ip
+#IP_COPY_DHCP_TO_STATIC="true"
+#Comment IP_TYPE line and uncomment other IP_* settings to configure a static ip
 #IP_TYPE="static"
 #IP_ADDRESS=""
 #IP_NETMASK=""
@@ -65,19 +68,40 @@ IP_TYPE="dhcp"
 #IP_DNS_SERVER2=""
 #IP_DNS_DOMAIN=""
 #IP_DNS_SEARCH=""
-#IP_COPY_DHCP_TO_STATIC="true"
 
-#Pi settings
-#Install bluetooth packages
+# Pi settings
+# Install bluetooth packages
 BT_ENABLE="false"
 
-#Enable internal bluetooth chip
+# Enable internal bluetooth chip
 BT_INTERNAL="false"
 
-#myMPDos repository
+# myMPDos repository
 MYMPDOS_REPOSITORY="https://raw.githubusercontent.com/jcorporation/myMPDos/master/repository"
 #MYMPDOS_REPOSITORY="https://raw.githubusercontent.com/jcorporation/myMPDos/devel/repository"
 
-#List of audio hats: https://jcorporation.github.io/myMPDos/references/audio-hats
+# List of audio hats: https://jcorporation.github.io/myMPDos/references/audio-hats
 AUDIOHAT=""
 DISABLE_HDMI="false"
+
+# myMPD configuration
+# https://jcorporation.github.io/myMPD/configuration/configuration-files
+#MYMPD_ACL=""
+#MYMPD_ALBUM_GROUP_TAG="Date"
+#MYMPD_ALBUM_MODE="adv"
+#MYMPD_COVERCACHE_KEEP_DAYS=32
+#MYMPD_HTTP=true
+#MYMPD_HTTP_HOST="[::]"
+#MYMPD_HTTP_PORT=80
+#MYMPD_LOGLEVEL=5
+#MYMPD_LUALIBS=all
+#MYMPD_URI=""
+#MYMPD_SAVE_CACHES=true
+#MYMPD_SCRIPTACL=""
+#MYMPD_STICKERS=true
+#MYMPD_SSL=true
+#MYMPD_SSL_PORT=443
+#MYMPD_SSL_SAN=""
+#MYMPD_CUSTOM_CERT=false
+#MYMPD_SSL_CERT=""
+#MYMPD_SSL_KEY=""
