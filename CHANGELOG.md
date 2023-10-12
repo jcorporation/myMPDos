@@ -4,13 +4,14 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
-## myMPDos v1.3.0 (not yet released)
+## myMPDos v1.3.0 (2023-10-12)
 
 This release is build up on Alpine Linux 3.18.4.
 
 ### Changelog
 
 - Install myMPD scripts through bootstrap script #28
+- Add myMPD config options to bootstrap file
 
 ## myMPDos v1.2.4 (2023-08-10)
 
