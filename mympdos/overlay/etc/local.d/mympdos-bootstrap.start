@@ -516,7 +516,7 @@ mympd -c
 
 echo "Saving configuration"
 echo "LBU_MEDIA=$LBUMEDIA" > /etc/lbu/lbu.conf
-LBU_INCLUDES="/var/lib/mympd /var/lib/mpd /var/lib/alsa"
+LBU_INCLUDES="/var/lib/mympd /var/lib/mpd /var/lib/alsa /var/lib/misc/openrc-shutdowntime"
 for INCLUDE in $LBU_INCLUDES
 do
     lbu_include "$INCLUDE"
