@@ -6,11 +6,18 @@ https://github.com/jcorporation/myMPDos/
 
 ## myMPDos v1.3.1 (not yet released)
 
-Describe release here.
+This release is build up on Alpine Linux 3.19.0.
+
+### Notes
+
+myGPIOd must be configured from scratch: https://github.com/jcorporation/myGPIOd
 
 ### Changelog
 
+- Alpine Linux 3.19.0
 - Save shutdowntime in apkovl
+- New package: mympdos-libgpiod2 (libgpiod v2.1.0)
+- myGPIOd v0.4.0 with many new features
 
 ***
 

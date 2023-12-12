@@ -18,6 +18,7 @@ B_LIBMPDCLIENT="1"
 B_MPC="1"
 B_MPD_STABLE="1"
 B_MPD_MASTER="1"
+B_LIBGPIOD2="1"
 B_MYGPIOD="1"
 B_MUSICDB_SCRIPTS="1"
 
@@ -178,11 +179,31 @@ then
   cd ..
 fi
 
+LIBGPIOD2_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-libgpiod2)
+B_LIBGPIOD2_VER=$(get_pkgver /media/vda1/mympdos/mympdos-libgpiod2)
+if [ "$B_LIBGPIOD2" = "1" ] && [ ! -f "packages/package/$ARCH/$LIBGPIOD2_PACKAGE" ]
+then
+  echo "Building libgpiod v2"
+  su build -c "rm -rf mympdos-libgpiod2"
+  su build -c "cp -r /media/vda1/mympdos/mympdos-libgpiod2 ."
+  cd mympdos-libgpiod2 || exit 1
+  su build -c "git clone -b v2.1.x --depth=1 https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git"
+  mv "libgpiod" "mympdos-libgpiod2-${B_LIBGPIOD2_VER}"
+  tar -czf mympdos-libgpiod2.tar.gz "mympdos-libgpiod2-${B_LIBGPIOD2_VER}"
+  rm -fr "mympdos-libgpiod2-${B_LIBGPIOD2_VER}"
+  su build -c "abuild checksum"
+  su build -c "abuild -r"
+  cd ..
+fi
+
+apk update
+apk add mympdos-libgpiod2 mympdos-libgpiod2-dev
+
 if [ "$B_MYGPIOD" = "1" ]
 then
   echo "Build myGPIOd"
   su build -c "rm -rf myGPIOd"
-  su build -c "git clone -b master --depth=1 https://github.com/jcorporation/myGPIOd.git"
+  su build -c "git clone -b devel --depth=1 https://github.com/jcorporation/myGPIOd.git"
   cd myGPIOd || exit 1
   MYGPIOD_PACKAGE=$(get_pkgname contrib/packaging/alpine)
   if [ ! -f "../packages/package/$ARCH/$MYGPIOD_PACKAGE" ]
