@@ -1,7 +1,6 @@
-# Contributor: vinymeuh <vinymeuh@gmail.com>
-# Maintainer: Luca Weiss <luca@z3ntu.xyz>
+# Maintainer: Juergen Mang <mail@jcgames.de>
 pkgname=mympdos-libgpiod2
-pkgver=2.1.0
+pkgver=2.1
 pkgrel=0
 pkgdesc="C library and tools for interacting with the linux GPIO character device"
 url="https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/"

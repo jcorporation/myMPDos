@@ -14,6 +14,8 @@ B_BUILD="1"
 B_MYMPD="1"
 B_MYMPD_BRANCH="master"
 #B_MYMPD_BRANCH="devel"
+#B_MYGPIOD_BRANCH="master"
+B_MYGPIOD_BRANCH="devel"
 B_LIBMPDCLIENT="1"
 B_MPC="1"
 B_MPD_STABLE="1"
@@ -203,12 +205,13 @@ if [ "$B_MYGPIOD" = "1" ]
 then
   echo "Build myGPIOd"
   su build -c "rm -rf myGPIOd"
-  su build -c "git clone -b devel --depth=1 https://github.com/jcorporation/myGPIOd.git"
+  su build -c "git clone -b "$B_MYGPIOD_BRANCH" --depth=1 https://github.com/jcorporation/myGPIOd.git"
   cd myGPIOd || exit 1
   MYGPIOD_PACKAGE=$(get_pkgname contrib/packaging/alpine)
   if [ ! -f "../packages/package/$ARCH/$MYGPIOD_PACKAGE" ]
   then
     ./build.sh installdeps
+    sed -i 's/depends="/depends="mympdos-libgpiod2 /' contrib/packaging/alpine/APKBUILD
     su build -c "./build.sh pkgalpine"
   else
     echo "myGPIOd is already up-to-date"
