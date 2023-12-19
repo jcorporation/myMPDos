@@ -8,20 +8,55 @@ myMPDos can be configured to shutdown the Raspberry Pi safely with a press of a 
 
 ## Configuration
 
-- Connect a button to pin 5 (GPIO 3 SCL) and pin 6 (Ground)
-- Add the package mygpiod: `apk add mygpiod`
-- Add a line in `/etc/mygpiod.conf`: `3,falling,doas /usr/bin/saveshutdown.sh 2>&1`
-- Configure doas: `echo "permit nopass mygpiod cmd /usr/bin/saveshutdown.sh" >> /etc/doas.d/mygpiod.conf`
-- Enable and start the mygpiod service: `rc-update add mygpiod`, `service mygpiod start`
+- Connect a button to pin 5 (GPIO 3 SCL) and pin 6 (Ground).
+- We use the internal pull-up resistor and do not need an external one.
+
+```sh
+# Add the package mygpiod
+
+apk add mygpiod
+
+# Configure GPIO 5
+
+cat > /etc/mygpiod.d/5.in << EOL
+event_request = falling
+bias = pull-up
+debounce = 1000
+action_falling = system:/etc/mygpiod.scripts/shutdown.sh
+EOL
+
+# Add a script for shutdown
+
+mkdir /etc/mygpiod.scripts
+cat > /etc/mygpiod.scripts/shutdown.sh << EOL
+#!/bin/sh
+doas /usr/bin/saveshutdown.sh
+EOL
+chmod +x /etc/mygpiod.scripts/shutdown.sh
+
+# Configure doas
+
+echo "permit nopass mygpiod cmd /usr/bin/saveshutdown.sh" >> /etc/doas.d/mygpiod.conf
+
+# Enable and start the mygpiod service
+
+rc-update add mygpiod
+service mygpiod start
+```
 
 ## How it works
 
 ### Power on
 
-The WAKE_ON_GPIO powers on the the Raspberry Pi if you shortend pin 5 (GPIO 3 SCL) to ground. 
-
-Reference: [https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2711_bootloader_config.md](https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2711_bootloader_config.md)
+The WAKE_ON_GPIO powers on the the Raspberry Pi if you shorten pin 5 (GPIO 3 SCL) to ground.
 
 ### Power off
 
-The myGPIOd daemon listens on pin 5 (GPIO 3 SCL) and calls `/usr/bin/saveshutdown.sh`.
+The myGPIOd daemon listens on pin 5 (GPIO 3 SCL) and calls `/etc/mygpiod.scripts/shutdown.sh`.
+
+****
+
+### References
+
+- [myGPIOd](https://github.com/jcorporation/myGPIOd)
+- [https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2711_bootloader_config.md](https://www.raspberrypi.org/documentation/hardware/raspberrypi/bcm2711_bootloader_config.md)

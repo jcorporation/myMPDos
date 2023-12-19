@@ -12,6 +12,7 @@ myMPDos has an extra repository for custom packages. This repository can also be
 | PACKAGE | DESCRIPTION |
 | ------- | ----------- |
 | mympdos-base | Base myMPDos package |
+| mympdos-libgpiod2 | [libgpiod v2](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/) |
 | mympdos-libmpdclient | [Libmympdclient](https://github.com/jcorporation/libmympdclient) |
 | mympdos-mpc | [MPC](https://github.com/jcorporation/mpc) |
 | mympdos-mpd-master | [MPD from master branch](https://github.com/MusicPlayerDaemon/MPD) |

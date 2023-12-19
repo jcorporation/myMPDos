@@ -10,13 +10,10 @@ The best is to attach a bluetooth dongle to the raspberry but you can also try t
 
 ## Install packages
 
-```
-apk add bluez bluez-alsa
-```
-## Reboot
+Install packages, enable it and restart.
 
-Enable the services at startup, save and reboot again.
-```
+```sh
+apk add bluez bluez-alsa
 rc-update add bluetooth
 rc-update add bluealsa
 savereboot.sh
@@ -24,31 +21,32 @@ savereboot.sh
 
 ## Connect the bluetooth speakers
 
-1. Discover the speaker
-```
+```sh
+# Discover the speaker
+
 bluetoothctl power on
 bluetoothctl agent on
 bluetoothctl default-agent
 bluetoothctl scan on
-```
-2. The speaker should appear
-3. Connect the speaker
-```
+
+# The speaker should appear
+# Connect the speaker
+
 bluetoothctl pair <address>
 bluetoothctl trust <address>
 bluetoothctl connect <address>
-```
-4. Save the bluetooth state
-```
+
+# Save the bluetooth state
+
 lbu include /var/lib/bluetooth
 lbu commit
 ```
 
 ## Configure MPD
 
-Add following to `/etc/mpd.custom.conf`
+Append the following to `/etc/mpd.custom.conf`
 
-```
+```text
 audio_output {
        type            "alsa"
        name            "BT-Speaker"
@@ -58,8 +56,12 @@ audio_output {
 }
 ```
 
-Restart MPD: `service mpd restart`
+Restart MPD
+
+```sh
+service mpd restart
+```
 
 ***
 
-Reference: <a href="https://wiki.alpinelinux.org/wiki/Raspberry_Pi_3_-_Setting_Up_Bluetooth">https://wiki.alpinelinux.org/wiki/Raspberry_Pi_3_-_Setting_Up_Bluetooth</a>
+Reference: [https://wiki.alpinelinux.org/wiki/Raspberry_Pi_3_-_Setting_Up_Bluetooth](https://wiki.alpinelinux.org/wiki/Raspberry_Pi_3_-_Setting_Up_Bluetooth)
