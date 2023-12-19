@@ -2,7 +2,7 @@
 # Based on: https://pkgs.alpinelinux.org/package/edge/community/x86_64/mpd
 pkgname=mympdos-mpd-stable
 pkgver=0.23.14
-pkgrel=0
+pkgrel=1
 pkgdesc="Music daemon that plays MP3, FLAC and Ogg Vorbis files"
 url="https://musicpd.org"
 pkgusers="mpd"
@@ -43,7 +43,7 @@ source="mympdos-mpd-stable.tar.gz
 	${pkgname}.confd
 	stacksize.patch
 	"
-options="!check"
+options="!check setcap"
 
 build() {
 	meson \

@@ -1,0 +1,29 @@
+# Maintainer: Juergen Mang <mail@jcgames.de>
+pkgname=mympdos-libgpiod2
+pkgver=2.1
+pkgrel=0
+pkgdesc="C library and tools for interacting with the linux GPIO character device"
+url="https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/"
+arch="all"
+license="LGPL-2.1-or-later"
+options="!check" # no test suite
+makedepends="autoconf automake libtool linux-headers autoconf-archive python3-dev doxygen help2man"
+subpackages="$pkgname-dev $pkgname-doc"
+source="mympdos-libgpiod2.tar.gz"
+
+prepare() {
+	default_prepare
+}
+
+build() {
+	./autogen.sh \
+		--enable-tools=yes \
+		--prefix=/usr
+	make
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+sha512sums=""

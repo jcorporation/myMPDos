@@ -346,7 +346,7 @@ apk update
 apk upgrade
 
 echo "Installing packages"
-PKGLIST_ADV="usbutils raspberrypi busybox-extras net-tools mpg123 mygpiod mympdos-musicdb-scripts"
+PKGLIST_ADV="usbutils raspberrypi busybox-extras net-tools mpg123 mympdos-libgpiod2 mygpiod mympdos-musicdb-scripts"
 PKGLIST="mympdos-base mympd mympdos-libmpdclient mympdos-mpc doas alsa-utils"
 [ "$BT_ENABLE" = "true" ] && PKGLIST="$PKGLIST bluez bluez-alsa"
 [ "$ENABLE_RNGD" = "true" ] && PKGLIST="$PKGLIST rng-tools"
@@ -516,7 +516,7 @@ mympd -c
 
 echo "Saving configuration"
 echo "LBU_MEDIA=$LBUMEDIA" > /etc/lbu/lbu.conf
-LBU_INCLUDES="/var/lib/mympd /var/lib/mpd /var/lib/alsa"
+LBU_INCLUDES="/var/lib/mympd /var/lib/mpd /var/lib/alsa /var/lib/misc/openrc-shutdowntime"
 for INCLUDE in $LBU_INCLUDES
 do
     lbu_include "$INCLUDE"
