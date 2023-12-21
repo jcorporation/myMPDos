@@ -514,6 +514,10 @@ export MYMPD_SSL_CERT
 export MYMPD_SSL_KEY
 mympd -c
 
+echo "Trusting myMPD CA"
+cp /var/lib/mympd/ssl/ca.pem /etc/ssl/certs/mympd.pem
+update-ca-certificates
+
 echo "Saving configuration"
 echo "LBU_MEDIA=$LBUMEDIA" > /etc/lbu/lbu.conf
 LBU_INCLUDES="/var/lib/mympd /var/lib/mpd /var/lib/alsa /var/lib/misc/openrc-shutdowntime"
