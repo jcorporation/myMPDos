@@ -1,8 +1,8 @@
 # Maintainer: Juergen Mang <mail@jcgames.de>
 # Based on: https://git.alpinelinux.org/aports/tree/community/mpc/APKBUILD?h=3.18-stable
 pkgname=mympdos-mpc
-pkgver=0.34
-pkgrel=1
+pkgver=0.36
+pkgrel=0
 pkgdesc="Minimalist command line interface to MPD"
 url="https://www.musicpd.org/clients/mpc/"
 arch="all"
