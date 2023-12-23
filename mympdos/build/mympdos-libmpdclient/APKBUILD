@@ -1,7 +1,7 @@
 # Maintainer: Juergen Mang <mail@jcgames.de>
 pkgname=mympdos-libmpdclient
-pkgver=2.21
-pkgrel=7
+pkgver=2.23
+pkgrel=0
 pkgdesc="An asynchronous API library for interfacing MPD in the C, C++ & Objective C languages"
 url="https://github.com/jcorporation/libmympdclient"
 arch="all"
@@ -13,7 +13,7 @@ subpackages="$pkgname-dev $pkgname-doc"
 options="!check"
 
 build() {
-	meson \
+	meson setup \
 		--prefix=/usr \
 		--sysconfdir=/etc \
 		--mandir=/usr/share/man \
@@ -27,8 +27,6 @@ package() {
 	DESTDIR="$pkgdir" ninja -C output install
 
 	mkdir -p "$pkgdir"/usr/share/licenses/$pkgname/
-	mv "$pkgdir"/usr/share/doc/libmpdclient/COPYING \
-		"$pkgdir"/usr/share/licenses/$pkgname/
 }
 
 sha512sums=""
