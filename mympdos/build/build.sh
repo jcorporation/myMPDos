@@ -124,7 +124,7 @@ fi
 #install freshly build libmpdclient
 echo "/usr/build/packages/package/" >> /etc/apk/repositories
 apk update
-apk add mympdos-libmpdclient
+apk add mympdos-libmpdclient mympdos-libmpdclient-dev
 
 MPC_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-mpc)
 B_MPC_VER=$(get_pkgver /media/vda1/mympdos/mympdos-mpc)
@@ -199,7 +199,7 @@ then
 fi
 
 apk update
-apk add mympdos-libgpiod2 mympdos-libgpiod2-dev
+apk add mympdos-libgpiod2 mympdos-libgpiod2-dev curl-dev mympdos-libmpdclient mympdos-libmpdclient-dev
 
 if [ "$B_MYGPIOD" = "1" ]
 then
