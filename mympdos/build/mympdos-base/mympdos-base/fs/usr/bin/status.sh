@@ -5,10 +5,10 @@
 # https://github.com/jcorporation/myMPDos
 
 CPU_TEMP=$(cat /sys/class/thermal/thermal_zone0/temp)
-GPU_TEMP=$(/opt/vc/bin/vcgencmd measure_temp | cut -d= -f2)
-VOLTS_CORE=$(/opt/vc/bin/vcgencmd measure_volts core | cut -d= -f2)
-CLOCK_CORE=$(/opt/vc/bin/vcgencmd measure_clock arm | cut -d= -f2)
-THROTTLED_MASK=$(/opt/vc/bin/vcgencmd get_throttled | cut -d= -f2)
+GPU_TEMP=$(vcgencmd measure_temp | cut -d= -f2)
+VOLTS_CORE=$(vcgencmd measure_volts core | cut -d= -f2)
+CLOCK_CORE=$(vcgencmd measure_clock arm | cut -d= -f2)
+THROTTLED_MASK=$(vcgencmd get_throttled | cut -d= -f2)
 
 echo "--"
 echo "Model: $(cat /sys/firmware/devicetree/base/model)"
