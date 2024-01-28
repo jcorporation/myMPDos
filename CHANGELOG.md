@@ -6,8 +6,11 @@ https://github.com/jcorporation/myMPDos/
 
 ## myMPDos v1.4.1 (not yet released)
 
+This release is build up on Alpine Linux 3.19.1.
+
 ### Changelog
 
+- Alpine Linux 3.19.1
 - Upd: add myMPD ca to system trust store
 
 ***

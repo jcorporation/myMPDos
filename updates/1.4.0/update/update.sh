@@ -1,10 +1,10 @@
 #!/bin/sh
 
-#export V_MAJOR=3
-#export V_MINOR=14
-#export V_POINT=1
-#export CHECKSUM=376627f9f44142198a26123544c6505cf126b84199697fe436f6603de0b466a7
-#alpine-upgrade.sh
+export V_MAJOR=3
+export V_MINOR=19
+export V_POINT=1
+export CHECKSUM=e277d6f474e2f8e503257fb1d0b8c5a32874081629e291ab8a1cc6142d8a881c
+alpine-upgrade.sh
 
 echo "Trusting myMPD CA"
 cp /var/lib/mympd/ssl/ca.pem /etc/ssl/certs/mympd.pem
