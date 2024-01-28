@@ -210,7 +210,7 @@ then
   MYGPIOD_PACKAGE=$(get_pkgname contrib/packaging/alpine)
   if [ ! -f "../packages/package/$ARCH/$MYGPIOD_PACKAGE" ]
   then
-    sed -i 's/depends="/depends="mympdos-libgpiod2 /' contrib/packaging/alpine/APKBUILD
+    sed -i 's/libmpdclient/mympdos-libmpdclient/g' contrib/packaging/alpine/APKBUILD
     su build -c "./build.sh pkgalpine"
   else
     echo "myGPIOd is already up-to-date"
