@@ -16,9 +16,9 @@ myMPDos can be configured to shutdown the Raspberry Pi safely with a press of a 
 
 apk add mygpiod
 
-# Configure GPIO 5
+# Configure GPIO 3 (SCL)
 
-cat > /etc/mygpiod.d/5.in << EOL
+cat > /etc/mygpiod.d/3.in << EOL
 event_request = falling
 bias = pull-up
 debounce = 1000
