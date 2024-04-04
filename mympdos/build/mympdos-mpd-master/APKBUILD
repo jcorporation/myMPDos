@@ -22,7 +22,7 @@ makedepends="alsa-lib-dev
 	lame-dev
 	libcap
 	libid3tag-dev
-	libmad-dev
+	mpg123-dev
 	libnfs-dev
 	libogg-dev
 	libsamplerate-dev
