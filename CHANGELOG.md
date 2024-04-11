@@ -4,6 +4,19 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
+## myMPDos v1.4.2 (not yet released)
+
+This release improves the bootstrap script.
+
+### Changelog
+
+- Increase boot partition size
+- Improve bootstrap script
+- Do not default install mympdos-musicdb-scripts
+- Save bootstrap log to `/boot/bootstrap.log`
+
+***
+
 ## myMPDos v1.4.1 (2024-01-28)
 
 This release is build up on Alpine Linux 3.19.1.

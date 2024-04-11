@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# myMPDos (c) 2020-2023 Juergen Mang <mail@jcgames.de>
+# myMPDos (c) 2020-2024 Juergen Mang <mail@jcgames.de>
 # https://github.com/jcorporation/myMPDos
 
-VERSION="1.4.1"
+VERSION="1.4.2"
 
 ARCH="aarch64"
 BUILDIMAGE="myMPDos-build.img"
@@ -13,8 +13,8 @@ ALPINE_MIRROR="http://dl-cdn.alpinelinux.org/alpine"
 COMPRESSIMAGE="false"
 PRIVATEIMAGE="false"
 BUILDUSER="$USER"
-IMAGESIZE="256"
-BOOTPARTSIZE="+200M"
+IMAGESIZE="1024"
+BOOTPARTSIZE="+512M"
 IMAGESIZEBUILD="8192"
 BOOTPARTSIZEBUILD="+1024M"
 BUILDCPUS="8"
