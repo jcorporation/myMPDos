@@ -28,12 +28,14 @@ WLAN_PSK="psk of the ssid"
 AUDIOHAT="allo-digione"
 ```
 
-## First start 
+## First start
 
-At the first start myMPD executes the bootstrap script to configure your instance according to `bootstrap.txt`. 
+At the first start myMPD executes the bootstrap script to configure your instance according to `bootstrap.txt`.
 
 - It adds a data partition to the sd-card
 - It needs internet connectivity to set the time and update the packages.
+
+The bootstrap log is saved to `/boot/bootstrap.log`.
 
 ## References
 
