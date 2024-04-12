@@ -435,7 +435,7 @@ install -d /etc/mympdos/custom
 echo "Enabling boot services"
 [ "$ENABLE_RNGD" = "true" ] && rc-update add rngd boot
 rc-update add networking boot
-rc-update add urandom boot
+rc-update add seedrng boot
 rc-update add alsa boot
 [ "$ENABLE_CRON" = "true" ] && rc-update add crond boot
 if [ "$BT_ENABLE" = "true" ]
