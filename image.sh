@@ -41,7 +41,7 @@ burnimage() {
         exit 1
     fi
     echo "Transfering $IMAGE to $SDCARD"
-    sudo dd if="$IMAGE" of="$SDCARD"
+    sudo dd status=progress bs=4M oflag=sync if="$IMAGE" of="$SDCARD"
 }
 
 startimage() {
