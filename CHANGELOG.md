@@ -4,7 +4,7 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
-## myMPDos v1.4.2 (not yet released)
+## myMPDos v1.4.2 (2024-04-20)
 
 This release fixes the bootstrap script.
 
@@ -12,10 +12,13 @@ This release fixes the bootstrap script.
 
 - Increase boot partition size
 - Improve bootstrap script
-- Do not default install mympdos-musicdb-scripts
-- Save bootstrap log to `/boot/bootstrap.log`
-- Update swclock in `save*.sh`
-- Fix race condition in `save.sh` #39
+  - Do not default install mympdos-musicdb-scripts
+  - Save bootstrap log to `/boot/bootstrap.log`
+  - Save time for swclock
+- Improve save*.sh scripts
+  - Save time for swclock
+  - Reliably save myMPD state
+- Do not reset volume to 100% on startup
 
 ***
 
