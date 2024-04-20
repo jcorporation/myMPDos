@@ -334,14 +334,12 @@ setup-apkcache "$DATAMEDIA/apkcache"
 
 echo "Adding repositories and upgrade"
 echo "${BOOTMEDIA}/apks" > /etc/apk/repositories
-setup-apkrepos -1
-sed -r -e's/^#\s?(.*\d\/community)/\1/' -i /etc/apk/repositories
+setup-apkrepos -c -1
 while apk update 2>&1 | grep WARNING
 do
     echo "Error...trying new random repository"
     echo "${BOOTMEDIA}/apks" > /etc/apk/repositories
-    setup-apkrepos -r
-    sed -r -e's/^#\s?(.*\d\/community)/\1/' -i /etc/apk/repositories
+    setup-apkrepos -c -r
 done
 
 echo "$MYMPDOS_REPOSITORY" >> /etc/apk/repositories
@@ -381,7 +379,6 @@ addgroup -S mpd
 
 echo "Creating files in data partition"
 mount -oremount,rw "$DATAMEDIA"
-install -d "$DATAMEDIA/apkcache"
 install -d "$DATAMEDIA/library" -o mpd -g audio -m 775
 ln -s /mnt "$DATAMEDIA/library/USB"
 mount -oremount,ro "$DATAMEDIA"
@@ -493,9 +490,6 @@ do
     delgroup "$DG" > /dev/null 2>&1
 done
 
-echo "Syncing apk cache"
-apk cache -v sync
-
 echo "Cleaning up"
 sed -i -r 's/tty(2|3|4|5|6)/#tty\1/' /etc/inittab
 rm /etc/local.d/mympdos-bootstrap.start
@@ -530,6 +524,10 @@ mympd -c
 echo "Trusting myMPD CA"
 cp /var/lib/mympd/ssl/ca.pem /etc/ssl/certs/mympd.pem
 update-ca-certificates
+
+echo "Setting swclock"
+install -d /var/lib/misc/
+touch /var/lib/misc/openrc-shutdowntime
 
 echo "Saving configuration"
 echo "LBU_MEDIA=$LBUMEDIA" > /etc/lbu/lbu.conf
