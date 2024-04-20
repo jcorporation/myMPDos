@@ -147,7 +147,7 @@ do
   for F in $(amixer -c "$CARD" | grep -B1 pvolume | grep "mixer control" | sed -r "s/.+'([^']+)'.*/\1/")
   do
     echo "$CARD:$F"
-    amixer -c "$CARD" set "$F" 100% unmute > /dev/null
+    amixer -c "$CARD" set "$F" unmute > /dev/null
   done
 done
 
