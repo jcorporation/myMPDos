@@ -87,7 +87,7 @@ fi
 cd /
 rm -fr "$TMPDIR"
 
-echo "Syncing apk cache"
-apk -v cache sync
+#echo "Syncing apk cache"
+#apk -v cache sync
 
 exit 0
