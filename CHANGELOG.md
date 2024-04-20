@@ -6,7 +6,7 @@ https://github.com/jcorporation/myMPDos/
 
 ## myMPDos v1.4.2 (not yet released)
 
-This release improves the bootstrap script.
+This release fixes the bootstrap script.
 
 ### Changelog
 
@@ -14,6 +14,8 @@ This release improves the bootstrap script.
 - Improve bootstrap script
 - Do not default install mympdos-musicdb-scripts
 - Save bootstrap log to `/boot/bootstrap.log`
+- Update swclock in `save*.sh`
+- Fix race condition in `save.sh` #39
 
 ***
 
