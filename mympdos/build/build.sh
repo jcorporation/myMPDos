@@ -143,6 +143,46 @@ then
   cd ..
 fi
 
+LIBGPIOD2_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-libgpiod2)
+B_LIBGPIOD2_VER=$(get_pkgver /media/vda1/mympdos/mympdos-libgpiod2)
+if [ "$B_LIBGPIOD2" = "1" ] && [ ! -f "packages/package/$ARCH/$LIBGPIOD2_PACKAGE" ]
+then
+  echo "Building libgpiod v2"
+  su build -c "rm -rf mympdos-libgpiod2"
+  su build -c "cp -r /media/vda1/mympdos/mympdos-libgpiod2 ."
+  cd mympdos-libgpiod2 || exit 1
+  su build -c "git clone -b v2.1.x --depth=1 https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git"
+  mv "libgpiod" "mympdos-libgpiod2-${B_LIBGPIOD2_VER}"
+  tar -czf mympdos-libgpiod2.tar.gz "mympdos-libgpiod2-${B_LIBGPIOD2_VER}"
+  rm -fr "mympdos-libgpiod2-${B_LIBGPIOD2_VER}"
+  su build -c "abuild checksum"
+  su build -c "abuild -r"
+  cd ..
+fi
+
+apk update
+apk add mympdos-libgpiod2 mympdos-libgpiod2-dev curl-dev
+
+if [ "$B_MYGPIOD" = "1" ]
+then
+  echo "Build myGPIOd"
+  su build -c "rm -rf myGPIOd"
+  su build -c "git clone -b "$B_MYGPIOD_BRANCH" --depth=1 https://github.com/jcorporation/myGPIOd.git"
+  cd myGPIOd || exit 1
+  MYGPIOD_PACKAGE=$(get_pkgname contrib/packaging/alpine)
+  if [ ! -f "../packages/package/$ARCH/$MYGPIOD_PACKAGE" ]
+  then
+    sed -i 's/libmpdclient/mympdos-libmpdclient/g' contrib/packaging/alpine/APKBUILD
+    su build -c "./build.sh pkgalpine"
+  else
+    echo "myGPIOd is already up-to-date"
+  fi
+  cd ..
+fi
+
+apk update
+apk add mygpiod mygpiod-dev
+
 if [ "$B_MYMPD" = "1" ]
 then
   echo "Build myMPD"
@@ -178,43 +218,6 @@ then
   tar -czf "mympdos-base-$B_MYMPDOS_BASE_VER.tar.gz" "mympdos-base-$B_MYMPDOS_BASE_VER"
   su build -c "abuild checksum"
   su build -c "abuild -r"
-  cd ..
-fi
-
-LIBGPIOD2_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-libgpiod2)
-B_LIBGPIOD2_VER=$(get_pkgver /media/vda1/mympdos/mympdos-libgpiod2)
-if [ "$B_LIBGPIOD2" = "1" ] && [ ! -f "packages/package/$ARCH/$LIBGPIOD2_PACKAGE" ]
-then
-  echo "Building libgpiod v2"
-  su build -c "rm -rf mympdos-libgpiod2"
-  su build -c "cp -r /media/vda1/mympdos/mympdos-libgpiod2 ."
-  cd mympdos-libgpiod2 || exit 1
-  su build -c "git clone -b v2.1.x --depth=1 https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git"
-  mv "libgpiod" "mympdos-libgpiod2-${B_LIBGPIOD2_VER}"
-  tar -czf mympdos-libgpiod2.tar.gz "mympdos-libgpiod2-${B_LIBGPIOD2_VER}"
-  rm -fr "mympdos-libgpiod2-${B_LIBGPIOD2_VER}"
-  su build -c "abuild checksum"
-  su build -c "abuild -r"
-  cd ..
-fi
-
-apk update
-apk add mympdos-libgpiod2 mympdos-libgpiod2-dev curl-dev mympdos-libmpdclient mympdos-libmpdclient-dev
-
-if [ "$B_MYGPIOD" = "1" ]
-then
-  echo "Build myGPIOd"
-  su build -c "rm -rf myGPIOd"
-  su build -c "git clone -b "$B_MYGPIOD_BRANCH" --depth=1 https://github.com/jcorporation/myGPIOd.git"
-  cd myGPIOd || exit 1
-  MYGPIOD_PACKAGE=$(get_pkgname contrib/packaging/alpine)
-  if [ ! -f "../packages/package/$ARCH/$MYGPIOD_PACKAGE" ]
-  then
-    sed -i 's/libmpdclient/mympdos-libmpdclient/g' contrib/packaging/alpine/APKBUILD
-    su build -c "./build.sh pkgalpine"
-  else
-    echo "myGPIOd is already up-to-date"
-  fi
   cd ..
 fi
 
