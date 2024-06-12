@@ -4,6 +4,16 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
+## myMPDos v1.5.0 (2024-06-12)
+
+This release is build up on Alpine Linux 3.20.0.
+
+### Changelog
+
+- Alpine Linux 3.20.0
+
+***
+
 ## myMPDos v1.4.2 (2024-04-20)
 
 This release fixes the bootstrap script.
