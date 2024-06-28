@@ -46,7 +46,7 @@ source="mympdos-mpd-stable.tar.gz
 options="!check setcap"
 
 build() {
-	meson \
+	meson setup \
 		--prefix=/usr \
 		--sysconfdir=/etc \
 		--mandir=/usr/share/man \
