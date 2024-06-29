@@ -49,6 +49,7 @@ build() {
 		--sysconfdir=/etc \
 		--mandir=/usr/share/man \
 		--localstatedir=/var \
+                --bindir=/usr/bin \
 		--buildtype=release \
 		-Dqobuz=disabled \
 		-Dsoundcloud=disabled \
