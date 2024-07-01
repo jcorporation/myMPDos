@@ -44,11 +44,12 @@ source="mympdos-mpd-master.tar.gz
 options="!check setcap"
 
 build() {
-	meson \
+	meson setup \
 		--prefix=/usr \
 		--sysconfdir=/etc \
 		--mandir=/usr/share/man \
 		--localstatedir=/var \
+		--bindir=/usr/bin \
 		--buildtype=release \
 		-Dqobuz=disabled \
 		-Dsoundcloud=disabled \
