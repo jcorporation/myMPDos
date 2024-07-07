@@ -66,12 +66,6 @@ build() {
 
 package() {
 	DESTDIR="$pkgdir" ninja -C output install
-	if [ -f "$pkgdir"/usr/mpd ]
-	then
-		mkdir "$pkgdir"/usr/bin/
-		mv "$pkgdir"/usr/mpd "$pkgdir"/usr/bin/
-	fi
-
 	# mpd attempts to configure real-time scheduling on linux
 	# add the capability which allows doing that
 	# see: https://www.musicpd.org/doc/html/user.html#real-time-scheduling
