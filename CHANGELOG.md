@@ -4,6 +4,18 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
+## myMPDos v1.5.2 (2024-07-27)
+
+This release is build up on Alpine Linux 3.20.2.
+
+### Changelog
+
+- Alpine Linux 3.20.2
+- Update mpc, libmpdclient, mpd-master
+- Support ShowMovement Tag
+
+***
+
 ## myMPDos v1.5.1 (2024-07-02)
 
 This release is build up on Alpine Linux 3.20.1.

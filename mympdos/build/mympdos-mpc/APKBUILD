@@ -2,7 +2,7 @@
 # Based on: https://git.alpinelinux.org/aports/tree/community/mpc/APKBUILD?h=3.18-stable
 pkgname=mympdos-mpc
 pkgver=0.36
-pkgrel=1
+pkgrel=2
 pkgdesc="Minimalist command line interface to MPD"
 url="https://www.musicpd.org/clients/mpc/"
 arch="all"
