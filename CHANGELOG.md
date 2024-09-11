@@ -4,6 +4,16 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
+## myMPDos v1.5.3 (2024-09-11)
+
+This release is build up on Alpine Linux 3.20.3.
+
+### Changelog
+
+- Alpine Linux 3.20.3
+
+***
+
 ## myMPDos v1.5.2 (2024-07-27)
 
 This release is build up on Alpine Linux 3.20.2.

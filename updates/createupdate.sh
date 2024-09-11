@@ -15,7 +15,6 @@ skel() {
 #export V_POINT=1
 #export CHECKSUM=376627f9f44142198a26123544c6505cf126b84199697fe436f6603de0b466a7
 #alpine-upgrade.sh
-
 EOL
   echo "$TO" > "$FROM/update/myMPDos.version"
 }
