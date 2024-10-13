@@ -2,6 +2,14 @@
 
 https://github.com/jcorporation/myMPDos/
 
+## myMPD v1.5.4 (not yet released)
+
+This is a small maintenance release.
+
+### Changelog
+
+- Set read permissions for all users for vcgencmd
+
 ***
 
 ## myMPDos v1.5.3 (2024-09-11)
