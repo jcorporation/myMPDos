@@ -4,6 +4,8 @@ myMPDos is a Raspberry Pi image (aarch64) based on Alpine Linux. It is running e
 
 myMPDos is a turnkey music playback solution and is designed arround [MPD](https://www.musicpd.org/) and [myMPD](https://github.com/jcorporation/myMPD). After startup you can access the myMPD webinterface, copy music to the sd-card data partition, mount a music share or simply plugin an usb storage and you can start enjoying your music.
 
+myMPDos has no configuration dialogs or web ui for initial and further configuration. But there are all common linux utilities installed and more can be installed from the alpine linux repositories.
+
 The initial configuration is done through a simple bootstrap file, that has sane default values preconfigured. Setting up myMPDos takes only a few minutes. Experts can use the advanced bootstrap file to customize the installation further.
 
 ## Features
