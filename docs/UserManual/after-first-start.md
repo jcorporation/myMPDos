@@ -4,7 +4,7 @@ title: After first start
 
 After startup you should be able to connect with ssh and https to your myMPDos instance.
 
-You need the ip-address of your raspberry pi:
+You need the ip-address of your Raspberry Pi:
 
 - myMPDos displays the ip-address after startup on the hdmi display
 - look at your routers dhcp leases

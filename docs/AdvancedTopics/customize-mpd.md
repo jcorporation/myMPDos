@@ -2,7 +2,7 @@
 title: Customize MPD
 ---
 
-The MPD configuration is created by the script `/usr/bin/configmpd.sh`. This script is executes as soon an audio device was changed (executed by mdev).
+The MPD configuration is created by the script `/usr/bin/configmpd.sh`. This script is executed as soon as an audio device was changed (executed by mdev).
 
 ## Fully custom mpd.conf
 

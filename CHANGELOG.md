@@ -9,6 +9,7 @@ This is a small maintenance release.
 ### Changelog
 
 - Set read permissions for all users for vcgencmd
+- Migrate documentation to mkdocs
 
 ***
 

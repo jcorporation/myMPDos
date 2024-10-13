@@ -2,7 +2,7 @@
 title: Compatible devices
 ---
 
-Devices known to work with myMPDos. In theory all Raspberry devices with aarch64 architecture should work.
+Devices known to work with myMPDos. In theory all Raspberry Pi devices with aarch64 architecture should work.
 
 If you run myMPD on an other device please drop me a note, so I can add it to the list.
 
