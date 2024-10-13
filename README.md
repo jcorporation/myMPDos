@@ -22,7 +22,7 @@ The initial configuration is done through a simple bootstrap file, that has sane
 ## Usage
 
 1. Download the latest [release image](https://github.com/jcorporation/myMPDos/releases)
-2. Transfer it to the sd-card, e. g. with [balenaEtcher](https://www.balena.io/etcher/) 
+2. Transfer it to the sd-card, e. g. with [balenaEtcher](https://www.balena.io/etcher/)
 3. Copy `bootstrap-simple.txt` or `bootstrap-advanced.txt` to `bootstrap.txt`
 4. Adapt `bootstrap.txt`
 5. Boot your Raspberry Pi
@@ -37,7 +37,8 @@ init-+-getty
      |     |-{player}
      |     `-{rtio}
      |-mympd-+-{mympd_api}
-     |       `-{mympd_webserver}
+     |       |-{scripts}
+     |       `-{webserver}
      |-ntpd
      |-rngd
      |-sshd
