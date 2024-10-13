@@ -403,6 +403,14 @@ then
     sed -i -r 's/^sd\[a-z\]\.\*.*/sd\[a-z\]\.\*    root:disk 0660 \*\/usr\/bin\/automount.sh/' /etc/mdev.conf
 fi
 
+# Set read permissions for all users for vcgencmd
+cat >> /etc/mdev.conf << EOL
+
+#vcgencmd
+vcio            root:root 0664
+
+EOL
+
 echo "#myMPDos configuration file" > /etc/mympdos/mympdos.conf
 echo "DISABLE_HDMI=\"$DISABLE_HDMI\"" >> /etc/mympdos/mympdos.conf
 echo "RESAMPLER=\"$RESAMPLER\"" >> /etc/mympdos/mympdos.conf
