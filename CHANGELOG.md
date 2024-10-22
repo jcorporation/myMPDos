@@ -10,6 +10,7 @@ This is a small maintenance release.
 
 - Set read permissions for all users for vcgencmd
 - Migrate documentation to mkdocs
+- Update libgpiod to v2.2
 
 ***
 
