@@ -2,7 +2,7 @@
 
 https://github.com/jcorporation/myMPDos/
 
-## myMPD v1.5.4 (not yet released)
+## myMPD v1.5.4 (2024-11-01)
 
 This is a small maintenance release.
 
