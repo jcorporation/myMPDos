@@ -1,5 +1,5 @@
 ---
-title: Audio hats
+title: Audio Hats
 ---
 
 You can define the audio hat in the bootstrap file or configure it afterwards with `audiohat.sh` and rebooting.

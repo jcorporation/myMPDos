@@ -1,5 +1,5 @@
 ---
-title: Compatible devices
+title: Compatible Devices
 ---
 
 Devices known to work with myMPDos. In theory all Raspberry Pi devices with aarch64 architecture should work.

@@ -1,5 +1,5 @@
 ---
-title: Filesystem layout
+title: Filesystem Layout
 ---
 
 | MOUNTPOINT | DESCRIPTION |

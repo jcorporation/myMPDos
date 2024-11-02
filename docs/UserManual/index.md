@@ -1,5 +1,5 @@
 ---
-title: User manual
+title: User Manual
 ---
 
 - [Bootstrap](bootstrap.md)

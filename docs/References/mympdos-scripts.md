@@ -1,5 +1,5 @@
 ---
-title: Custom scripts
+title: Custom Scripts
 ---
 
 This scripts are installed by the mympdos-base package in the directory `/usr/bin`.

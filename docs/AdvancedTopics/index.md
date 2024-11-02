@@ -1,5 +1,5 @@
 ---
-title: Advanced topics
+title: Advanced Topics
 ---
 
 - [Bluetooth](bluetooth.md)
