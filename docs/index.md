@@ -35,7 +35,7 @@ The initial configuration is done through a simple bootstrap file, that has sane
 
 ## Processlist
 
-```
+```txt
 init-+-getty
      |-mpd-+-{decoder:mad}
      |     |-{io}
