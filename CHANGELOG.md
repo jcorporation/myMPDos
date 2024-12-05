@@ -2,6 +2,19 @@
 
 https://github.com/jcorporation/myMPDos/
 
+***
+
+## myMPDos v1.6.0 (2024-12-05)
+
+This release is build up on Alpine Linux 3.21.0.
+
+### Changelog
+
+- Alpine Linux 3.21.0
+- MPD 0.23.16
+
+***
+
 ## myMPD v1.5.4 (2024-11-01)
 
 This is a small maintenance release.

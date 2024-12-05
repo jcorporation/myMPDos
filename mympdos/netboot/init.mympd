@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # this is the init script version
-VERSION=3.9.1-r0
+VERSION=3.11.1-r0
 SINGLEMODE=no
 sysroot="$ROOT"/sysroot
 splashfile=/.splash.ctrl
@@ -146,9 +146,9 @@ setup_inittab_console() {
 ethernets() {
 	for i in "$ROOT/sys/class/net/"*; do
 		local iface="${i##*/}"
-		case "$iface" in
-			eth*) echo "$(cat "$i/ifindex") $iface";;
-		esac
+		if [ -d "$i/device" ]; then
+			echo "$(cat "$i/ifindex") $iface"
+		fi
 	done | sort -n | awk '{print $2}'
 }
 
@@ -156,7 +156,7 @@ ethernets() {
 find_first_interface_up() {
 	local n=0
 	[ $# -eq 0 ] && return 0
-	while [ "$n" -le "${LINK_WAIT_MAX:-10}" ]; do
+	while [ "$n" -le "${LINK_WAIT_MAX:-40}" ]; do
 		for i in "$@"; do
 			if grep -q -F -x "up" "$ROOT/sys/class/net/$i/operstate"; then
 				echo "$i"
@@ -208,6 +208,10 @@ configure_ip() {
 		off|none) return;;
 		dhcp) autoconf="dhcp";;
 	esac
+
+	if [ -e "$ROOT"/etc/mactab ]; then
+		$MOCK nameif -s
+	fi
 
 	if [ -z "$iface" ] && [ -n "$KOPT_BOOTIF" ]; then
 		mac=$(printf "%s\n" "$KOPT_BOOTIF"|sed 's/^01-//;s/-/:/g')
@@ -297,9 +301,9 @@ remount_fstab_entry() {
 # find the dirs under ALPINE_MNT that are boot repositories
 find_boot_repositories() {
 	if [ -n "$ALPINE_REPO" ]; then
-		echo "$ALPINE_REPO"
+		echo "$ALPINE_REPO" | tr ',' '\n'
 	else
-		find /media/* -maxdepth 3 -name .boot_repository -type f \
+		find "$ROOT"/media/* -maxdepth 3 -name .boot_repository -type f \
 			| sed 's:/.boot_repository$::'
 	fi
 }
@@ -387,16 +391,38 @@ want_tiny_cloud() {
 	if [ -f "$sysroot/etc/tiny-cloud.disabled" ]; then
 		return 1
 	fi
-	case "$KOPT_ds" in
-		nocloud*) return 0;;
-	esac
-	if grep -q "^ds=nocloud" "$ROOT"/sys/class/dmi/id/product_serial 2>/dev/null; then
+	if [ -n "$KOPT_ds" ] || [ "$KOPT_tinycloud" ]; then
+		return 0
+	fi
+	if grep -q "^ds=" "$ROOT"/sys/class/dmi/id/product_serial 2>/dev/null; then
 		return 0
 	fi
 	findfs LABEL=cidata >/dev/null 2>&1 || findfs LABEL=CIDATA >/dev/null 2>&1
 }
 
-/bin/busybox mkdir -p "$ROOT"/usr/bin \
+resume_from_disk () {
+	if [ -z "$KOPT_resume" ]; then
+		return
+	fi
+	if [ ! -e "$ROOT"/sys/power/resume ]; then
+		echo "resume: no hibernation support found"
+		return
+	fi
+	echo "Resume from disk"
+	case "$KOPT_resume" in
+	UUID*|LABEL*) resume_dev=$(findfs "$KOPT_resume");;
+	*) resume_dev="$KOPT_resume";;
+	esac
+	printf "%d:%d" $(stat -Lc "0x%t 0x%T" "$resume_dev") > "$ROOT"/sys/power/resume
+	if [ -n "$KOPT_resume_offset" ]; then
+		echo "$KOPT_resume_offset" > "$ROOT"/sys/power/resume_offset
+	fi
+}
+
+/bin/busybox mkdir -p \
+	"$ROOT"/bin \
+	"$ROOT"/sbin \
+	"$ROOT"/usr/bin \
 	"$ROOT"/usr/sbin \
 	"$ROOT"/proc \
 	"$ROOT"/sys \
@@ -442,11 +468,50 @@ $MOCK mount -t tmpfs -o nodev,nosuid,noexec shm /dev/shm
 #  acpi_osi="!Windows 2006" xen-pciback.hide=(01:00.0)
 set -- $(cat "$ROOT"/proc/cmdline)
 
-myopts="autodetect_serial chart cryptroot cryptdm cryptheader cryptoffset
-	cryptdiscards cryptkey debug_init ds init init_args keep_apk_new modules
-	pkgs quiet root_size root usbdelay ip alpine_repo apkovl splash
-	blacklist overlaytmpfs overlaytmpfsflags rootfstype rootflags nbd resume s390x_net
-	dasd ssh_key BOOTIF zfcp uevent_buf_size aoe aoe_iflist aoe_mtu wireguard"
+myopts="BOOTIF
+	alpine_repo
+	aoe
+	aoe_iflist
+	aoe_mtu
+	apkovl
+	autodetect_serial
+	blacklist
+	chart
+	cryptdiscards
+	cryptdm
+	cryptheader
+	cryptkey
+	cryptoffset
+	cryptroot
+	dasd
+	debug_init
+	ds
+	init
+	init_args
+	ip
+	keep_apk_new
+	modules
+	nbd
+	overlaytmpfs
+	overlaytmpfsflags
+	pkgs
+	quiet
+	resume
+	resume_offset
+	root
+	root_size
+	rootflags
+	rootfstype
+	s390x_net
+	splash
+	ssh_key
+	tinycloud
+	uevent_buf_size
+	usbdelay
+	usrflags
+	wireguard
+	zfcp
+"
 
 for opt; do
 	case "$opt" in
@@ -493,7 +558,7 @@ done
 # start bootcharting if wanted
 if [ "$KOPT_chart" = yes ]; then
 	ebegin "Starting bootchart logging"
-	$MOCK /sbin/bootchartd start-initfs "$sysroot"
+	$MOCK /sbin/bootchartd start-initfs
 	eend 0
 fi
 
@@ -649,18 +714,7 @@ if [ -n "$KOPT_root" ]; then
 			echo "Failed to scan devices for btrfs filesystem."
 	fi
 
-	if [ -n "$KOPT_resume" ]; then
-		echo "Resume from disk"
-		if [ -e /sys/power/resume ]; then
-			case "$KOPT_resume" in
-			UUID*|LABEL*) resume_dev=$(findfs "$KOPT_resume");;
-			*) resume_dev="$KOPT_resume";;
-			esac
-			printf "%d:%d" $(stat -Lc "0x%t 0x%T" "$resume_dev") >/sys/power/resume
-		else
-			echo "resume: no hibernation support found"
-		fi
-	fi
+	resume_from_disk
 
 	if [ "$KOPT_overlaytmpfs" = "yes" ]; then
 		# Create mountpoints
@@ -688,8 +742,27 @@ if [ -n "$KOPT_root" ]; then
 	fi
 
 	eend $?
+
+	if [ -r "$sysroot/etc/fstab" ] && [ "$KOPT_usrflags" != "disable" ]; then
+		while read dev mnt fs mntopts chk; do
+			if [ "$mnt" = "/usr" ]; then
+				ebegin "Mounting /usr"
+				$MOCK modprobe -a $fs 2> /dev/null
+				$MOCK nlplug-findfs \
+				      -p /sbin/mdev \
+				      ${KOPT_debug_init:+-d} \
+				      ${KOPT_uevent_buf_size:+-U $KOPT_uevent_buf_size} \
+				      $dev
+				$MOCK mount -t $fs \
+					-o ${KOPT_usrflags:-ro} \
+					$dev $sysroot/usr
+				eend $?
+			fi
+		done < $sysroot/etc/fstab
+	fi
+
 	cat "$ROOT"/proc/mounts 2>/dev/null | while read DEV DIR TYPE OPTS ; do
-		if [ "$DIR" != "/" -a "$DIR" != "$sysroot" -a -d "$DIR" ]; then
+		if [ "$DIR" != "/" -a "$DIR" != "$sysroot" -a "$DIR" != "$sysroot/usr" -a -d "$DIR" ]; then
 			mkdir -p $sysroot/$DIR
 			$MOCK mount -o move $DIR $sysroot/$DIR
 		fi
@@ -699,6 +772,8 @@ if [ -n "$KOPT_root" ]; then
 	echo "initramfs emergency recovery shell launched"
 	exec /bin/busybox sh
 fi
+
+resume_from_disk
 
 if $do_networking; then
 	repoopts="-n"
@@ -798,7 +873,7 @@ if [ -f "$sysroot/etc/.default_boot_services" -o ! -f "$ovl" ]; then
 	fi
 
 	if want_tiny_cloud; then
-		pkgs="$pkgs tiny-cloud-alpine ifupdown-ng doas"
+		pkgs="$pkgs tiny-cloud ifupdown-ng doas"
 		rc_add tiny-cloud-boot boot
 		rc_add tiny-cloud-early default
 		rc_add tiny-cloud-main default
@@ -948,7 +1023,7 @@ fi
 # fix inittab if alternative console
 setup_inittab_console
 
-#mympd build
+# mympd build
 echo "Adding myMPDos build service to firstboot"
 sed -i -e 's|eend $rc|/media/vda1/mympdos/build.sh\n\teend $rc|' "${sysroot}/etc/init.d/firstboot"
 

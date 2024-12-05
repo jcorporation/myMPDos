@@ -1,5 +1,3 @@
-950a951,954
-> #mympd build
-> echo "Adding myMPDos build service to firstboot"
-> sed -i -e 's|eend $rc|/media/vda1/mympdos/build.sh\n\teend $rc|' "${sysroot}/etc/init.d/firstboot"
-> 
+# mympd build
+echo "Adding myMPDos build service to firstboot"
+sed -i -e 's|eend $rc|/media/vda1/mympdos/build.sh\n\teend $rc|' "${sysroot}/etc/init.d/firstboot"
