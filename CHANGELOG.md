@@ -4,6 +4,17 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
+## myMPDos v1.6.1 (2024-12-11)
+
+This is a small bugfix release.
+
+### Changelog
+
+- Fix chown semantics
+- Add missing ca-certificates package
+
+***
+
 ## myMPDos v1.6.0 (2024-12-05)
 
 This release is build up on Alpine Linux 3.21.0.
