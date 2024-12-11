@@ -352,7 +352,7 @@ apk update
 apk upgrade
 
 PKGLIST_ADV="usbutils raspberrypi busybox-extras net-tools mpg123 mympdos-libgpiod2 mygpiod"
-PKGLIST="mympdos-base mympd mympdos-libmpdclient mympdos-mpc doas alsa-utils"
+PKGLIST="mympdos-base mympd mympdos-libmpdclient mympdos-mpc doas alsa-utils ca-certificates"
 [ "$BT_ENABLE" = "true" ] && PKGLIST="$PKGLIST bluez bluez-alsa"
 [ "$ENABLE_RNGD" = "true" ] && PKGLIST="$PKGLIST rng-tools"
 [ "$ADVANCED_SOFTWARE" = "true" ] && PKGLIST="$PKGLIST $PKGLIST_ADV"
@@ -386,7 +386,7 @@ mount -oremount,ro "$DATAMEDIA"
 echo "Installing myMPD scripts"
 install -d /var/lib/mympd/scripts
 cp -v /usr/local/defaults/mympd-scripts/*.lua /var/lib/mympd/scripts
-chown -R mympd.mympd /var/lib/mympd/scripts
+chown -R mympd:mympd /var/lib/mympd/scripts
 
 echo "Setting defaults"
 install -d /var/lib/mpd/cache -o mpd -g mpd
