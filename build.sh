@@ -63,6 +63,7 @@ build_stage1() {
     if ! tar -xzf "$TMPDIR/$NETBOOT_ARCHIVE" -C "$TMPDIR/netboot"
     then
       echo "Can not extract $NETBOOT_ARCHIVE"
+      rm -f "$NETBOOT_ARCHIVE"
       exit 1
     fi
   fi
@@ -75,6 +76,7 @@ build_stage1() {
     if ! tar -tzf "$TMPDIR/$ARCHIVE" > /dev/null
     then
       echo "Can not extract $ARCHIVE"
+      rm -f "$ARCHIVE"
       exit 1
     fi
   fi
