@@ -10,7 +10,9 @@ pkggroups="mpd audio"
 provides="mpd"
 arch="all"
 license="GPL-2.0-or-later"
-makedepends="alsa-lib-dev
+makedepends="
+        wavpack-dev
+        alsa-lib-dev
 	curl-dev
 	expat-dev
 	faad2-dev
