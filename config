@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-# myMPDos (c) 2020-2024 Juergen Mang <mail@jcgames.de>
+# myMPDos (c) 2020-2025 Juergen Mang <mail@jcgames.de>
 # https://github.com/jcorporation/myMPDos
 
-VERSION="1.6.2"
+VERSION="1.6.3"
 
 ARCH="aarch64"
 BUILDIMAGE="myMPDos-build.img"
 ALPINE_MAJOR_VERSION="3.21"
-ALPINE_MINOR_VERSION="2"
+ALPINE_MINOR_VERSION="3"
 ALPINE_VERSION="${ALPINE_MAJOR_VERSION}.${ALPINE_MINOR_VERSION}"
 ALPINE_MIRROR="http://dl-cdn.alpinelinux.org/alpine"
 COMPRESSIMAGE="false"

@@ -4,6 +4,18 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
+## myMPDos v1.6.3 (2025-03-07)
+
+This release is build up on Alpine Linux 3.21.3.
+
+### Changelog
+
+- Alpine Linux 3.21.3
+- Updated MPD master
+- Enabled wavpack for MPD builds
+
+***
+
 ## myMPDos v1.6.2 (2025-01-09)
 
 This release is build up on Alpine Linux 3.21.2.

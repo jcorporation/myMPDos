@@ -2,7 +2,7 @@
 # Based on: https://pkgs.alpinelinux.org/package/edge/community/x86_64/mpd
 pkgname=mympdos-mpd-master
 pkgver=0.24.0
-pkgrel=26
+pkgrel=27
 pkgdesc="Music daemon that plays MP3, FLAC and Ogg Vorbis files"
 url="https://musicpd.org"
 pkgusers="mpd"
@@ -11,8 +11,7 @@ provides="mpd"
 arch="all"
 license="GPL-2.0-or-later"
 makedepends="
-        wavpack-dev
-        alsa-lib-dev
+	alsa-lib-dev
 	curl-dev
 	expat-dev
 	faad2-dev
@@ -36,7 +35,8 @@ makedepends="
 	opus-dev
 	pcre2-dev
 	soxr-dev
-	sqlite-dev"
+	sqlite-dev
+	wavpack-dev"
 install="$pkgname.pre-install"
 subpackages="$pkgname-dbg $pkgname-doc $pkgname-openrc"
 source="mympdos-mpd-master.tar.gz
