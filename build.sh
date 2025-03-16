@@ -238,7 +238,7 @@ build_stage5() {
   sudo losetup -d "${LOOP}"
   install -d "$STARTPATH/images"
   mv "$TMPDIR/$IMAGE" "$STARTPATH/images"
-  [ "$COMPRESSIMAGE" = "true" ] && gzip "$STARTPATH/images/$IMAGE"
+  [ "$COMPRESSIMAGE" = "true" ] && gzip -9 "$STARTPATH/images/$IMAGE"
 
   echo ""
   echo "Image $STARTPATH/images/$IMAGE created successfully."
