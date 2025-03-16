@@ -2,7 +2,7 @@
 
 myMPDos is a Raspberry Pi image (aarch64) based on Alpine Linux. It is running entirely in RAM and it does not write to the sd-card unless you want to save settings. Therefore, myMPDos is very robust and you can simply turn off the power without any risk of corruption of your sd-card.
 
-myMPDos is a turnkey music playback solution and is designed arround [MPD](https://www.musicpd.org/) and [myMPD](https://github.com/jcorporation/myMPD). After startup you can access the myMPD webinterface, copy music to the sd-card data partition, mount a music share or simply plugin an usb storage and you can start enjoying your music.
+myMPDos is a turnkey music playback solution and is designed around [MPD](https://www.musicpd.org/) and [myMPD](https://github.com/jcorporation/myMPD). After startup you can access the myMPD webinterface, copy music to the sd-card data partition, mount a music share or simply plugin an usb storage and you can start enjoying your music.
 
 myMPDos has no configuration dialogs or web ui for initial and further configuration. But there are all common linux utilities installed and more can be installed from the alpine linux repositories.
 
@@ -18,7 +18,7 @@ The initial configuration is done through a simple bootstrap file, that has sane
 - Bleeding edge versions of MPD, mpc and libmpdclient
 - Automounts USB devices and adds its contents to the mpd database
 - Configures MPD outputs automatically
-- Use GPIO buttons to control MPD and myMPD with myGPIOd
+- Use GPIO buttons to control MPD and myMPD with [myGPIOd](https://github.com/jcorporation/myGPIOd)
 - Optional bluetooth support
 
 ## Usage
@@ -38,7 +38,7 @@ init-+-getty
      |     |-{output:U24XL US}
      |     |-{player}
      |     `-{rtio}
-     |-mympd-+-{mympd_api}
+     |-mympd-+-{api}
      |       |-{scripts}
      |       `-{webserver}
      |-ntpd
