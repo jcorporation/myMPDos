@@ -4,6 +4,12 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
+## myMPDos v1.6.4 (not yet released)
+
+This release updates the mympdos-mpd-stable package to MPD 0.24.1. The mympdos-mpd-master package will be stale until the development of MPD 0.25 begins. Migrate to the mympdos-mpd-stable package to keep your installation up-to-date.
+
+***
+
 ## myMPDos v1.6.3 (2025-03-07)
 
 This release is build up on Alpine Linux 3.21.3.
