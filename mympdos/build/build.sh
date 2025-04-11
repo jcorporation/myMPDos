@@ -72,7 +72,7 @@ install -d /usr/build/distfiles -g abuild -m775
 setup-apkcache /usr/build/distfiles
 
 echo "Installing build packages"
-apk add git alpine-sdk perl build-base xz
+apk add alpine-sdk build-base cmake git perl xz
 
 echo "Adding build user"
 adduser -D build -h "$BUILDDIR"
