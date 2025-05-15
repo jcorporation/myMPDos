@@ -30,4 +30,4 @@ touch /var/lib/misc/openrc-shutdowntime
 
 # Save the state to /media/mmcblk0p2/
 echo "Commiting changes"
-lbu_commit
+lbu_commit -d
