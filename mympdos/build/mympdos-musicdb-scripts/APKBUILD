@@ -1,7 +1,7 @@
 # Maintainer: Juergen Mang <mail@jcgames.de>
 pkgname=mympdos-musicdb-scripts
 pkgver=0.1.0
-pkgrel=6
+pkgrel=7
 pkgdesc="myMPDos musicdb-scripts"
 url="https://github.com/jcorporation/musicdb-scripts"
 arch="noarch"
