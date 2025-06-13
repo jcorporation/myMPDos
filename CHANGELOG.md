@@ -4,6 +4,14 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
+## myMPDos v1.7.1 (not yet released)
+
+### Changelog
+
+- Set default myMPD ports
+
+***
+
 ## myMPDos v1.7.0 (2025-06-01)
 
 This release is build up on Alpine Linux 3.22.0. The mympdos-mpd-master package tracks now the MPD master branch that will become MPD 0.25.
