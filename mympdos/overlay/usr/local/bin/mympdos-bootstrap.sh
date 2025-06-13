@@ -57,6 +57,9 @@ ENABLE_AUTOMOUNT="true"
 ENABLE_CONFIGMPD="true"
 ENABLE_MIXER="true"
 SOFTWARE_MIXER_FALLBACK="false"
+MYMPD_HTTP_PORT=80
+MYMPD_SSL_PORT=443
+
 if [ -f "$BOOTMEDIA/bootstrap.txt" ]
 then
     . "$BOOTMEDIA/bootstrap.txt"
