@@ -25,7 +25,6 @@ makedepends="
 	libid3tag-dev
 	libmad-dev
 	mpg123-dev
-	libnfs-dev
 	libogg-dev
 	libsamplerate-dev
 	liburing-dev
@@ -56,6 +55,7 @@ build() {
 		--buildtype=release \
 		-Dqobuz=disabled \
 		-Dneighbor=false \
+		-Dnfs=disabled \
 		-Ddbus=disabled \
 		-Dbzip2=disabled \
 		-Diso9660=disabled \

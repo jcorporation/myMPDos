@@ -14,5 +14,4 @@ Simply attach an usb-stick or drive to the raspberry and myMPDos mounts the driv
 
 ## Mounting a NAS
 
-- You can mount a NFS share via the native MPD implementation. You can configure this in the myMPD gui.
-- Alternatively you can configure a [linux mount](../AdvancedTopics/mount-a-cifs-or-nfs-share.md)
+You can mount a [NFS or CIFS shares](../AdvancedTopics/mount-a-cifs-or-nfs-share.md). Native CIFS and NFS support for MPD is disabled.

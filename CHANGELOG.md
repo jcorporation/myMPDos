@@ -9,6 +9,7 @@ https://github.com/jcorporation/myMPDos/
 ### Changelog
 
 - Set default myMPD ports
+- Disabled NFS support in MPD
 
 ***
 
