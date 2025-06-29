@@ -2,7 +2,7 @@
 # Based on: https://pkgs.alpinelinux.org/package/edge/community/x86_64/mpd
 pkgname=mympdos-mpd-master
 pkgver=0.25.0
-pkgrel=4
+pkgrel=5
 pkgdesc="Music daemon that plays MP3, FLAC and Ogg Vorbis files"
 url="https://musicpd.org"
 pkgusers="mpd"
@@ -21,7 +21,6 @@ makedepends="
 	glib-dev
 	icu-dev
 	lame-dev
-	libcap
 	libid3tag-dev
 	libmad-dev
 	mpg123-dev
@@ -68,11 +67,6 @@ build() {
 
 package() {
 	DESTDIR="$pkgdir" ninja -C output install
-	# mpd attempts to configure real-time scheduling on linux
-	# add the capability which allows doing that
-	# see: https://www.musicpd.org/doc/html/user.html#real-time-scheduling
-	setcap cap_sys_nice+ep "$pkgdir"/usr/bin/mpd
-
 	install -m755 -D "$srcdir"/$pkgname.initd \
 		"$pkgdir"/etc/init.d/mpd
 	install -m644 -D "$srcdir"/$pkgname.confd \

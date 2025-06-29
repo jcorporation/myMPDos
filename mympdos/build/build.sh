@@ -221,8 +221,6 @@ MYMPDOS_BASE_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-base)
 B_MYMPDOS_BASE_VER=$(get_pkgver /media/vda1/mympdos/mympdos-base)
 if [ "$B_BUILD" = "1" ] && [ ! -f "packages/package/$ARCH/$MYMPDOS_BASE_PACKAGE" ]
 then
-  addgroup -S mympd
-  adduser -S -D -H -h /var/lib/mympd -s /sbin/nologin -G mympd -g myMPD mympd
   su build -c "rm -rf mympdos-base"
   su build -c "cp -r /media/vda1/mympdos/mympdos-base ."
   cd mympdos-base || exit 1
