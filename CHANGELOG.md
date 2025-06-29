@@ -4,7 +4,7 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
-## myMPDos v1.7.1 (not yet released)
+## myMPDos v1.7.1 (2025-06-29)
 
 ### Changelog
 
