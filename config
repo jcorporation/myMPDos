@@ -2,12 +2,12 @@
 # myMPDos (c) 2020-2025 Juergen Mang <mail@jcgames.de>
 # https://github.com/jcorporation/myMPDos
 
-VERSION="1.7.1"
+VERSION="1.7.2"
 
 ARCH="aarch64"
 BUILDIMAGE="myMPDos-build.img"
 ALPINE_MAJOR_VERSION="3.22"
-ALPINE_MINOR_VERSION="0"
+ALPINE_MINOR_VERSION="1"
 ALPINE_VERSION="${ALPINE_MAJOR_VERSION}.${ALPINE_MINOR_VERSION}"
 ALPINE_MIRROR="http://dl-cdn.alpinelinux.org/alpine"
 COMPRESSIMAGE="true"
