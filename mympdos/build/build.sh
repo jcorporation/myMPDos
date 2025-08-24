@@ -112,8 +112,8 @@ then
   su build -c "rm -rf libmpdclient"
   su build -c "cp -r /media/vda1/mympdos/mympdos-libmpdclient ."
   cd mympdos-libmpdclient || exit 1
-  su build -c "git clone -b libmympdclient --depth=1 https://github.com/jcorporation/libmympdclient.git"
-  mv libmympdclient "mympdos-libmpdclient-${B_LIBMPDCLIENT_VER}"
+  su build -c "git clone -b master --depth=1 https://github.com/MusicPlayerDaemon/libmpdclient.git"
+  mv libmpdclient "mympdos-libmpdclient-${B_LIBMPDCLIENT_VER}"
   tar -czf mympdos-libmpdclient.tar.gz "mympdos-libmpdclient-${B_LIBMPDCLIENT_VER}"
   rm -fr "mympdos-libmpdclient-${B_LIBMPDCLIENT_VER}"
   su build -c "abuild checksum"
