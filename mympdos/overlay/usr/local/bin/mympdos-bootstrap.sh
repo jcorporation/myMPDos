@@ -386,11 +386,6 @@ install -d "$DATAMEDIA/library" -o mpd -g audio -m 775
 ln -s /mnt "$DATAMEDIA/library/USB"
 mount -oremount,ro "$DATAMEDIA"
 
-echo "Installing myMPD scripts"
-install -d /var/lib/mympd/scripts
-cp -v /usr/local/defaults/mympd-scripts/*.lua /var/lib/mympd/scripts
-chown -R mympd:mympd /var/lib/mympd/scripts
-
 echo "Setting defaults"
 install -d /var/lib/mpd/cache -o mpd -g mpd
 cp /usr/local/defaults/etc/doas.conf /etc/doas.d/mympd.conf
@@ -440,6 +435,45 @@ install -d /etc/mympdos/custom
 [ -f "$BOOTMEDIA/mpd.custom.conf" ] && cp "$BOOTMEDIA/mpd.custom.conf" /etc/
 /usr/bin/configmpd.sh
 
+echo "Creating myMPD configuration"
+install -d /var/lib/mympd/scripts
+cp -v /usr/local/defaults/mympd-scripts/*.lua /var/lib/mympd/scripts
+
+export MYMPD_ACL
+export MYMPD_ALBUM_GROUP_TAG
+export MYMPD_ALBUM_MODE
+export MYMPD_CACHE_COVER_KEEP_DAYS
+export MYMPD_CACHE_HTTP_KEEP_DAYS
+export MYMPD_CACHE_LYRICS_KEEP_DAYS
+export MYMPD_CACHE_MISC_KEEP_DAYS
+export MYMPD_CACHE_THUMBS_KEEP_DAYS
+export MYMPD_LOGLEVEL
+export MYMPD_MYMPD_URI
+export MYMPD_SAVE_CACHES
+export MYMPD_SCRIPTACL
+export MYMPD_SCRIPTS_EXTERNAL
+export MYMPD_STICKERS
+export MYMPD_STICKERS_PAD_INT
+export MYMPD_HTTP_HOST
+export MYMPD_HTTP
+export MYMPD_HTTP_PORT
+export MYMPD_SSL
+export MYMPD_SSL_PORT
+export MYMPD_SSL_SAN
+export MYMPD_CUSTOM_CERT
+export MYMPD_SSL_CERT
+export MYMPD_SSL_KEY
+export MYMPD_WEBRADIODB
+export MYMPD_CERT_CHECK
+export MYMPD_CA_CERT_STORE
+mympd -c
+
+chown -R mympd:mympd /var/lib/mympd/scripts
+
+echo "Trusting myMPD CA"
+cp /var/lib/mympd/ssl/ca.pem /etc/ssl/certs/mympd.pem
+update-ca-certificates
+
 echo "Enabling boot services"
 [ "$ENABLE_RNGD" = "true" ] && rc-update add rngd boot
 rc-update add networking boot
@@ -465,6 +499,10 @@ then
   echo "Setting root password"
   printf "%s\n%s\n" "$ROOT_PASSWORD" "$ROOT_PASSWORD" | passwd
 fi
+
+echo "Setting swclock"
+install -d /var/lib/misc/
+touch /var/lib/misc/openrc-shutdowntime
 
 mount -o remount,rw "$BOOTMEDIA"
 
@@ -509,36 +547,6 @@ for DIR in /usr/local/defaults /etc/logrotate.d /etc/openldap /etc/pkcs11 /etc/a
 do
     rm -rf "$DIR"
 done
-
-echo "Create myMPD configuration"
-export MYMPD_ACL
-export MYMPD_ALBUM_GROUP_TAG
-export MYMPD_ALBUM_MODE
-export MYMPD_COVERCACHE_KEEP_DAYS
-export MYMPD_HTTP
-export MYMPD_HTTP_HOST
-export MYMPD_HTTP_PORT
-export MYMPD_LOGLEVEL
-export MYMPD_LUALIBS
-export MYMPD_URI
-export MYMPD_SAVE_CACHES
-export MYMPD_SCRIPTACL
-export MYMPD_STICKERS
-export MYMPD_SSL
-export MYMPD_SSL_PORT
-export MYMPD_SSL_SAN
-export MYMPD_CUSTOM_CERT
-export MYMPD_SSL_CERT
-export MYMPD_SSL_KEY
-mympd -c
-
-echo "Trusting myMPD CA"
-cp /var/lib/mympd/ssl/ca.pem /etc/ssl/certs/mympd.pem
-update-ca-certificates
-
-echo "Setting swclock"
-install -d /var/lib/misc/
-touch /var/lib/misc/openrc-shutdowntime
 
 echo "Saving configuration"
 echo "LBU_MEDIA=$LBUMEDIA" > /etc/lbu/lbu.conf
