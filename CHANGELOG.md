@@ -4,6 +4,17 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
+## myMPDos v1.7.3 (2025-08-28)
+
+This release fixes a bootstrap issue introduced with myMPD v22.0.0.
+
+### Changelog
+
+- Fix file permissions for myMPD state folder #49
+- Support all myMPD config variables
+
+***
+
 ## myMPDos v1.7.2 (2025-07-17)
 
 This release is build up on Alpine Linux 3.22.1.

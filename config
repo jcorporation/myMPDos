@@ -2,7 +2,7 @@
 # myMPDos (c) 2020-2025 Juergen Mang <mail@jcgames.de>
 # https://github.com/jcorporation/myMPDos
 
-VERSION="1.7.2"
+VERSION="1.7.3"
 
 ARCH="aarch64"
 BUILDIMAGE="myMPDos-build.img"
