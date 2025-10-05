@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # SPDX-License-Identifier: GPL-3.0-or-later
-# myMPDos (c) 2020-2023 Juergen Mang <mail@jcgames.de>
+# myMPDos (c) 2020-2025 Juergen Mang <mail@jcgames.de>
 # https://github.com/jcorporation/myMPDos
 
 # Upgrades alpine to a new version
@@ -15,7 +15,7 @@
 echo "Updating alpine boot image to ${V_MAJOR}.${V_MINOR}.${V_POINT}"
 echo " - Downloading"
 BOOTDEV="/media/mmcblk0p1"
-ARCHIVE="alpine-rpi-${V_MAJOR}.${V_MINOR}.${V_POINT}-aarch64.tar.gz"
+ARCHIVE="/tmp/alpine-rpi-${V_MAJOR}.${V_MINOR}.${V_POINT}-aarch64.tar.gz"
 BACKUP_FILE="/tmp/old_boot.tgz"
 
 if ! wget -q "http://dl-cdn.alpinelinux.org/alpine/v${V_MAJOR}.${V_MINOR}/releases/aarch64/$ARCHIVE" -O "$ARCHIVE"
