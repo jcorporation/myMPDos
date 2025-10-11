@@ -8,6 +8,8 @@ https://github.com/jcorporation/myMPDos/
 
 ### Changelog
 
+- Support myMPD v23 config variables
+
 ***
 
 ## myMPDos v1.7.4 (2025-10-11)

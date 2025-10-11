@@ -442,6 +442,7 @@ cp -v /usr/local/defaults/mympd-scripts/*.lua /var/lib/mympd/scripts
 export MYMPD_ACL
 export MYMPD_ALBUM_GROUP_TAG
 export MYMPD_ALBUM_MODE
+export MYMPD_ALBUM_UNKNOWN
 export MYMPD_CACHE_COVER_KEEP_DAYS
 export MYMPD_CACHE_HTTP_KEEP_DAYS
 export MYMPD_CACHE_LYRICS_KEEP_DAYS
