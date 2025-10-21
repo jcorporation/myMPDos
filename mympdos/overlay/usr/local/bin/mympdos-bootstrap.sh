@@ -436,9 +436,6 @@ install -d /etc/mympdos/custom
 /usr/bin/configmpd.sh
 
 echo "Creating myMPD configuration"
-install -d /var/lib/mympd/scripts
-cp -v /usr/local/defaults/mympd-scripts/*.lua /var/lib/mympd/scripts
-
 export MYMPD_ACL
 export MYMPD_ALBUM_GROUP_TAG
 export MYMPD_ALBUM_MODE
@@ -450,7 +447,6 @@ export MYMPD_CACHE_MISC_KEEP_DAYS
 export MYMPD_CACHE_THUMBS_KEEP_DAYS
 export MYMPD_LOGLEVEL
 export MYMPD_MYMPD_URI
-export MYMPD_SAVE_CACHES
 export MYMPD_SCRIPTACL
 export MYMPD_SCRIPTS_EXTERNAL
 export MYMPD_STICKERS
@@ -467,9 +463,18 @@ export MYMPD_SSL_KEY
 export MYMPD_WEBRADIODB
 export MYMPD_CERT_CHECK
 export MYMPD_CA_CERT_STORE
+export MYMPD_JUKEBOX_QUEUE_LENGTH_ALBUM
+export MYMPD_JUKEBOX_QUEUE_LENGTH_ALBUM_MIN
+export MYMPD_JUKEBOX_QUEUE_LENGTH_SONG
+export MYMPD_JUKEBOX_QUEUE_LENGTH_SONG_MIN
 mympd -c
 
-chown -R mympd:mympd /var/lib/mympd/scripts
+echo "Installing myMPD scripts"
+cp -v /usr/local/defaults/mympd-scripts/*.lua /var/lib/mympd/scripts
+
+echo "Fixing myMPD permissions"
+chown -R mympd:mympd /var/lib/mympd
+chown -R mympd:mympd /var/cache/mympd
 
 echo "Trusting myMPD CA"
 cp /var/lib/mympd/ssl/ca.pem /etc/ssl/certs/mympd.pem

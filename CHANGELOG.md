@@ -4,11 +4,12 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
-## myMPDos v1.7.5 (not yet released)
+## myMPDos v1.7.5 (2025-10-21)
 
 ### Changelog
 
 - Support myMPD v23 config variables
+- Fix myMPD permission issues #50
 
 ***
 
