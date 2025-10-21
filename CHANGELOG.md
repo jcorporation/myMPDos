@@ -9,6 +9,7 @@ https://github.com/jcorporation/myMPDos/
 ### Changelog
 
 - Support myMPD v23 config variables
+- Fix myMPD permission issues #50
 
 ***
 
