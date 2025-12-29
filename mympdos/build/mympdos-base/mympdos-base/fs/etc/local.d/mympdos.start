@@ -1,12 +1,13 @@
 #!/bin/sh
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
-# myMPDos (c) 2020-2023 Juergen Mang <mail@jcgames.de>
+# myMPDos (c) 2020-2025 Juergen Mang <mail@jcgames.de>
 # https://github.com/jcorporation/myMPDos
 #
 
-[ -f /etc/mympdos/mympdos.conf ] && source /etc/mympdos/mympdos.conf
+[ -f /etc/mympdos/mympdos.conf ] && . /etc/mympdos/mympdos.conf
 
+# Dynamic welcome screen
 if [ -s /media/mmcblk0p1/myMPDos.version ]
 then
   read VERSION < /media/mmcblk0p1/myMPDos.version
@@ -31,9 +32,11 @@ Enjoy the music!
 
 EOL
 
+# Some useful symlinks
 ln -s /media/mmcblk0p1 /boot
 ln -s /media/mmcblk0p2 /data
 
+# Disable HDMI to save power
 if [ "$DISABLE_HDMI" = "true" ]
 then
   if [ -x /opt/vc/bin/tvservice ]
@@ -45,6 +48,11 @@ then
   fi
 fi
 
+# Workaround for missing lock folder
+mkdir -p /run/lock
+alsactl restore
+
+# Play welcome jingle
 if [ -f /media/mmcblk0p2/welcome.wav ]
 then
   aplay /media/mmcblk0p2/welcome.wav
@@ -52,4 +60,6 @@ elif [ -f /media/mmcblk0p2/welcome.mp3 ] && [ -x /usr/bin/mpg123 ]
 then
   mpg123 /media/mmcblk0p2/welcome.mp3
 fi
+
+# Exit gracefully
 exit 0
