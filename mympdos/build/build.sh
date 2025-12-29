@@ -14,14 +14,13 @@ B_BUILD="1"
 B_MYMPD="1"
 B_MYMPD_BRANCH="master"
 #B_MYMPD_BRANCH="devel"
-B_MYGPIOD_BRANCH="master"
-#B_MYGPIOD_BRANCH="devel"
 B_LIBMPDCLIENT="1"
 B_MPC="1"
 B_MPD_STABLE="1"
 B_MPD_MASTER="1"
-B_LIBGPIOD2="1"
 B_MYGPIOD="1"
+#B_MYGPIOD_BRANCH="master"
+B_MYGPIOD_BRANCH="devel"
 B_MUSICDB_SCRIPTS="1"
 
 get_pkgver() {
@@ -72,7 +71,7 @@ install -d /usr/build/distfiles -g abuild -m775
 setup-apkcache /usr/build/distfiles
 
 echo "Installing build packages"
-apk add alpine-sdk build-base cmake git perl xz
+apk add alpine-sdk build-base cmake git meson perl samurai xz
 
 echo "Adding build user"
 adduser -D build -h "$BUILDDIR"
@@ -145,30 +144,6 @@ then
   su build -c "abuild checksum"
   su build -c "abuild -r"
   cd ..
-fi
-
-LIBGPIOD2_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-libgpiod2)
-B_LIBGPIOD2_VER=$(get_pkgver /media/vda1/mympdos/mympdos-libgpiod2)
-if [ "$B_LIBGPIOD2" = "1" ] && [ ! -f "packages/package/$ARCH/$LIBGPIOD2_PACKAGE" ]
-then
-  echo "Building libgpiod v2"
-  su build -c "rm -rf mympdos-libgpiod2"
-  su build -c "cp -r /media/vda1/mympdos/mympdos-libgpiod2 ."
-  cd mympdos-libgpiod2 || exit 1
-  su build -c "git clone -b v2.1.x --depth=1 https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git"
-  mv "libgpiod" "mympdos-libgpiod2-${B_LIBGPIOD2_VER}"
-  tar -czf mympdos-libgpiod2.tar.gz "mympdos-libgpiod2-${B_LIBGPIOD2_VER}"
-  rm -fr "mympdos-libgpiod2-${B_LIBGPIOD2_VER}"
-  su build -c "abuild checksum"
-  su build -c "abuild -r"
-  cd ..
-fi
-
-apk update
-if ! apk add mympdos-libgpiod2 mympdos-libgpiod2-dev curl-dev
-then
-  echo "Failed"
-  exit 1
 fi
 
 if [ "$B_MYGPIOD" = "1" ]
