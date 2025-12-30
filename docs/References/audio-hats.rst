@@ -1,8 +1,8 @@
----
-title: Audio Hats
----
+Audio Hats
+==========
 
-You can define the audio hat in the bootstrap file or configure it afterwards with `audiohat.sh` and rebooting.
+You can define the audio hat in the bootstrap file or configure it
+afterwards with ``audiohat.sh`` and rebooting.
 
 myMPDos supports following audio hats.
 
@@ -34,4 +34,6 @@ myMPDos supports following audio hats.
 - rpi-dac
 - rpi-proto
 
-The list is generated from [https://raw.githubusercontent.com/raspberrypi/firmware/master/boot/overlays/README](https://raw.githubusercontent.com/raspberrypi/firmware/master/boot/overlays/README) and NOT tested.
+The list is generated from
+https://raw.githubusercontent.com/raspberrypi/firmware/master/boot/overlays/README
+and NOT tested.
