@@ -7,7 +7,7 @@ is a small and secure replacement for ``sudo``.
 
 First, configure the script to run as root with the help of ``doas``:
 
-.. code:: txt
+.. code:: sh
 
    # Create the file /etc/doas.d/custom.conf
    permit nopass mympd cmd /root/my-script.sh
