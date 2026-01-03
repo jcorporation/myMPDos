@@ -4,6 +4,16 @@ https://github.com/jcorporation/myMPDos/
 
 ***
 
+## myMPDos v1.8.1 (2026-01-03)
+
+This release fixes a bootstrap issue.
+
+### Changelog
+
+- Remove obsolete mympdos-libgpiod dependency
+
+***
+
 ## myMPDos v1.8.0 (2025-12-29)
 
 This release is build up on Alpine Linux 3.23.2.
