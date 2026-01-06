@@ -21,6 +21,7 @@ B_MPD_MASTER="1"
 B_MYGPIOD="1"
 #B_MYGPIOD_BRANCH="master"
 B_MYGPIOD_BRANCH="devel"
+B_MYGPIOD_PKGREL="1"
 B_MUSICDB_SCRIPTS="1"
 
 get_pkgver() {
@@ -152,6 +153,12 @@ then
   su build -c "rm -rf myGPIOd"
   su build -c "git clone -b "$B_MYGPIOD_BRANCH" --depth=1 https://github.com/jcorporation/myGPIOd.git"
   cd myGPIOd || exit 1
+  # Enforce specific package release
+  if [ -n "${B_MYGPIOD_PKGREL}" ]
+  then
+    echo "Setting pkgrel to ${B_MYGPIOD_PKGREL}"
+    sed -i "s/^pkgrel=.*/pkgrel=${B_MYGPIOD_PKGREL}/" contrib/packaging/alpine/APKBUILD
+  fi
   MYGPIOD_PACKAGE=$(get_pkgname contrib/packaging/alpine)
   if [ ! -f "../packages/package/$ARCH/$MYGPIOD_PACKAGE" ]
   then
