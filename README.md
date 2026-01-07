@@ -53,4 +53,4 @@ For further information on installation and configuration, see the [myMPDos docu
 
 ## Copyright
 
-2020-2025 Juergen Mang <mail@jcgames.de>
+2020-2026 Juergen Mang <mail@jcgames.de>
