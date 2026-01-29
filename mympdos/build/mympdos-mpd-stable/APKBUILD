@@ -1,7 +1,7 @@
 # Maintainer: Juergen Mang <mail@jcgames.de>
 # Based on: https://pkgs.alpinelinux.org/package/edge/community/x86_64/mpd
 pkgname=mympdos-mpd-stable
-pkgver=0.24.7
+pkgver=0.24.8
 pkgrel=0
 pkgdesc="Music daemon that plays MP3, FLAC and Ogg Vorbis files"
 url="https://musicpd.org"
