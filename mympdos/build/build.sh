@@ -14,14 +14,15 @@ B_BUILD="1"
 B_MYMPD="1"
 B_MYMPD_BRANCH="master"
 #B_MYMPD_BRANCH="devel"
+B_MYMPD_PKGREL="1"
 B_LIBMPDCLIENT="1"
 B_MPC="1"
 B_MPD_STABLE="1"
 B_MPD_MASTER="1"
 B_MYGPIOD="1"
-#B_MYGPIOD_BRANCH="master"
-B_MYGPIOD_BRANCH="devel"
-B_MYGPIOD_PKGREL="1"
+B_MYGPIOD_BRANCH="master"
+#B_MYGPIOD_BRANCH="devel"
+B_MYGPIOD_PKGREL="2"
 B_MUSICDB_SCRIPTS="1"
 
 get_pkgver() {
@@ -183,6 +184,12 @@ then
   su build -c "rm -rf myMPD"
   su build -c "git clone -b $B_MYMPD_BRANCH --depth=1 https://github.com/jcorporation/myMPD.git"
   cd myMPD || exit 1
+  # Enforce specific package release
+  if [ -n "${B_MYMPD_PKGREL}" ]
+  then
+    echo "Setting pkgrel to ${B_MYMPD_PKGREL}"
+    sed -i "s/^pkgrel=.*/pkgrel=${B_MYMPD_PKGREL}/" contrib/packaging/alpine/APKBUILD
+  fi
   MYMPD_PACKAGE=$(get_pkgname contrib/packaging/alpine)
   if [ ! -f "../packages/package/$ARCH/$MYMPD_PACKAGE" ]
   then
