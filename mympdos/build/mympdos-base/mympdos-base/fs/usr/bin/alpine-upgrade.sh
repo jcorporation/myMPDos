@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # SPDX-License-Identifier: GPL-3.0-or-later
-# myMPDos (c) 2020-2025 Juergen Mang <mail@jcgames.de>
+# myMPDos (c) 2020-2026 Juergen Mang <mail@jcgames.de>
 # https://github.com/jcorporation/myMPDos
 
 # Upgrades alpine to a new version
@@ -15,17 +15,17 @@
 echo "Updating alpine boot image to ${V_MAJOR}.${V_MINOR}.${V_POINT}"
 echo " - Downloading"
 BOOTDEV="/media/mmcblk0p1"
-ARCHIVE="/tmp/alpine-rpi-${V_MAJOR}.${V_MINOR}.${V_POINT}-aarch64.tar.gz"
+ARCHIVE="alpine-rpi-${V_MAJOR}.${V_MINOR}.${V_POINT}-aarch64.tar.gz"
 BACKUP_FILE="/tmp/old_boot.tgz"
 
-if ! wget -q "http://dl-cdn.alpinelinux.org/alpine/v${V_MAJOR}.${V_MINOR}/releases/aarch64/$ARCHIVE" -O "$ARCHIVE"
+if ! wget -q "http://dl-cdn.alpinelinux.org/alpine/v${V_MAJOR}.${V_MINOR}/releases/aarch64/$ARCHIVE" -O "/tmp/$ARCHIVE"
 then
   echo "Error downloading alpine base image"
   exit 1
 fi
 
 echo " - Checking"
-if ! echo "$CHECKSUM  $ARCHIVE" | sha256sum -c -w
+if ! echo "$CHECKSUM  /tmp/$ARCHIVE" | sha256sum -c -w
 then
     echo "Checksum error"
     exit 1
@@ -55,7 +55,7 @@ rm -f "${BOOTDEV}"/*.dat
 rm -f "${BOOTDEV}"/*.elf
 
 echo " - Extracting new boot files"
-if ! tar -xzf "$ARCHIVE" -C "$BOOTDEV"
+if ! tar -xzf "/tmp/$ARCHIVE" -C "$BOOTDEV"
 then
     echo "Error extracting archiv, restoring old /boot"
     rm -fr "${BOOTDEV}"/*
@@ -67,8 +67,8 @@ then
 fi
 
 echo " - Cleaning up"
-rm "$ARCHIVE"
-rm "$BACKUP_FILE"
+rm -f "/tmp/$ARCHIVE"
+rm -f "$BACKUP_FILE"
 sync
 
 echo " - Mounting $BOOTDEV ro"
