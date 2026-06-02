@@ -1,6 +1,6 @@
 # Maintainer: Juergen Mang <mail@jcgames.de>
 pkgname=mympdos-base
-pkgver=0.9.9
+pkgver=0.9.10
 pkgrel=0
 pkgdesc="myMPDos base package"
 url="https://github.com/jcorporation/myMPDos"

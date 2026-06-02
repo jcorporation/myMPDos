@@ -388,7 +388,6 @@ mount -oremount,ro "$DATAMEDIA"
 
 echo "Setting defaults"
 install -d /var/lib/mpd/cache -o mpd -g mpd
-cp /usr/local/defaults/etc/doas.conf /etc/doas.d/mympd.conf
 
 if [ "$ENABLE_CONFIGMPD" = "true" ]
 then
