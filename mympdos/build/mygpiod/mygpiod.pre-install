@@ -1,0 +1,18 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-or-later
+# myGPIOd (c) 2020-2026 Juergen Mang <mail@jcgames.de>
+# https://github.com/jcorporation/myGPIOd
+
+addgroup -S gpio 2>/dev/null
+adduser -S -D -H -h /var/lib/mygpiod -s /sbin/nologin -g mygpiod -G gpio mygpiod 2>/dev/null
+
+#add gpio to mdev to set devices to gpio group
+if [ -f /etc/mdev.conf ]
+then
+    if ! grep -q "^gpio" /etc/mdev.conf
+    then
+        sed -i '/# fallback/i # gpio\ngpiochip[0-9]\troot:gpio 0660\ngpiomem\t\troot:gpio 0660\n\n' /etc/mdev.conf
+    fi
+fi
+
+exit 0

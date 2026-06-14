@@ -1,0 +1,10 @@
+#!/bin/sh
+# SPDX-License-Identifier: GPL-3.0-or-later
+# myGPIOd (c) 2020-2026 Juergen Mang <mail@jcgames.de>
+# https://github.com/jcorporation/myGPIOd
+
+echo "myGPIOd installed"
+echo "Modify /etc/mygpiod.conf to suit your needs."
+sed -i 's/syslog=false/syslog=true/' /etc/mygpiod.conf
+/sbin/ldconfig
+exit 0

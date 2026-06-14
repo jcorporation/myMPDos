@@ -1,28 +1,22 @@
 #!/bin/sh
-#
-# SPDX-License-Identifier: GPL-3.0-or-later
-# myMPDos (c) 2020-2023 Juergen Mang <mail@jcgames.de>
-# https://github.com/jcorporation/myMPDos
-#
 
-BUILDDIR="/usr/build"
-POWEROFF="1"
+# SPDX-License-Identifier: GPL-3.0-or-later
+# myMPDos (c) 2020-2026 Juergen Mang <mail@jcgames.de>
+# https://github.com/jcorporation/myMPDos
+
+
+BUILDDIR="/build"
 ARCH=$(uname -m)
 
 #Build packages
 B_BUILD="1"
 B_MYMPD="1"
 B_MYMPD_BRANCH="master"
-#B_MYMPD_BRANCH="devel"
-B_MYMPD_PKGREL="1"
 B_LIBMPDCLIENT="1"
 B_MPC="1"
 B_MPD_STABLE="1"
 B_MPD_MASTER="1"
 B_MYGPIOD="1"
-B_MYGPIOD_BRANCH="master"
-#B_MYGPIOD_BRANCH="devel"
-#B_MYGPIOD_PKGREL="0"
 B_MUSICDB_SCRIPTS="1"
 
 get_pkgver() {
@@ -37,93 +31,129 @@ get_pkgname() {
   echo "${PKGNAME}-${PKGVER}-r${PKGREL}.apk"
 }
 
-echo ""
-echo "Starting myMPDos build"
-
-echo "Setting the local clock"
-date -s@"$(cat /media/vda1/date)"
-
-if [ "$POWEROFF" = "0" ]
-then
-  echo "Setting keymap"
-  setup-keymap de de-nodeadkeys
-fi
-
-echo "Setup repositories and upgrade"
-echo "/media/vda1/apks" > /etc/apk/repositories
-setup-apkrepos -1
-sed -r -e's/^#\s?(.*\d\/community)/\1/' -i /etc/apk/repositories
-while apk update 2>&1 | grep WARNING
-do
-  echo "Error...trying new random repository"
-  echo "/media/vda1/apks" > /etc/apk/repositorie
-  setup-apkrepos -r
-  sed -r -e's/^#\s?(.*\d\/community)/\1/' -i /etc/apk/repositories
-done
-apk upgrade
-
-echo "Moving /usr to /dev/vda2"
-mount /dev/vda2 /mnt -text4
-cp -a /usr/* /mnt
-umount /mnt
-mount /dev/vda2 /usr -text4
-
-echo "Setup apkcache"
-install -d /usr/build/distfiles -g abuild -m775
-setup-apkcache /usr/build/distfiles
-
-echo "Installing build packages"
-apk add alpine-sdk build-base cmake git linux-headers meson perl samurai xz
+echo "Setup myMPDos build"
 
 echo "Adding build user"
-adduser -D build -h "$BUILDDIR"
-addgroup build abuild
+adduser -D build -u 1000 -h "$BUILDDIR"
+adduser build abuild
+adduser build wheel
+
+export HOME="$BUILDDIR"
+
+# default distfiles location
+install -d -g abuild -m 775 /var/cache/distfiles
+
 cd "$BUILDDIR" || exit 1
 
 echo "Setting up package signing key"
-if [ -f /media/vda1/mympdos/abuild.tgz ]
+if [ -f "$BUILDDIR/abuild.tgz" ]
 then
   echo "Restoring .abuild"
-  cp /media/vda1/mympdos/abuild.tgz .
   tar -xzf abuild.tgz
 else
-  if su build -c "abuild-keygen -n -a"
+  if abuild-keygen -n -a
   then
     tar -czf abuild.tgz .abuild
   fi
 fi
-cp .abuild/*.rsa.pub /etc/apk/keys/
+cp -v .abuild/*.rsa.pub /etc/apk/keys/
 
-su build -c "install -d packages/package/$ARCH/"
-ln -s /usr/build/packages/package/ /usr/build/packages/build
+echo "Adding local myMPDos repository"
+echo "$BUILDDIR/packages/package" >> /etc/apk/repositories
 
-if [ -f /media/vda1/mympdos-apks/APKINDEX.tar.gz ]
+# Enable apk cache
+ln -s /var/cache/apk /etc/apk/cache
+
+echo "Updating apks"
+apk update
+apk upgrade
+
+echo "Installing build packages"
+apk add \
+  alsa-lib-dev \
+  alpine-sdk \
+  build-base \
+  check-dev \
+  cmake \
+  curl-dev \
+  doas \
+  expat-dev \
+  faad2-dev \
+  ffmpeg-dev \
+  flac-dev \
+  fmt-dev \
+  git \
+  glib-dev \
+  gzip \
+  icu-dev \
+  jq \
+  lame-dev \
+  libgpiod-dev \
+  libid3tag-dev \
+  libmad-dev \
+  linux-headers \
+  lua5.4 \
+  lua5.4-dev \
+  meson \
+  mpg123-dev \
+  newt \
+  libmicrohttpd-dev \
+  libogg-dev \
+  libsamplerate-dev \
+  liburing-dev \
+  libvorbis-dev \
+  meson \
+  nlohmann-json \
+  opus-dev \
+  pcre2-dev \
+  perl \
+  raspberrypi-utils-vcgencmd \
+  samurai \
+  soxr-dev \
+  sqlite-dev \
+  utf8proc-dev \
+  wavpack-dev \
+  xz
+
+# Doas config
+cat > /etc/doas.d/doas.conf <<EOL
+permit nopass :wheel
+permit nopass :root
+EOL
+chmod 600 /etc/doas.d/doas.conf
+
+install -o build -d "packages/package/$ARCH/"
+if [ ! -h "$BUILDDIR/packages/build" ]
 then
-  echo "Restoring existing packages"
-  su build -c "cp /media/vda1/mympdos-apks/* packages/package/$ARCH/"
-else
-  echo "No existing packages found"
+  ln -s "$BUILDDIR/packages/package/" "$BUILDDIR/packages/build"
 fi
 
-LIBMPDCLIENT_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-libmpdclient)
-B_LIBMPDCLIENT_VER=$(get_pkgver /media/vda1/mympdos/mympdos-libmpdclient)
+echo "Starting myMPDos build"
+
+LIBMPDCLIENT_PACKAGE=$(get_pkgname /mympdos/mympdos-libmpdclient)
+B_LIBMPDCLIENT_VER=$(get_pkgver /mympdos/mympdos-libmpdclient)
 if [ "$B_LIBMPDCLIENT" = "1" ] && [ ! -f "packages/package/$ARCH/$LIBMPDCLIENT_PACKAGE" ]
 then
   echo "Build libmpdclient"
-  su build -c "rm -rf libmpdclient"
-  su build -c "cp -r /media/vda1/mympdos/mympdos-libmpdclient ."
+  rm -rf libmpdclient
+  cp -r /mympdos/mympdos-libmpdclient .
+  chown -R build mympdos-libmpdclient
   cd mympdos-libmpdclient || exit 1
   su build -c "git clone -b master --depth=1 https://github.com/MusicPlayerDaemon/libmpdclient.git"
   mv libmpdclient "mympdos-libmpdclient-${B_LIBMPDCLIENT_VER}"
   tar -czf mympdos-libmpdclient.tar.gz "mympdos-libmpdclient-${B_LIBMPDCLIENT_VER}"
   rm -fr "mympdos-libmpdclient-${B_LIBMPDCLIENT_VER}"
-  su build -c "abuild checksum"
-  su build -c "abuild -r"
-  cd ..
+  abuild -F checksum
+  if ! abuild -F
+  then
+    # Retry
+    abuild -F
+  fi
 fi
 
+cd "$BUILDDIR" || exit 1
+
 #install freshly build libmpdclient
-echo "/usr/build/packages/package/" >> /etc/apk/repositories
 apk update
 if ! apk add mympdos-libmpdclient mympdos-libmpdclient-dev
 then
@@ -131,102 +161,104 @@ then
   exit 1
 fi
 
-MPC_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-mpc)
-B_MPC_VER=$(get_pkgver /media/vda1/mympdos/mympdos-mpc)
+MPC_PACKAGE=$(get_pkgname /mympdos/mympdos-mpc)
+B_MPC_VER=$(get_pkgver /mympdos/mympdos-mpc)
 if [ "$B_MPC" = "1" ] && [ ! -f "packages/package/$ARCH/$MPC_PACKAGE" ]
 then
   echo "Building mpc"
-  su build -c "rm -rf mympdos-mpc"
-  su build -c "cp -r /media/vda1/mympdos/mympdos-mpc ."
+  rm -rf mympdos-mpc
+  cp -r /mympdos/mympdos-mpc .
+  chown -R build mympdos-mpc
   cd mympdos-mpc || exit 1
-  su build -c "git clone -b master --depth=1 https://github.com/jcorporation/mpc.git"
+  git clone -b master --depth=1 https://github.com/jcorporation/mpc.git
   mv "mpc" "mympdos-mpc-${B_MPC_VER}"
   tar -czf mympdos-mpc.tar.gz "mympdos-mpc-${B_MPC_VER}"
   rm -fr "mympdos-mpc-${B_MPC_VER}"
-  su build -c "abuild checksum"
-  su build -c "abuild -r"
-  cd ..
+  abuild -F checksum
+  if ! abuild -F
+  then
+    # Retry
+    abuild -F
+  fi
 fi
 
-if [ "$B_MYGPIOD" = "1" ]
+cd "$BUILDDIR" || exit 1
+
+MYGPIOD_PACKAGE=$(get_pkgname /mympdos/mygpiod)
+B_MYGPIOD_VER=$(get_pkgver /mympdos/mygpiod)
+if [ "$B_MYGPIOD" = "1" ] && [ ! -f "packages/package/$ARCH/$MYGPIOD_PACKAGE" ]
 then
-  echo "Build myGPIOd"
-  su build -c "rm -rf myGPIOd"
-  su build -c "git clone -b "$B_MYGPIOD_BRANCH" --depth=1 https://github.com/jcorporation/myGPIOd.git"
-  cd myGPIOd || exit 1
-  # Enforce specific package release
-  if [ -n "${B_MYGPIOD_PKGREL}" ]
+  echo "Build mygpiod"
+  rm -rf mygpiod
+  cp -r /mympdos/mygpiod .
+  chown -R build mygpiod
+  cd mygpiod || exit 1
+  su build -c "git clone -b master --depth=1 https://github.com/jcorporation/myGPIOd.git"
+  mv myGPIOd "mygpiod-${B_MYGPIOD_VER}"
+  tar -czf mygpiod.tar.gz "mygpiod-${B_MYGPIOD_VER}"
+  rm -fr "mygpiod-${B_MYGPIOD_VER}"
+  abuild -F checksum
+  if ! abuild -F
   then
-    echo "Setting pkgrel to ${B_MYGPIOD_PKGREL}"
-    sed -i "s/^pkgrel=.*/pkgrel=${B_MYGPIOD_PKGREL}/" contrib/packaging/alpine/APKBUILD
+    # Retry
+    abuild -F
   fi
-  MYGPIOD_PACKAGE=$(get_pkgname contrib/packaging/alpine)
-  if [ ! -f "../packages/package/$ARCH/$MYGPIOD_PACKAGE" ]
-  then
-    sed -i 's/libmpdclient/mympdos-libmpdclient/g' contrib/packaging/alpine/APKBUILD
-    su build -c "./build.sh pkgalpine"
-  else
-    echo "myGPIOd is already up-to-date"
-  fi
-  cd ..
 fi
 
-apk update
-if ! apk add mygpiod mygpiod-dev
+cd "$BUILDDIR" || exit 1
+
+MYMPD_PACKAGE=$(get_pkgname /mympdos/mympd)
+B_MYMPD_VER=$(get_pkgver /mympdos/mympd)
+if [ "$B_MYMPD" = "1" ] && [ ! -f "packages/package/$ARCH/$MYMPD_PACKAGE" ]
 then
-  echo "Failed"
-  exit 1
+  echo "Build mympd"
+  rm -rf mympd
+  cp -r /mympdos/mympd .
+  chown -R build mympd
+  cd mympd || exit 1
+  su build -c "git clone -b "$B_MYMPD_BRANCH" --depth=1 https://github.com/jcorporation/myMPD.git"
+  mv myMPD "mympd-${B_MYMPD_VER}"
+  tar -czf mympd.tar.gz "mympd-${B_MYMPD_VER}"
+  rm -fr "mympd-${B_MYMPD_VER}"
+  git config --global --add safe.directory "/${BUILDDIR}/mympd/src/mympd-${B_MYMPD_VER}"
+  abuild -F checksum
+  if ! abuild -F
+  then
+    # Retry
+    abuild -F
+  fi
 fi
 
-if [ "$B_MYMPD" = "1" ]
-then
-  echo "Build myMPD"
-  su build -c "rm -rf myMPD"
-  su build -c "git clone -b $B_MYMPD_BRANCH --depth=1 https://github.com/jcorporation/myMPD.git"
-  cd myMPD || exit 1
-  # Enforce specific package release
-  if [ -n "${B_MYMPD_PKGREL}" ]
-  then
-    echo "Setting pkgrel to ${B_MYMPD_PKGREL}"
-    sed -i "s/^pkgrel=.*/pkgrel=${B_MYMPD_PKGREL}/" contrib/packaging/alpine/APKBUILD
-  fi
-  MYMPD_PACKAGE=$(get_pkgname contrib/packaging/alpine)
-  if [ ! -f "../packages/package/$ARCH/$MYMPD_PACKAGE" ]
-  then
-    ./build.sh installdeps
-    if [ "$B_MYMPD_BRANCH" != "master" ]
-    then
-      su build -c "./build.sh cleanupdist"
-      su build -c "./build.sh createdist"
-    fi
-    su build -c "./build.sh pkgalpine"
-  else
-    echo "myMPD is already up-to-date"
-  fi
-  cd ..
-fi
+cd "$BUILDDIR" || exit 1
 
-MYMPDOS_BASE_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-base)
-B_MYMPDOS_BASE_VER=$(get_pkgver /media/vda1/mympdos/mympdos-base)
+MYMPDOS_BASE_PACKAGE=$(get_pkgname /mympdos/mympdos-base)
+B_MYMPDOS_BASE_VER=$(get_pkgver /mympdos/mympdos-base)
 if [ "$B_BUILD" = "1" ] && [ ! -f "packages/package/$ARCH/$MYMPDOS_BASE_PACKAGE" ]
 then
-  su build -c "rm -rf mympdos-base"
-  su build -c "cp -r /media/vda1/mympdos/mympdos-base ."
+  rm -rf mympdos-base
+  cp -r /mympdos/mympdos-base .
+  chown -R build mympdos-base
   cd mympdos-base || exit 1
   mv mympdos-base "mympdos-base-$B_MYMPDOS_BASE_VER"
   tar -czf "mympdos-base-$B_MYMPDOS_BASE_VER.tar.gz" "mympdos-base-$B_MYMPDOS_BASE_VER"
-  su build -c "abuild checksum"
-  su build -c "abuild -r"
-  cd ..
+  abuild -F checksum
+  if ! abuild -F
+  then
+    # Retry
+    abuild -F
+  fi
 fi
 
-MPD_STABLE_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-mpd-stable)
-B_MPD_STABLE_VER=$(get_pkgver /media/vda1/mympdos/mympdos-mpd-stable)
+cd "$BUILDDIR" || exit 1
+
+MPD_STABLE_PACKAGE=$(get_pkgname /mympdos/mympdos-mpd-stable)
+B_MPD_STABLE_VER=$(get_pkgver /mympdos/mympdos-mpd-stable)
 if [ "$B_MPD_STABLE" = "1" ] && [ ! -f "packages/package/$ARCH/$MPD_STABLE_PACKAGE" ]
 then
   echo "Building MPD stable"
-  su build -c "rm -rf mympdos-mpd-stable"
-  su build -c "cp -r /media/vda1/mympdos/mympdos-mpd-stable ."
+  rm -rf mympdos-mpd-stable
+  cp -r /mympdos/mympdos-mpd-stable .
+  chown -R build mympdos-mpd-stable
   cd mympdos-mpd-stable || exit 1
   su build -c "wget http://www.musicpd.org/download/mpd/0.24/mpd-${B_MPD_STABLE_VER}.tar.xz"
   tar -xf "mpd-${B_MPD_STABLE_VER}.tar.xz"
@@ -234,48 +266,58 @@ then
   mv "mpd-${B_MPD_STABLE_VER}" "mympdos-mpd-stable-${B_MPD_STABLE_VER}"
   tar -czf mympdos-mpd-stable.tar.gz "mympdos-mpd-stable-${B_MPD_STABLE_VER}"
   rm -fr "mympdos-mpd-stable-${B_MPD_STABLE_VER}"
-  su build -c "abuild checksum"
-  su build -c "abuild -r"
-  cd ..
+  abuild -F checksum
+  if ! abuild -F
+  then
+    # Retry
+    abuild -F
+  fi
 fi
 
-MPD_MASTER_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-mpd-master)
-B_MPD_MASTER_VER=$(get_pkgver /media/vda1/mympdos/mympdos-mpd-master)
+cd "$BUILDDIR" || exit 1
+
+MPD_MASTER_PACKAGE=$(get_pkgname /mympdos/mympdos-mpd-master)
+B_MPD_MASTER_VER=$(get_pkgver /mympdos/mympdos-mpd-master)
 if [ "$B_MPD_MASTER" = "1" ] && [ ! -f "packages/package/$ARCH/$MPD_MASTER_PACKAGE" ]
 then
   echo "Build MDP master"
-  su build -c "rm -rf mympdos-mpd-master"
-  su build -c "cp -r /media/vda1/mympdos/mympdos-mpd-master ."
+  rm -rf mympdos-mpd-master
+  cp -r /mympdos/mympdos-mpd-master .
+  chown -R build mympdos-mpd-master
   cd mympdos-mpd-master || exit 1
   su build -c "git clone -b master --depth=1 https://github.com/MusicPlayerDaemon/MPD.git"
   mv MPD "mympdos-mpd-master-${B_MPD_MASTER_VER}"
   tar -czf mympdos-mpd-master.tar.gz "mympdos-mpd-master-${B_MPD_MASTER_VER}"
   rm -fr "mympdos-mpd-master-${B_MPD_MASTER_VER}"
-  su build -c "abuild checksum"
-  su build -c "abuild -r"
-  cd ..
+  abuild -F checksum
+  if ! abuild -F
+  then
+    # Retry
+    abuild -F
+  fi
 fi
 
-MUSICDB_SCRIPTS_PACKAGE=$(get_pkgname /media/vda1/mympdos/mympdos-musicdb-scripts)
-B_MUSICDB_SCRIPTS_VER=$(get_pkgver /media/vda1/mympdos/mympdos-musicdb-scripts)
+cd "$BUILDDIR" || exit 1
+
+MUSICDB_SCRIPTS_PACKAGE=$(get_pkgname /mympdos/mympdos-musicdb-scripts)
+B_MUSICDB_SCRIPTS_VER=$(get_pkgver /mympdos/mympdos-musicdb-scripts)
 if [ "$B_MUSICDB_SCRIPTS" = "1" ] && [ ! -f "packages/package/$ARCH/$MUSICDB_SCRIPTS_PACKAGE" ]
 then
   echo "Build musicdb-scripts"
-  su build -c "rm -rf mympdos-musicdb-scripts"
-  su build -c "cp -r /media/vda1/mympdos/mympdos-musicdb-scripts ."
+  rm -rf mympdos-musicdb-scripts
+  cp -r /mympdos/mympdos-musicdb-scripts .
+  chown -R build mympdos-musicdb-scripts
   cd mympdos-musicdb-scripts || exit 1
   su build -c "git clone -b master --depth=1 https://github.com/jcorporation/musicdb-scripts.git"
   mv musicdb-scripts "mympdos-musicdb-scripts-${B_MUSICDB_SCRIPTS_VER}"
   tar -czf "mympdos-musicdb-scripts-${B_MUSICDB_SCRIPTS_VER}.tar.gz" "mympdos-musicdb-scripts-${B_MUSICDB_SCRIPTS_VER}"
   rm -fr "mympdos-musicdb-scripts-${B_MUSICDB_SCRIPTS_VER}"
-  su build -c "abuild checksum"
-  su build -c "abuild -r"
-  cd ..
+  abuild -F checksum
+  if ! abuild -F
+  then
+    # Retry
+    abuild -F
+  fi
 fi
 
-echo "Creating repository index"
-rm -f packages/package/aarch64/APKINDEX.tar.gz
-apk index --rewrite-arch aarch64 --no-warnings -d "myMPDos" -o packages/package/aarch64/APKINDEX.tar.gz packages/package/aarch64/*.apk
-abuild-sign -k /usr/build/$(echo .abuild/*.rsa) packages/package/aarch64/APKINDEX.tar.gz
-
-[ "$POWEROFF" = "1" ] && poweroff
+chown -R build:build "/build/"

@@ -2,7 +2,7 @@
 # Based on: https://git.alpinelinux.org/aports/tree/community/mpc/APKBUILD?h=3.18-stable
 pkgname=mympdos-mpc
 pkgver=0.36
-pkgrel=5
+pkgrel=6
 pkgdesc="Minimalist command line interface to MPD"
 url="https://www.musicpd.org/clients/mpc/"
 arch="all"
@@ -15,7 +15,7 @@ build() {
 	abuild-meson \
 		-Dtest=true \
 		. output
-	meson compile ${JOBS:+-j ${JOBS}} -C output
+	meson compile -j 4 -C output
 }
 
 check() {
