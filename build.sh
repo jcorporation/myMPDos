@@ -54,7 +54,7 @@ build_stage1() {
   if [ ! -f "$TMPDIR/$NETBOOT_ARCHIVE" ]
   then
     echo "Getting $NETBOOT_ARCHIVE"
-    wget -q "${ALPINE_MIRROR}/v${ALPINE_MAJOR_VERSION}/releases/${ARCH}/$NETBOOT_ARCHIVE" \
+    wget "${ALPINE_MIRROR}/v${ALPINE_MAJOR_VERSION}/releases/${ARCH}/$NETBOOT_ARCHIVE" \
       -O "$TMPDIR/$NETBOOT_ARCHIVE"
   fi
   if [ ! -d "$TMPDIR/netboot" ]
@@ -71,7 +71,7 @@ build_stage1() {
   if [ ! -f "$TMPDIR/$ARCHIVE" ]
   then
     echo "Getting $ARCHIVE"
-    wget -q "${ALPINE_MIRROR}/v${ALPINE_MAJOR_VERSION}/releases/${ARCH}/$ARCHIVE" \
+    wget "${ALPINE_MIRROR}/v${ALPINE_MAJOR_VERSION}/releases/${ARCH}/$ARCHIVE" \
       -O "$TMPDIR/$ARCHIVE"
     if ! tar -tzf "$TMPDIR/$ARCHIVE" > /dev/null
     then
