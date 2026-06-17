@@ -93,6 +93,7 @@ else
   fi
 fi
 cp .abuild/*.rsa.pub /etc/apk/keys/
+ln -s /usr/build /build
 
 su build -c "install -d packages/package/$ARCH/"
 ln -s /usr/build/packages/package/ /usr/build/packages/build
