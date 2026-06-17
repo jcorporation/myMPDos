@@ -6,9 +6,12 @@ https://github.com/jcorporation/myMPDos/
 
 ## myMPDos v1.9.0
 
+This release is build up on Alpine Linux 3.24.1.
+
 ### Changelog
 
 - Move mympd doas config from bootstrap script to mympdos-base package
+- Alpine Linux 3.24.1
 
 ***
 
